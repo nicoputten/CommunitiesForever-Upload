@@ -1,3 +1,4 @@
+using System.Reflection;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
@@ -6,6 +7,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunitiesForever.Upload.Core;
+using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Windows;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -31,7 +33,7 @@ internal sealed partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            _services = ConfigureServices();
+            _services = ConfigureServices(desktop.Args ?? []);
             _mainWindow = CreateMainWindow(desktop.Args ?? [], _services);
             desktop.MainWindow = _mainWindow;
             _trayIcon = CreateTrayIcon(desktop);
@@ -46,11 +48,15 @@ internal sealed partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    internal static ServiceProvider ConfigureServices()
+    internal static ServiceProvider ConfigureServices(string[]? args = null)
     {
+        string version = AppVersion();
         var services = new ServiceCollection()
             .AddCore()
             .AddWindowsAdapters();
+        services.AddSingleton(new SiteOptions(SiteUri(args ?? []), version));
+        // One HttpClient for the app's lifetime, disposed with the container.
+        services.AddSingleton(_ => SiteHttp.Create(version));
         services.AddTransient<MainWindow>();
         services.AddTransient<GalleryWindow>();
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
@@ -70,8 +76,8 @@ internal sealed partial class App : Application
         }
     }
 
-    // The component gallery (--gallery) is for development and the design checks only.
-    private static readonly bool GalleryAllowed = IsDebugBuild();
+    // Development switches (--gallery, --site) work in Debug builds only.
+    private static readonly bool DevSwitchesAllowed = IsDebugBuild();
 
     private static bool IsDebugBuild()
     {
@@ -82,8 +88,24 @@ internal sealed partial class App : Application
 #endif
     }
 
+    /// <summary>The site: wow.vestras.nl; Debug builds accept <c>--site http://localhost:3000</c> for the web dev server.</summary>
+    internal static Uri SiteUri(string[] args)
+    {
+        int at = Array.IndexOf(args, "--site");
+        return DevSwitchesAllowed && at >= 0 && at + 1 < args.Length && Uri.TryCreate(args[at + 1], UriKind.Absolute, out var uri)
+            ? new Uri(uri.AbsoluteUri.TrimEnd('/') + "/")
+            : SiteOptions.DefaultBaseUri;
+    }
+
+    private static string AppVersion()
+    {
+        string? informational = typeof(App).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        // "1.0.0+<commit>": the site only needs the version.
+        return informational?.Split('+')[0] ?? "0.0.0";
+    }
+
     private static Window CreateMainWindow(string[] args, ServiceProvider services) =>
-        GalleryAllowed && args.Contains("--gallery")
+        DevSwitchesAllowed && args.Contains("--gallery")
             ? services.GetRequiredService<GalleryWindow>()
             : services.GetRequiredService<MainWindow>();
 

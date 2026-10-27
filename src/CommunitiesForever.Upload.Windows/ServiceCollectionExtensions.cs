@@ -1,4 +1,5 @@
 using CommunitiesForever.Upload.Core;
+using CommunitiesForever.Upload.Core.Site;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CommunitiesForever.Upload.Windows;
@@ -9,6 +10,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddWindowsAdapters(this IServiceCollection services)
     {
         services.AddSingleton<IMotionPreference, WindowsMotionPreference>();
+        services.AddSingleton<ITokenStore>(_ => new DpapiTokenStore(AppPaths.DataDirectory));
+        services.AddSingleton<IBrowser, WindowsBrowser>();
+        services.AddSingleton<IDeviceInfo, WindowsDeviceInfo>();
         return services;
     }
 }

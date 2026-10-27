@@ -8,5 +8,6 @@
     <Project Path="tests/CommunitiesForever.Upload.App.DesignChecks/CommunitiesForever.Upload.App.DesignChecks.csproj" />
     <Project Path="tests/CommunitiesForever.Upload.App.Tests/CommunitiesForever.Upload.App.Tests.csproj" />
     <Project Path="tests/CommunitiesForever.Upload.Core.Tests/CommunitiesForever.Upload.Core.Tests.csproj" />
+    <Project Path="tests/CommunitiesForever.Upload.Windows.Tests/CommunitiesForever.Upload.Windows.Tests.csproj" />
   </Folder>
 </Solution>
