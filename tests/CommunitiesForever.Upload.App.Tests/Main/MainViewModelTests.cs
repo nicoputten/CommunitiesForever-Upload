@@ -149,12 +149,14 @@ public sealed class MainViewModelTests
         var vm = h.Create();
         var asked = new List<string>();
         vm.ReconnectRequested += (_, _) => asked.Add("reconnect");
-        vm.WatchedAccountsRequested += (_, _) => asked.Add("accounts");
 
         vm.ReconnectCommand.Execute(null);
         vm.ChangeAccountsCommand.Execute(null);
 
-        Assert.Equal(["reconnect", "accounts"], asked);
+        Assert.Equal(["reconnect"], asked);
+        Assert.Equal(SettingsSection.GameFolders, vm.Settings?.Section);
+        Assert.Equal("CommunitiesForever Uploader · Settings", vm.Title);
+        vm.Dispose();
     }
 
     [AvaloniaFact]
@@ -166,33 +168,30 @@ public sealed class MainViewModelTests
         vm.Attach();
         h.Status(MainHarness.First, AccountState.NotWatching);
         Dispatcher.UIThread.RunJobs();
-        bool changed = false, opened = false;
+        bool changed = false;
         vm.AccountsChanged += (_, _) => changed = true;
-        vm.WatchedAccountsRequested += (_, _) => opened = true;
 
         await vm.ScanAgainCommand.ExecuteAsync(null);
 
         Assert.True(changed);
-        Assert.False(opened);
+        Assert.False(vm.IsSettingsOpen);
         var saved = Assert.IsType<SettingsLoad.Loaded>(new SettingsStore(h.SettingsFile).Load()).Settings;
         Assert.Equal(@"D:\Games\World of Warcraft\_forever_", Assert.Single(saved.Accounts).InstallPath);
         vm.Dispose();
     }
 
     [AvaloniaFact]
-    public async Task ScanAgainFindingNothingOpensWatchedAccounts()
+    public async Task ScanAgainFindingNothingOpensGameFolders()
     {
         var h = new MainHarness();
         var vm = h.Create();
         vm.Attach();
         h.Status(MainHarness.First, AccountState.NotWatching);
         Dispatcher.UIThread.RunJobs();
-        bool opened = false;
-        vm.WatchedAccountsRequested += (_, _) => opened = true;
 
         await vm.ScanAgainCommand.ExecuteAsync(null);
 
-        Assert.True(opened);
+        Assert.Equal(SettingsSection.GameFolders, vm.Settings?.Section);
         vm.Dispose();
     }
 

@@ -1,0 +1,151 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:CommunitiesForever.Upload.App.Controls"
+             xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+             x:Class="CommunitiesForever.Upload.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+  <!-- Board: design/boards/settings (UP-09). A page in the main window; everything saves right away. -->
+  <DockPanel>
+    <Border Classes="settings-nav" DockPanel.Dock="Left">
+      <StackPanel Spacing="{StaticResource S0_5}" AutomationProperties.Name="Settings">
+        <Button Classes="nav nav-back" Content="← Back" Command="{Binding BackCommand}" />
+        <Button Name="NavBehaviour" Classes="nav" Content="Behaviour" />
+        <Button Name="NavGameFolders" Classes="nav" Content="Game folders" />
+        <Button Name="NavConnection" Classes="nav" Content="Connection" />
+        <Button Name="NavAbout" Classes="nav" Content="About" />
+      </StackPanel>
+    </Border>
+
+    <ScrollViewer Name="Page">
+      <StackPanel Margin="{StaticResource AppSettingsPad}" Spacing="{StaticResource AppSectionGap}">
+
+        <!-- Behaviour -->
+        <StackPanel Name="SectionBehaviour">
+          <TextBlock Classes="section settings" Text="Behaviour" />
+          <Border Classes="row">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+              <StackPanel>
+                <TextBlock Classes="label" Text="Upload automatically" />
+                <TextBlock Classes="meta" Text="A few seconds after the game finishes saving" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding UploadAutomatically}" AutomationProperties.Name="Upload automatically" />
+            </Grid>
+          </Border>
+          <Border Classes="row">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+              <StackPanel>
+                <TextBlock Classes="label" Text="Start with Windows" />
+                <TextBlock Classes="meta" Text="Starts hidden in the tray" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding StartWithWindows}" AutomationProperties.Name="Start with Windows" />
+            </Grid>
+          </Border>
+          <Border Classes="row">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+              <StackPanel>
+                <TextBlock Classes="label" Text="Close button hides to the tray" />
+                <TextBlock Classes="meta" Text="Quit from the tray menu" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding CloseHidesToTray}" AutomationProperties.Name="Close hides to tray" />
+            </Grid>
+          </Border>
+          <Border Classes="row">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+              <TextBlock Classes="label" VerticalAlignment="Center" Text="Notifications" />
+              <ListBox Grid.Column="1" Theme="{StaticResource Segmented}" SelectedIndex="{Binding Notifications}" AutomationProperties.Name="Notifications">
+                <ListBoxItem Content="Every upload" />
+                <ListBoxItem Content="Only problems" />
+                <ListBoxItem Content="Off" />
+              </ListBox>
+            </Grid>
+          </Border>
+          <Border Classes="row" BorderThickness="0">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+              <StackPanel>
+                <TextBlock Classes="label" Text="Pause uploads" />
+                <TextBlock Classes="meta" Text="For a while, e.g. while you test addon settings" />
+              </StackPanel>
+              <ListBox Grid.Column="1" Theme="{StaticResource Segmented}" SelectedIndex="{Binding Pause}" VerticalAlignment="Center" AutomationProperties.Name="Pause">
+                <ListBoxItem Content="Not paused" />
+                <ListBoxItem Content="1 hour" />
+                <ListBoxItem Content="Until tomorrow" />
+              </ListBox>
+            </Grid>
+          </Border>
+        </StackPanel>
+
+        <!-- Game folders -->
+        <StackPanel Name="SectionGameFolders">
+          <TextBlock Classes="section settings" Text="Game folders" />
+          <ItemsControl ItemsSource="{Binding Folders}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:GameFolderRow">
+                <Border Classes="row">
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                    <StackPanel>
+                      <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding Name}" />
+                      <TextBlock Classes="mono faint" Text="{Binding Folder}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Folder}" />
+                      <TextBlock Classes="meta warn" Text="Not found: the folder is gone" IsVisible="{Binding IsMissing}" />
+                    </StackPanel>
+                    <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsWatched}" AutomationProperties.Name="{Binding Name, StringFormat='Watch account {0}'}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Classes="meta" Text="No accounts found yet. Scan again, or add the game folder." IsVisible="{Binding !Folders.Count}" />
+          <TextBlock Classes="meta stale" TextWrapping="Wrap" Text="{Binding FolderProblem}" IsVisible="{Binding FolderProblem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" Margin="{StaticResource AppFooterPad}">
+            <Button Classes="small" Content="Scan again" Command="{Binding ScanCommand}" IsEnabled="{Binding !IsScanning}" />
+            <Button Classes="small neutral" Content="Add folder…" Command="{Binding AddFolderCommand}" IsEnabled="{Binding !IsScanning}" />
+          </StackPanel>
+        </StackPanel>
+
+        <!-- Connection -->
+        <StackPanel Name="SectionConnection">
+          <TextBlock Classes="section settings" Text="Connection" />
+          <Border Classes="row">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+              <StackPanel>
+                <TextBlock Classes="label" Text="{Binding SiteHost}" />
+                <TextBlock Classes="meta" TextWrapping="Wrap" Text="{Binding ConnectionLine}" />
+              </StackPanel>
+              <Border Grid.Column="1" Classes="pill"
+                      Classes.fresh="{Binding BadgeTone, Converter={x:Static c:Tones.Fresh}}"
+                      Classes.warn="{Binding BadgeTone, Converter={x:Static c:Tones.Warn}}">
+                <TextBlock Text="{Binding Badge}" />
+              </Border>
+            </Grid>
+          </Border>
+          <!-- Connected: test and disconnect (asked first) -->
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" Margin="{StaticResource AppFooterPad}"
+                      IsVisible="{Binding IsConnected}">
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" IsVisible="{Binding !IsConfirmingDisconnect}">
+              <Button Classes="small" Content="Test connection" Command="{Binding TestConnectionCommand}" IsEnabled="{Binding !IsBusy}" />
+              <Button Classes="small danger" Content="Disconnect" Command="{Binding AskDisconnectCommand}" IsEnabled="{Binding !IsBusy}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" IsVisible="{Binding IsConfirmingDisconnect}" AutomationProperties.LiveSetting="Assertive">
+              <TextBlock Classes="meta" VerticalAlignment="Center" Text="This stops uploading from this PC." />
+              <Button Classes="small danger" Content="Disconnect" Command="{Binding DisconnectCommand}" />
+              <Button Classes="small ghost" Content="Cancel" Command="{Binding CancelDisconnectCommand}" />
+            </StackPanel>
+          </StackPanel>
+          <!-- Not connected -->
+          <StackPanel Orientation="Horizontal" Margin="{StaticResource AppFooterPad}" IsVisible="{Binding IsNotConnected}">
+            <Button Classes="small primary" Content="Connect" Command="{Binding ConnectCommand}" />
+          </StackPanel>
+        </StackPanel>
+
+        <!-- About ("Check for updates" comes with UP-10) -->
+        <StackPanel Name="SectionAbout">
+          <TextBlock Classes="section settings" Text="About" />
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
+            <TextBlock Classes="meta" VerticalAlignment="Center" Text="{Binding AboutLine}" />
+            <TextBlock Classes="meta" VerticalAlignment="Center" Text="·" />
+            <Button Classes="link" Content="Open log folder" Command="{Binding OpenLogFolderCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

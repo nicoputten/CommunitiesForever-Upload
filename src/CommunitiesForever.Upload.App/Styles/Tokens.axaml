@@ -451,6 +451,19 @@
     <GradientStop Color="{StaticResource AppStaleSoft}" Offset="0" />
     <GradientStop Color="{StaticResource AppSurfaceHero}" Offset="0.6" />
   </LinearGradientBrush>
+  <!-- settings board (UP-09) -->
+  <x:Double x:Key="AppNavW">190</x:Double>
+  <Thickness x:Key="AppNavPad">12,18</Thickness>
+  <Thickness x:Key="AppNavItemPad">12,8</Thickness>
+  <Thickness x:Key="AppNavBackMargin">0,0,0,10</Thickness>
+  <BoxShadows x:Key="AppNavActiveShadow">inset 2 0 0 0 #FFD4AF6A</BoxShadows>
+  <Thickness x:Key="AppSettingsPad">28,20</Thickness>
+  <x:Double x:Key="AppSectionGap">22</x:Double>
+  <Thickness x:Key="AppSectionTitleMargin">0,0,0,4</Thickness>
+  <!-- main-window board status bar: the Settings gear (14 px, 16 px box, 1.4 stroke) -->
+  <x:Double x:Key="AppGearIcon">14</x:Double>
+  <x:Double x:Key="AppGearIconBox">16</x:Double>
+  <x:Double x:Key="AppGearIconStroke">1.4</x:Double>
   <!-- window background: main-window board, page glow top left over the night -->
   <RadialGradientBrush x:Key="AppWindowBackground" Center="20%,-10%" GradientOrigin="20%,-10%" RadiusX="78%" RadiusY="48%">
     <GradientStop Color="{StaticResource PageGlow}" Offset="0" />

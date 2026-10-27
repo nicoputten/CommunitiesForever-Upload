@@ -35,15 +35,17 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private readonly IBrowser _browser;
     private readonly TimeProvider _time;
     private readonly GameScanner _scanner;
+    private readonly Func<SettingsViewModel> _newSettings;
     private SynchronizationContext? _ui;
     private ITimer? _ticker;
     private CancellationTokenSource? _identityLoad;
     private AppSettings _current = new();
     private WatchedAccount? _heroAccount;
 
-    public MainViewModel(IUploadLoop loop, UploadHistory history, SettingsStore settings, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time, GameScanner scanner)
+    public MainViewModel(IUploadLoop loop, UploadHistory history, SettingsStore settings, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time, GameScanner scanner, Func<SettingsViewModel> newSettings)
     {
         _scanner = scanner;
+        _newSettings = newSettings;
         _loop = loop;
         _history = history;
         _settings = settings;
@@ -58,11 +60,14 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     /// <summary>"Reconnect": the app opens the Connect window.</summary>
     public event EventHandler? ReconnectRequested;
 
-    /// <summary>"Change…", or the game wasn't found again: the app opens the Watched accounts window.</summary>
-    public event EventHandler? WatchedAccountsRequested;
-
-    /// <summary>"Scan again" or "Choose folder…" found the game somewhere else; the settings are saved, the app restarts watching.</summary>
+    /// <summary>
+    /// The accounts, "upload automatically" or the connection changed (Scan again, Choose folder…, Settings);
+    /// the settings are saved, the app restarts watching.
+    /// </summary>
     public event EventHandler? AccountsChanged;
+
+    /// <summary>Settings saved: the app applies "Start with Windows" and the close button.</summary>
+    public event EventHandler<AppSettings>? SettingsChanged;
 
     /// <summary>The window's clipboard and folder picker, while it is open.</summary>
     public IUiServices? Ui { get; set; }
@@ -86,7 +91,16 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool HasRecent { get; set; }
 
-    public string Title => Identity is { SiteName.Length: > 0 } me ? $"{me.SiteName} Uploader" : App.DefaultName;
+    /// <summary>The settings page, while it is open (UP-09); the window shows it instead of the dashboard.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title), nameof(IsSettingsOpen))]
+    public partial SettingsViewModel? Settings { get; set; }
+
+    public bool IsSettingsOpen => Settings is not null;
+
+    public string Title => Settings is null ? Name : $"{Name} · Settings";
+
+    private string Name => Identity is { SiteName.Length: > 0 } me ? $"{me.SiteName} Uploader" : App.DefaultName;
 
     public string ConnectedText => !IsConnected
         ? $"Not connected · {Host}"
@@ -105,7 +119,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         Reload();
     }
 
-    /// <summary>Reads the settings and who is connected again (after Watched accounts or Reconnect).</summary>
+    /// <summary>Reads the settings and who is connected again (after Settings or Reconnect).</summary>
     public void Reload()
     {
         _current = _settings.Load() is SettingsLoad.Loaded { Settings: var settings } ? settings : new AppSettings();
@@ -114,8 +128,45 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _ = LoadIdentityAsync();
     }
 
+    /// <summary>Opens the settings page at a section ("Change…" opens Game folders).</summary>
+    public void ShowSettings(SettingsSection section)
+    {
+        if (Settings is not null)
+        {
+            return;
+        }
+
+        var settings = _newSettings();
+        settings.Section = section;
+        settings.AppName = Name;
+        settings.Ui = Ui;
+        settings.Changed += OnSettingsSaved;
+        settings.Disconnected += OnDisconnected;
+        settings.ConnectRequested += OnConnectRequested;
+        settings.BackRequested += OnSettingsBack;
+        Settings = settings;
+        _ = settings.OpenAsync();
+    }
+
+    /// <summary>"← Back": the dashboard again.</summary>
+    public void CloseSettings()
+    {
+        if (Settings is not { } settings)
+        {
+            return;
+        }
+
+        settings.Changed -= OnSettingsSaved;
+        settings.Disconnected -= OnDisconnected;
+        settings.ConnectRequested -= OnConnectRequested;
+        settings.BackRequested -= OnSettingsBack;
+        settings.Dispose();
+        Settings = null;
+    }
+
     public void Dispose()
     {
+        CloseSettings();
         _loop.StatusChanged -= OnStatusChanged;
         _ticker?.Dispose();
         _ticker = null;
@@ -182,11 +233,14 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void Reconnect() => ReconnectRequested?.Invoke(this, EventArgs.Empty);
 
     [RelayCommand]
-    private void ChangeAccounts() => WatchedAccountsRequested?.Invoke(this, EventArgs.Empty);
+    private void OpenSettings() => ShowSettings(SettingsSection.Behaviour);
+
+    [RelayCommand]
+    private void ChangeAccounts() => ShowSettings(SettingsSection.GameFolders);
 
     /// <summary>
-    /// "Scan again" (not watching): finds the accounts in their new place and saves that, without a window.
-    /// When an account is nowhere to be found, the Watched accounts window opens.
+    /// "Scan again" (not watching): finds the accounts in their new place and saves that, in place.
+    /// When an account is nowhere to be found, Settings › Game folders opens.
     /// </summary>
     [RelayCommand]
     private async Task ScanAgainAsync()
@@ -194,7 +248,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         var installs = await Task.Run(_scanner.Scan);
         if (!Relocate(installs))
         {
-            WatchedAccountsRequested?.Invoke(this, EventArgs.Empty);
+            ShowSettings(SettingsSection.GameFolders);
         }
     }
 
@@ -210,7 +264,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         var install = await Task.Run(() => _scanner.Inspect(folder));
         if (install is null || !Relocate([install]))
         {
-            WatchedAccountsRequested?.Invoke(this, EventArgs.Empty);
+            ShowSettings(SettingsSection.GameFolders);
         }
     }
 
@@ -310,6 +364,29 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             Identity = result.Value;
         }
     }
+
+    // Watching restarts only for what the loop uses; the rest the app applies (or reads when needed, like notifications).
+    private void OnSettingsSaved(object? sender, AppSettings saved)
+    {
+        bool restart = saved.UploadAutomatically != _current.UploadAutomatically || !saved.Accounts.SequenceEqual(_current.Accounts);
+        _current = saved;
+        StartsWithWindows = saved.StartWithWindows;
+        SettingsChanged?.Invoke(this, saved);
+        if (restart)
+        {
+            AccountsChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void OnDisconnected(object? sender, EventArgs e)
+    {
+        Identity = null;
+        AccountsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnConnectRequested(object? sender, EventArgs e) => ReconnectRequested?.Invoke(this, EventArgs.Empty);
+
+    private void OnSettingsBack(object? sender, EventArgs e) => CloseSettings();
 
     // The loop reports from its own threads; the window updates on its own.
     private void OnStatusChanged(object? sender, EventArgs e) => Post(Refresh);

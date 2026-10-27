@@ -86,16 +86,31 @@ internal sealed class MainHarness
         Loop.Changed();
     }
 
+    public static readonly SiteOptions Options = new(new Uri("https://wow.vestras.nl/"), "1.0.0");
+
     public MainViewModel Create() => new(
         Loop,
         History,
         new SettingsStore(SettingsFile),
         Site,
         Tokens,
-        new SiteOptions(new Uri("https://wow.vestras.nl/"), "1.0.0"),
+        Options,
         new Browser(Opened),
         Time,
-        new GameScanner(Disk, new Hints(Disk)));
+        new GameScanner(Disk, new Hints(Disk)),
+        CreateSettings);
+
+    /// <summary>The settings page over the same fakes.</summary>
+    public SettingsViewModel CreateSettings() => new(
+        new SettingsStore(SettingsFile),
+        Loop,
+        new GameScanner(Disk, new Hints(Disk)),
+        new ConnectFlow(Site, Tokens, new Browser(Opened), new SetupHarness.Device(), Time),
+        Site,
+        Tokens,
+        Options,
+        new Browser(Opened),
+        Time);
 
     private sealed class Hints(MemoryDisk disk) : IInstallHints
     {
@@ -133,7 +148,15 @@ internal sealed class FakeLoop : IUploadLoop
 
     public void Skip(WatchedAccount account) => Calls.Add($"Skip {account.Account}");
 
-    public void Pause(DateTimeOffset until) => Calls.Add("Pause");
+    public void Pause(DateTimeOffset until)
+    {
+        Calls.Add($"Pause {until:yyyy-MM-dd HH:mm}");
+        PausedUntil = until;
+    }
 
-    public void EndPause() => Calls.Add("EndPause");
+    public void EndPause()
+    {
+        Calls.Add("EndPause");
+        PausedUntil = null;
+    }
 }

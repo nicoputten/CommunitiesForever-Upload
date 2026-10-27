@@ -2,36 +2,14 @@ using Avalonia.Headless.XUnit;
 using CommunitiesForever.Upload.App.Tests.Setup;
 using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.Core.Game;
-using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 
 namespace CommunitiesForever.Upload.App.Tests.Main;
 
-/// <summary>The Watched accounts and Connect windows of the main window (UP-07).</summary>
+/// <summary>The Connect window of the main window (UP-07).</summary>
 public sealed class DialogTests
 {
     private readonly SetupHarness _harness = new();
-
-    [AvaloniaFact]
-    public async Task WatchedAccountsStartsWithTheCurrentChoiceAndSaves()
-    {
-        var store = new SettingsStore(_harness.SettingsFile);
-        store.Save(new AppSettings { StartWithWindows = false, Accounts = [new WatchedAccount(SetupHarness.Forever, "123456789#2")] });
-        var vm = new WatchedAccountsViewModel(new GameScanner(_harness.Disk, new Roots(_harness.Disk)), store, _harness.Time);
-        bool saved = false;
-        vm.Saved += (_, _) => saved = true;
-
-        await vm.StartAsync();
-        Assert.False(vm.Find.Installs[0].Accounts[0].IsChecked);
-        Assert.True(vm.Find.Installs[0].Accounts[1].IsChecked);
-        vm.Find.Installs[0].Accounts[0].IsChecked = true;
-        vm.SaveCommand.Execute(null);
-
-        Assert.True(saved);
-        var settings = Assert.IsType<SettingsLoad.Loaded>(store.Load()).Settings;
-        Assert.Equal(2, settings.Accounts.Count);
-        Assert.False(settings.StartWithWindows);
-    }
 
     [AvaloniaFact]
     public async Task ConnectWindowSaysWhenConnected()
