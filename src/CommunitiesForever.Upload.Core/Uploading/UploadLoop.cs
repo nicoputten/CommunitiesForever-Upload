@@ -10,7 +10,7 @@ namespace CommunitiesForever.Upload.Core.Uploading;
 /// The watch-and-upload loop (docs/ARCHITECTURE.md "The loop", UP-06): one worker per watched account, uploads one at a
 /// time. Everything with a lifetime is owned here and released by <see cref="StopAsync"/> (CLAUDE.md rule 11).
 /// </summary>
-public sealed partial class UploadLoop : IAsyncDisposable, IDisposable
+public sealed partial class UploadLoop : IUploadLoop, IAsyncDisposable, IDisposable
 {
     public static readonly TimeSpan SettleTime = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(30);
@@ -79,6 +79,9 @@ public sealed partial class UploadLoop : IAsyncDisposable, IDisposable
 
     public bool IsPaused => _pausedUntil is { } until && _time.GetUtcNow() < until;
 
+    /// <summary>When the pause ends, while paused.</summary>
+    public DateTimeOffset? PausedUntil => IsPaused ? _pausedUntil : null;
+
     /// <summary>(Re)starts watching the settings' accounts.</summary>
     public async Task StartAsync(AppSettings settings)
     {
@@ -109,7 +112,7 @@ public sealed partial class UploadLoop : IAsyncDisposable, IDisposable
         WakeAll();
     }
 
-    public void Resume()
+    public void EndPause()
     {
         _pausedUntil = null;
         WakeAll();
@@ -221,6 +224,7 @@ public sealed partial class UploadLoop : IAsyncDisposable, IDisposable
 
         private Task _run = Task.CompletedTask;
         private IDisposable? _watcher;
+        private FileStamp? _seen;
         private FileStamp? _handled;
         private (FileStamp Stamp, string Hash)? _pending;
         private DateTimeOffset? _nextTryAt;
@@ -306,12 +310,14 @@ public sealed partial class UploadLoop : IAsyncDisposable, IDisposable
 
             if (!_loop._files.FolderExists(_folder) || _loop._files.GetStamp(_file) is not { } stamp)
             {
+                _seen = null;
                 StopWatching();
                 Set(AccountState.NotWatching);
                 return;
             }
 
             _watcher ??= _loop._watchers.Watch(_folder, GameScanner.AddonFileName, Wake);
+            _seen = stamp;
 
             if (stamp != _handled && stamp != _pending?.Stamp)
             {
@@ -395,6 +401,7 @@ public sealed partial class UploadLoop : IAsyncDisposable, IDisposable
                 if (now != stamp)
                 {
                     stamp = now;
+                    _seen = now;
                     settlesAt = Now + SettleTime;
                     continue;
                 }
@@ -558,7 +565,7 @@ public sealed partial class UploadLoop : IAsyncDisposable, IDisposable
 
         private void Set(AccountState state, DateTimeOffset? settlesAt = null, DateTimeOffset? nextTryAt = null, string? rejection = null, int? schemaVersion = null)
         {
-            var status = new AccountStatus(Account, state, settlesAt, nextTryAt, rejection, schemaVersion, _loop._history.LastUpload(Account));
+            var status = new AccountStatus(Account, state, settlesAt, nextTryAt, rejection, schemaVersion, _loop._history.LastUpload(Account), _seen);
             if (status == Status)
             {
                 return;

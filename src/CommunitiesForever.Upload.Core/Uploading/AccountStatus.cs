@@ -28,4 +28,5 @@ public sealed record AccountStatus(
     DateTimeOffset? NextTryAt = null,
     string? Rejection = null,
     int? SchemaVersion = null,
-    HistoryEntry? LastUpload = null);
+    HistoryEntry? LastUpload = null,
+    FileStamp? File = null);

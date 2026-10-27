@@ -97,6 +97,9 @@ public sealed partial class SetupViewModel : ObservableObject, IDisposable
     /// <summary>"CommunitiesForever Uploader" until the site's name is known (docs/DESIGN-NOTES.md).</summary>
     public string Title => Identity is { SiteName.Length: > 0 } me ? $"{me.SiteName} Uploader" : App.DefaultName;
 
+    /// <summary>"Reconnect": start at step 1 even with a (revoked) token.</summary>
+    public bool ConnectFirst { get; set; }
+
     /// <summary>Settings from an earlier run (setup reopened because no account is watched), or null.</summary>
     public AppSettings? Existing { get; set; }
 
@@ -105,7 +108,7 @@ public sealed partial class SetupViewModel : ObservableObject, IDisposable
     {
         _existing = Existing ?? new AppSettings();
         HowItRuns.Load(_existing);
-        if (_tokens.Load() is { } token)
+        if (!ConnectFirst && _tokens.Load() is { } token)
         {
             await ShowFindStepAsync();
             // Best effort: show who is connected; offline leaves the plain title.

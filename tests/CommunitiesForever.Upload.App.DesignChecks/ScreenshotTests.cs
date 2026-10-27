@@ -5,19 +5,9 @@ using Avalonia.VisualTree;
 
 namespace CommunitiesForever.Upload.App.DesignChecks;
 
-/// <summary>Screenshots of every screen at its board size (STORIES.md "Every UI story"). New screens add theirs here.</summary>
+/// <summary>The component gallery. Each screen has its own screenshot class (setup, main window …).</summary>
 public sealed class ScreenshotTests
 {
-    [AvaloniaFact]
-    public void MainWindow()
-    {
-        var window = new MainWindow();
-        window.Show();
-
-        Screenshot.Matches(window, "main-window");
-        window.Close();
-    }
-
     [AvaloniaFact]
     public void Gallery()
     {

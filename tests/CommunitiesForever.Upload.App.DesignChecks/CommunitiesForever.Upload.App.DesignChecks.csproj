@@ -11,8 +11,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <!-- The setup fakes, shared with App.Tests -->
+    <!-- The setup and main window fakes, shared with App.Tests -->
     <Compile Include="..\CommunitiesForever.Upload.App.Tests\Setup\SetupHarness.cs" Link="Setup\SetupHarness.cs" />
+    <Compile Include="..\CommunitiesForever.Upload.App.Tests\Main\MainHarness.cs" Link="Main\MainHarness.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\CommunitiesForever.Upload.App\CommunitiesForever.Upload.App.csproj" />

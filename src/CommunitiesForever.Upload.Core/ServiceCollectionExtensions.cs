@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<GameScanner>();
         services.AddSingleton<UploadHistory>();
         services.AddSingleton<UploadLoop>();
+        services.AddSingleton<IUploadLoop>(sp => sp.GetRequiredService<UploadLoop>());
         return services;
     }
 }
