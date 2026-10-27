@@ -26,6 +26,15 @@
 
 Every package at an exact version. Anything not listed needs Nico's OK (CLAUDE.md rule 9). UP-01 checks the current versions.
 
+### Dependencies (UP-11)
+- Dependabot (`.github/dependabot.yml`) checks NuGet and GitHub Actions every Monday and opens PRs into `develop`: minor and patch updates grouped into one PR a week, majors on their own. Avalonia's four packages always move together (majors included); the .NET extensions and DPAPI form one group.
+- CI decides whether an update is safe (build, format, tests, design checks); Nico merges, no auto-merge. An update that changes a screenshot fails the design checks and waits for his OK on the look (CLAUDE.md rule 7).
+- Pins (ignored in `dependabot.yml` with the same reason; keep both lists in step):
+  - `xunit.v3` stays on 3.x: Avalonia.Headless.XUnit 12.x is built against it. Lift when Avalonia moves to xunit.v3 4.
+  - `Microsoft.Extensions.*` and `System.Security.Cryptography.ProtectedData` stay on 10.x: 11.x belongs to .NET 11, and the app is on .NET 10 LTS. Moving .NET is a deliberate story.
+  - The SDK (`global.json`, `rollForward: latestFeature`) is outside Dependabot; it takes 10.0 feature bands and patches by itself.
+- Versions stay exact (`[x.y.z]`, CLAUDE.md rule 9). If Dependabot's first run can't update the bracket notation, switch to plain `Version="x.y.z"` (with central package management NuGet restores exactly that version) and note it here.
+
 ### Techniques (agreed with Nico, 2026-10-27)
 - No generic Host: plain DI plus one class of our own that starts and stops the loop; settings stay in our versioned `settings.json`.
 - Retry and backoff are our own small state machine in Core, not Polly.

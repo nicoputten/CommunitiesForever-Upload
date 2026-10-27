@@ -63,4 +63,4 @@ powershell -File scripts/refresh-tokens.ps1
 | `tests/…App.Tests` | Headless UI tests, token drift, token lint, contrast |
 | `tests/…App.DesignChecks` | Screenshot design checks against `Baselines/` |
 
-Package versions live in `Directory.Packages.props`, shared build settings (nullable, warnings as errors, analyzers) in `Directory.Build.props`, style in `.editorconfig`. CI (`.github/workflows/ci.yml`) runs restore, build, format check and tests on `windows-latest`.
+Package versions live in `Directory.Packages.props` (Dependabot proposes updates every Monday; pins and why in `docs/ARCHITECTURE.md` "Dependencies"), shared build settings (nullable, warnings as errors, analyzers) in `Directory.Build.props`, style in `.editorconfig`. CI (`.github/workflows/ci.yml`) runs restore, build, format check and tests on `windows-latest`.

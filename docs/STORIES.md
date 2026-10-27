@@ -3,7 +3,7 @@
 Open stories only, in build order. Done stories move to `docs/STORIES-COMPLETED.md`.
 Each story: criteria are testable. "Manual" items are steps only Nico can do; they go in the PR.
 
-Build order: UP-11, UP-08, UP-09, UP-10 (UP-01 to UP-07 are done). All of it is v1 (decided with Nico).
+Build order: UP-08, UP-09, UP-10 (UP-01 to UP-07 and UP-11 are done). All of it is v1 (decided with Nico).
 The site side is built in the web repo: WEB-33 (uploader API, merged), WEB-34 (uploader page), WEB-35 (installer hosting and update feed).
 
 ## Every UI story
@@ -14,12 +14,6 @@ The site side is built in the web repo: WEB-33 (uploader API, merged), WEB-34 (u
 - The screen gets its design checks (UP-03): headless screenshot baselines and key style checks.
 
 ## E3 Screens
-
-### UP-11 Keep dependencies fresh
-Built after UP-07 (small; like WEB-37 in the web repo).
-- Dependabot (`.github/dependabot.yml`) for NuGet and GitHub Actions, weekly; minor and patch updates grouped into one PR, majors in their own.
-- CI decides whether an update is safe (build, format, tests, design checks). A changed screenshot still needs Nico's OK (CLAUDE.md rule 7), so such an update waits for him.
-- Every exact pin that Dependabot must not move (for example xunit.v3 3.x for Avalonia.Headless.XUnit) is listed with its reason in `docs/ARCHITECTURE.md`, and ignored in `dependabot.yml` with the same reason.
 
 ### UP-08 Tray, notifications and autostart
 - Board `tray`: tray icon per state (watching, uploading, paused, needs attention) with tooltip line; left click opens the window; right-click menu (status, Upload now, Pause uploads → 1 hour / until tomorrow, Open site, Show uploader, Quit).
