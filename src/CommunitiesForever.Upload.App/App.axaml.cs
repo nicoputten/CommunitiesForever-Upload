@@ -12,8 +12,10 @@ using CommunitiesForever.Upload.App.Views;
 using CommunitiesForever.Upload.Core;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Uploading;
 using CommunitiesForever.Upload.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace CommunitiesForever.Upload.App;
 
@@ -65,6 +67,10 @@ internal sealed partial class App : Application
             .AddCore()
             .AddWindowsAdapters();
         services.AddSingleton(new SiteOptions(SiteUri(args ?? []), version));
+        // Rolling files in the app's logs folder; disposed with the container.
+        services.AddLogging(logging => logging
+            .SetMinimumLevel(LogLevel.Information)
+            .AddProvider(new RollingFileLoggerProvider(AppPaths.LogDirectory)));
         // One HttpClient for the app's lifetime, disposed with the container.
         services.AddSingleton(_ => SiteHttp.Create(version));
         services.AddTransient<MainWindow>();
@@ -137,6 +143,11 @@ internal sealed partial class App : Application
         bool connected = services.GetRequiredService<ITokenStore>().Load() is not null;
         if (load is SettingsLoad.FromNewerVersion || (connected && settings is { Accounts.Count: > 0 }))
         {
+            if (settings is not null)
+            {
+                StartLoop(services, settings);
+            }
+
             return services.GetRequiredService<MainWindow>();
         }
 
@@ -156,11 +167,20 @@ internal sealed partial class App : Application
 
         var setupWindow = _mainWindow;
         ForgetSetup();
+        if (_services.GetRequiredService<SettingsStore>().Load() is SettingsLoad.Loaded { Settings: var settings })
+        {
+            StartLoop(_services, settings);
+        }
+
         var main = _services.GetRequiredService<MainWindow>();
         SetMainWindow(desktop, main);
         main.Show();
         setupWindow?.Close();
     }
+
+    // The watch-and-upload loop (UP-06); the container stops it on exit.
+    private static void StartLoop(ServiceProvider services, AppSettings settings) =>
+        _ = services.GetRequiredService<UploadLoop>().StartAsync(settings);
 
     private void OnSetupCancelled(object? sender, EventArgs e)
     {

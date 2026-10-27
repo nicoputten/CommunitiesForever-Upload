@@ -65,20 +65,23 @@ Watching ─▶ game running (WoW process seen) ─▶ file changed ─▶ settl
                                        │
             offline: keep the file, retry (1 min, backing off) ─┘
             401 token revoked: Not connected, "Reconnect"
-            rejected newer format: Not uploaded, retried after the next site update
+            rejected newer format: Not uploaded, retried at the next app start or after 24 h
             file or folder gone: Not watching, "Scan again / Choose folder"
 ```
 - Settling: the file must be unchanged (size and write time) for 5 s before it's read; the read is retried if the game still holds it.
-- An upload ledger per account records every finished upload by SHA-256 with its outcome (`ok`, `nothing_new`, `rejected` + reason); a file whose hash is in the ledger is never uploaded again, without a request. Bounded (last few hundred hashes), versioned (rule 10). Why: several friends upload, the site merges out-of-sync files (newer data wins), so re-sending a file it already judged only costs requests and noise. Whether `rejected: newer_format` is retried once after a site update is decided in UP-06.
+- An upload ledger per account records every finished upload by SHA-256 with its outcome (`ok`, `nothing_new`, `rejected` + reason); a file whose hash is in the ledger is never uploaded again, without a request. Bounded (last 300 hashes), versioned (rule 10). Why: several friends upload, the site merges out-of-sync files (newer data wins), so re-sending a file it already judged only costs requests and noise.
+- Retrying (decided with Nico, UP-06): `newer_format` blocks the same file for 24 h and only within one run of the app, so it is tried again at the next start or a day later (the site has no "which format do you read" endpoint); `no_community_yet` likewise for 1 h. `wrong_file`, `damaged`, `not_your_file`, `other_community`, `too_large`, `empty_file`, unknown codes and "Skip this one" are final for that hash. `may_not_upload` (403) keeps the token and tries again hourly. Offline and 5xx: 1 min, doubling to 30 min; 429: `Retry-After`; 401: every account "Not connected" until "Reconnect". A retry re-reads the file on disk, so it always sends the newest.
+- Reading: with sharing (the game may hold the file), retried 3 times a second apart; the bytes are hashed and sent, never parsed. "Upload now" skips the 5 s and the ledger; "Upload automatically" off keeps a settled file as "Ready to upload".
+- Implementation: `UploadLoop` in Core with one worker per account (`AccountState`, ordered by urgency: the overall status is the highest), uploads one at a time; `UploadHistory` for the ledger and history. Windows: `FileWatcherFactory` (FileSystemWatcher; the loop also checks every 30 s), `AddonFileReader`, `GameProcesses` (`Wow.exe` inside the install's `_forever_`, checked every 10 s, only to show "Playing").
 - Pause: no uploads until the pause ends; changes are noted and the newest file goes up after.
 - Several accounts are watched independently.
 
 ## Storage (per Windows user)
 - `%LocalAppData%\CommunitiesForever.Upload\settings.json`: versioned settings, migration step per version (CLAUDE.md rule 10). Version 1 (UP-05): `version`, `accounts` (`installPath` = the `_forever_` folder, `account`), `uploadAutomatically`, `startWithWindows`, `closeHidesToTray`, `notifications` (`EveryUpload`, `OnlyProblems`, `Off`), `siteUrl` (null for wow.vestras.nl). Written via a temporary file; a damaged file is kept as `settings.json.bad` and setup runs again; a file from a newer version is never overwritten. `SettingsStoreTests` keeps the released v1 text loading.
 - Finding WoW (UP-05): `GameScanner` in Core over `IFileSystem` (folders and file times only, no way to read contents) and `IInstallHints` (Windows: Blizzard registry keys, Battle.net.config `DefaultInstallPath`, the usual folders on every fixed drive).
-- `history.json`: the last 50 uploads per account with the site's summary line and report link.
+- `history.json` (version 1, UP-06): per account (`installPath`, `account`) the `ledger` (last 300: `hash`, `outcome`, `rejection`, `at`) and the `history` (last 50 uploads: the site's id, time, status, rejection, schema version, summary line, highlights, report link). Same migration rules as the settings; an unreadable file starts afresh (at worst one file goes up again). `UploadHistoryTests` keeps the released v1 text loading.
 - The token: DPAPI-protected file next to it, never in settings.
-- `logs\`: rolling log files (no tokens, no other people's BattleTags).
+- `logs\`: `uploader.log` rolled at 1 MB, at most 7 files (`RollingFileLoggerProvider`). No tokens, no highlights or other people's names (tested).
 
 ## Site API
 Defined by the web repo in `docs/UPLOADER-API.md`: connecting with the OAuth 2.0 device authorization flow (RFC 8628: device code, then token polling), uploading with the Bearer token (RFC 6750 error responses), identity, disconnecting by token revocation (RFC 7009), update feed. The app follows that document for every endpoint, field and error code. The upload response carries the summary the app shows ("5 levels gained", "Ves 37 → 39") and the status (`ok`, `nothing_new`, `rejected` with a reason such as `newer_format`).
