@@ -173,7 +173,7 @@ public sealed record Hero(Tone Tone, string Status, string Title, string Line, H
     }
 
     // One line per reason (UPLOADER-API.md "Uploading"); texts approved with Nico (docs/DESIGN-NOTES.md).
-    private static (string Title, string Line) Rejected(string? code, int? schemaVersion) => code switch
+    internal static (string Title, string Line) Rejected(string? code, int? schemaVersion) => code switch
     {
         UploadReceipt.Rejections.NewerFormat => (
             "The site can't read this file yet",

@@ -1,5 +1,6 @@
 using CommunitiesForever.Upload.Core;
 using CommunitiesForever.Upload.Core.Game;
+using CommunitiesForever.Upload.Core.Notifications;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Core.Uploading;
@@ -23,6 +24,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IAddonFileReader, AddonFileReader>();
         services.AddSingleton<IFileWatcherFactory, FileWatcherFactory>();
         services.AddSingleton<IGameProcesses, GameProcesses>();
+        services.AddSingleton<INotifier, WindowsNotifier>();
+        services.AddSingleton<IAutostart>(_ => new RegistryAutostart(Environment.ProcessPath ?? ""));
         return services;
     }
 }

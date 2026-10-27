@@ -3,7 +3,7 @@
 Open stories only, in build order. Done stories move to `docs/STORIES-COMPLETED.md`.
 Each story: criteria are testable. "Manual" items are steps only Nico can do; they go in the PR.
 
-Build order: UP-08, UP-09, UP-10 (UP-01 to UP-07 and UP-11 are done). All of it is v1 (decided with Nico).
+Build order: UP-09, UP-10 (UP-01 to UP-08 and UP-11 are done). All of it is v1 (decided with Nico).
 The site side is built in the web repo: WEB-33 (uploader API, merged), WEB-34 (uploader page), WEB-35 (installer hosting and update feed).
 
 ## Every UI story
@@ -14,11 +14,6 @@ The site side is built in the web repo: WEB-33 (uploader API, merged), WEB-34 (u
 - The screen gets its design checks (UP-03): headless screenshot baselines and key style checks.
 
 ## E3 Screens
-
-### UP-08 Tray, notifications and autostart
-- Board `tray`: tray icon per state (watching, uploading, paused, needs attention) with tooltip line; left click opens the window; right-click menu (status, Upload now, Pause uploads → 1 hour / until tomorrow, Open site, Show uploader, Quit).
-- Windows toasts: "Uploaded · 5 levels gained" with "See what changed", "No connection: will try again", "Upload token no longer works" with Reconnect / Later; "Only problems" keeps the last two.
-- Start with Windows (hidden in the tray), close hides to tray, single instance.
 
 ### UP-09 Settings
 - Board `settings`: Behaviour (upload automatically, start with Windows, close to tray, notifications, pause), Game folders (scan again, add folder, remove), Connection (connected as, token created, Test connection, Disconnect), About (version, Check for updates, Open log folder).

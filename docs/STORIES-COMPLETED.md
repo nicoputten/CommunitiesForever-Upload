@@ -55,3 +55,9 @@ Built after UP-07 (small; like WEB-37 in the web repo).
 - CI decides whether an update is safe (build, format, tests, design checks). A changed screenshot still needs Nico's OK (CLAUDE.md rule 7), so such an update waits for him.
 - Every exact pin that Dependabot must not move (for example xunit.v3 3.x for Avalonia.Headless.XUnit) is listed with its reason in `docs/ARCHITECTURE.md`, and ignored in `dependabot.yml` with the same reason.
 - Done (PR #8): `.github/dependabot.yml` (NuGet and GitHub Actions, weekly into `develop`; groups `avalonia`, `dotnet`, `minor-and-patch`; xunit.v3 and the .NET 10 packages pinned to their major), "Dependencies" in ARCHITECTURE. No auto-merge.
+
+### UP-08 Tray, notifications and autostart
+- Board `tray`: tray icon per state (watching, uploading, paused, needs attention) with tooltip line; left click opens the window; right-click menu (status, Upload now, Pause uploads → 1 hour / until tomorrow, Open site, Show uploader, Quit).
+- Windows toasts: "Uploaded · 5 levels gained" with "See what changed", "No connection: will try again", "Upload token no longer works" with Reconnect / Later; "Only problems" keeps the last two.
+- Start with Windows (hidden in the tray), close hides to tray, single instance.
+- Done (PR #11): `TrayController` (icon per state with the uploading animation, tooltip, menu with pause until 06:00 and resume), `NotificationPolicy` (Core) and `NotificationTexts`, Windows toasts through `ShellRegistration` (sender and the `communitiesforever-uploader://` link, no COM server), `SingleInstance`, `RegistryAutostart` (`--tray`), close hides to the tray. Deviations: the tray menu and notifications in Windows' own style.

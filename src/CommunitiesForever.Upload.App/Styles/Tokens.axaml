@@ -442,6 +442,7 @@
   <sys:TimeSpan x:Key="AppDurRing">0:0:3.2</sys:TimeSpan>
   <sys:TimeSpan x:Key="AppDurRingHalf">0:0:1.6</sys:TimeSpan>
   <sys:TimeSpan x:Key="AppDurFill">0:0:2.6</sys:TimeSpan>
+  <sys:TimeSpan x:Key="AppDurTrayFrame">0:0:0.25</sys:TimeSpan>
   <RadialGradientBrush x:Key="AppHeroBackground" Center="15%,50%" GradientOrigin="15%,50%" RadiusX="60%" RadiusY="100%">
     <GradientStop Color="{StaticResource AppTintSoft}" Offset="0" />
     <GradientStop Color="{StaticResource AppSurfaceHero}" Offset="1" />

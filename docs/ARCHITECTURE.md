@@ -44,6 +44,12 @@ Every package at an exact version. Anything not listed needs Nico's OK (CLAUDE.m
 - Startup: ReadyToRun on publish; no Native AOT.
 - Core targets plain `net10.0`, so Windows APIs are not even available there; `ArchitectureTests` in Core.Tests reads Core's metadata and fails on Avalonia, Windows APIs, the other projects, direct file system, process, registry or socket use and P/Invoke. `HttpClient` is allowed in Core but always injected.
 
+## Tray, notifications, start with Windows (UP-08)
+- The app lives in the tray (`ShutdownMode.OnExplicitShutdown`): it ends by the tray's Quit, or by closing the window when "Close hides to the tray" is off. `TrayController` (App) shows the icon per state, the tooltip and the menu, and turns status changes into notifications through `NotificationPolicy` (Core: an upload with something new, each problem once when it starts; the notification setting filters).
+- Notifications are Windows toasts for this unpackaged app, without a package: `ShellRegistration` registers, at every start and for the current user only, the sender (`HKCU\Software\Classes\AppUserModelId\CommunitiesForever.Uploader`, name and icon) and the app link scheme `communitiesforever-uploader://` (`open`, `reconnect`). Every toast click is a link (protocol activation), so no COM server is needed.
+- One instance per Windows user (`SingleInstance`: named mutex and pipe). A later start (Start menu, a notification's link) hands its arguments to the running app and quits.
+- Start with Windows: `RegistryAutostart` keeps `HKCU\…\Run\CommunitiesForever Uploader = "<exe>" --tray` in step with the setting; `--tray` starts hidden. Debug builds leave the Run key alone. UP-10 points the Run entry and the registrations at Velopack's stable launcher and removes them on uninstall.
+
 ## Long running (CLAUDE.md rule 11)
 The app lives for weeks in the tray, so memory must stay flat:
 - Whoever creates something with a lifetime disposes it: timers, watchers, `CancellationTokenSource`s, DI scopes, the tray icon. App disposes the service provider on exit.
