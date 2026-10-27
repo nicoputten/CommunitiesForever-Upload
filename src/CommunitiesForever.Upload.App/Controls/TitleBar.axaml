@@ -5,7 +5,7 @@
   <!-- main-window board: emblem, app name, minimise, close. Windows moves and snaps the window from here. -->
   <Border Classes="titlebar" chrome:WindowDecorationProperties.ElementRole="TitleBar">
     <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-      <Image Source="/Assets/icon.png"
+      <Image Source="/Assets/Icons/png/app-icon-small-32.png"
              Width="{StaticResource SizeIcon}" Height="{StaticResource SizeIcon}"
              Margin="{StaticResource AppTitleIconMargin}"
              VerticalAlignment="Center" />

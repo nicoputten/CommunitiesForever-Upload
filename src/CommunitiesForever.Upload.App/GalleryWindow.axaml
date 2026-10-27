@@ -3,7 +3,7 @@
         xmlns:c="using:CommunitiesForever.Upload.App.Controls"
         x:Class="CommunitiesForever.Upload.App.GalleryWindow"
         Title="Component gallery"
-        Icon="/Assets/icon.png"
+        Icon="/Assets/Icons/app.ico"
         Width="{StaticResource AppWindowW}" Height="{StaticResource AppWindowH}"
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"

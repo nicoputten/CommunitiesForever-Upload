@@ -10,6 +10,7 @@ The look is the web's "Night over Azeroth" design system: tokens, type and data 
 - App tokens: values from the app boards that the web has no token for are prefixed `App` in `Tokens.axaml` (window and title bar sizes, switch, segment padding, status dot, composed paddings, the window background glow). Fonts: Marcellus SC, Marcellus and Inter embedded (OFL), Consolas for paths and codes.
 - Letter spacing and line height stay in em as on the web; `Typography.LetterSpacingEm` / `LineHeightEm` turn them into pixels for the TextBlock's font size.
 - Window chrome: the app draws the board's title bar (emblem, name, minimise, close); Windows still moves, snaps and resizes the window. Until UP-08 the close button quits and is named "Close"; UP-08 makes it "Hide to tray" as on the board.
+- Icons: Nico's icon set (2026-10-27, source in `design/README.md` "Icons"). Exe, taskbar and window: `app.ico`; title bar emblem: `app-icon-small`; tray: `tray.ico` (watching) until UP-08 adds the other states.
 - Badges follow the web's data-age badge (roster cards): neutral, fresh, stale.
 - Reduced motion follows Windows' "Animation effects" (checked at start and whenever the window is activated); off removes every transition.
 

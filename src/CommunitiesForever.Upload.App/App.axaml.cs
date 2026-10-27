@@ -107,7 +107,7 @@ internal sealed partial class App : Application
 
         var trayIcon = new TrayIcon
         {
-            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://CommunitiesForever.Upload.App/Assets/icon.png"))),
+            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://CommunitiesForever.Upload.App/Assets/Icons/tray.ico"))),
             ToolTipText = DefaultName,
             Menu = new NativeMenu { Items = { open, quit } },
         };
