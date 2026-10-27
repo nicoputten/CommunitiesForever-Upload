@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Uploader status states</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus+SC&amp;family=Marcellus&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#03060B}
+a{color:#D4AF6A}a:hover{color:#F0D08E}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fill{from{width:10%}to{width:85%}}
+@keyframes count{0%,100%{opacity:.5}50%{opacity:1}}
+.spin{animation:spin 1.2s linear infinite;transform-origin:50% 50%}
+.fill{animation:fill 2.6s cubic-bezier(.2,.8,.2,1) infinite alternate}
+.cnt{animation:count 1s ease-in-out infinite}
+.st{padding:18px;border-radius:14px;background:rgba(12,18,30,.85);border:1px solid rgba(212,175,106,.3);display:flex;flex-direction:column;gap:10px;min-height:250px;box-sizing:border-box}
+.k{font-size:11px;text-transform:uppercase;letter-spacing:.14em}
+.t{margin:0;font:21px/1.2 'Marcellus',serif;color:#F3EBDA}
+.d{font-size:13px;color:#AEB6C3;line-height:1.5}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border-radius:9px;font:600 12px Inter,sans-serif;cursor:pointer;border:0;text-decoration:none}
+.pri{background:#D4AF6A;color:#0B0F14}
+.sec{background:transparent;border:1px solid rgba(212,175,106,.4);color:#F0D08E}
+.warn{border-color:rgba(224,138,74,.55);background:linear-gradient(180deg,rgba(224,138,74,.09),rgba(12,18,30,.85) 60%)}
+.cap{font:13px 'Marcellus SC',serif;letter-spacing:.06em;color:#7E8898;margin-bottom:-4px}
+@media (prefers-reduced-motion: reduce){.spin,.fill,.cnt{animation:none}}
+</style>
+</helmet>
+<div style="width: 1440px; min-height: 720px; box-sizing: border-box; padding: 32px 48px; background: #03060B; font-family: Inter, system-ui, sans-serif; color: #E6E1D6; display: flex; flex-direction: column; gap: 20px">
+  <!-- flow -->
+  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: #AEB6C3">
+    <span style="font: 15px 'Marcellus SC', serif; letter-spacing: .06em; color: #F0D08E; margin-right: 8px">The loop</span>
+    <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(212,175,106,0.3)">Watching</span>→
+    <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(212,175,106,0.3)">Game running</span>→
+    <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(212,175,106,0.3)">File changed</span>→
+    <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(212,175,106,0.3)">Unchanged for 5 s</span>→
+    <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(212,175,106,0.3)">Same as last upload? skip</span>→
+    <span style="padding: 6px 12px; border-radius: 999px; background: rgba(212,175,106,0.15); border: 1px solid #D4AF6A; color: #F3EBDA">Upload</span>→
+    <span style="padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(127,217,154,0.4); color: #9BE3B0">Report + notification</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 10px"><div class="cap">Game running</div>
+      <section class="st"><span class="k" style="color: #8DB0FF">● Playing</span><h2 class="t">Waiting for the game to save</h2><p class="d" style="margin: 0">World of Warcraft writes the file when you log out, type <span style="color: #E6E1D6">/reload</span> or quit. Nothing to do.</p><div style="flex: 1"></div><div style="font-size: 12px; color: #7E8898">Last upload today 19:02</div></section>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px"><div class="cap">Saved, settling</div>
+      <section class="st"><span class="k" style="color: #F0D08E">● File changed</span><h2 class="t">Game saved: uploading in <span class="cnt">4</span> s</h2><p class="d" style="margin: 0">Waiting until the file stops changing, so we never send half a file.</p><div style="flex: 1"></div><div style="display: flex; gap: 8px"><button class="btn pri">Upload now</button><button class="btn sec">Skip this one</button></div></section>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px"><div class="cap">Uploading</div>
+      <section class="st"><span class="k" style="color: #F0D08E">● Uploading</span><h2 class="t">Sending to wow.vestras.nl</h2><div style="height: 6px; border-radius: 3px; background: #1F2837; overflow: hidden"><div class="fill" style="height: 6px; background: linear-gradient(90deg, #D4AF6A, #F3DFAE)"></div></div><p class="d" style="margin: 0">48 KB · 10 characters · usually under a second</p></section>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px"><div class="cap">Done</div>
+      <section class="st" style="border-color: rgba(127,217,154,0.4)"><span class="k" style="color: #9BE3B0">● Uploaded 21:14</span><h2 class="t">5 levels gained</h2><p class="d" style="margin: 0">Ves 37 → 39 · Lia 35 → 37 · Tailoring 150 → 187 · Zul Kazrek is new</p><div style="flex: 1"></div><a href="UploadResult.dc.html" class="btn sec" style="align-self: flex-start">See the session report</a></section>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px"><div class="cap">Offline</div>
+      <section class="st warn"><span class="k" style="color: #F0A774">● Waiting to send</span><h2 class="t">Can't reach wow.vestras.nl</h2><p class="d" style="margin: 0">The file is kept and sent automatically. Next try in 1 min.</p><div style="flex: 1"></div><button class="btn sec" style="align-self: flex-start">Try now</button></section>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px"><div class="cap">Token revoked or expired</div>
+      <section class="st warn"><span class="k" style="color: #F0A774">● Not connected</span><h2 class="t">The site doesn't accept this uploader anymore</h2><p class="d" style="margin: 0">Its token was revoked. Connect again; it takes a minute.</p><div style="flex: 1"></div><a href="AppSetup.dc.html" class="btn pri" style="align-self: flex-start">Reconnect</a></section>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px"><div class="cap">Newer addon format</div>
+      <section class="st warn"><span class="k" style="color: #F0A774">● Not uploaded</span><h2 class="t">The site can't read this file yet</h2><p class="d" style="margin: 0">Your addon writes data format 3; the site reads up to 2. It uploads by itself once the site is updated.</p><div style="flex: 1"></div><span style="font-size: 12px; color: #7E8898">Told Nico automatically</span></section>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px"><div class="cap">Game not found</div>
+      <section class="st warn"><span class="k" style="color: #F0A774">● Not watching</span><h2 class="t">Where is World of Warcraft?</h2><p class="d" style="margin: 0">The game folder moved or the addon file is gone. Scan again or pick the folder yourself.</p><div style="flex: 1"></div><div style="display: flex; gap: 8px"><button class="btn pri">Scan again</button><button class="btn sec">Choose folder…</button></div></section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Uploader setup</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus+SC&amp;family=Marcellus&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#03060B}
+a{color:#D4AF6A}a:hover{color:#F0D08E}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sweep{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:.35}50%{opacity:1}}
+.win{width:760px;height:560px;border-radius:10px;overflow:hidden;background:radial-gradient(700px 300px at 70% -10%,#12233A,rgba(7,12,21,0) 70%),#070C15;border:1px solid rgba(212,175,106,.28);box-shadow:0 30px 70px rgba(0,0,0,.6);display:flex;flex-direction:column;font-family:Inter,system-ui,sans-serif;color:#E6E1D6}
+.tb{height:36px;flex:none;display:flex;align-items:center;gap:8px;padding:0 0 0 12px;background:#050A12;border-bottom:1px solid rgba(212,175,106,.15)}
+.tb .t{font:13px 'Marcellus SC',serif;letter-spacing:.06em;color:#F0D08E;flex:1}
+.wb{width:46px;height:36px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.body{flex:1;display:flex;min-height:0}
+.rail{width:210px;flex:none;padding:24px 18px;box-sizing:border-box;border-right:1px solid rgba(212,175,106,.12);display:flex;flex-direction:column;gap:6px;background:rgba(5,10,18,.5)}
+.st{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;font-size:13px;color:#7E8898}
+.st i{width:22px;height:22px;border-radius:50%;border:1.5px solid #3A4558;font:600 11px/19px Inter,sans-serif;text-align:center;font-style:normal;box-sizing:border-box;flex:none}
+.st.on{background:rgba(212,175,106,.12);color:#F3EBDA}
+.st.on i{border-color:#D4AF6A;color:#F0D08E}
+.st.done{color:#AEB6C3}
+.st.done i{background:#D4AF6A;border-color:#D4AF6A;color:#0B0F14}
+.main{flex:1;padding:28px 32px 22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.h{margin:0;font:26px 'Marcellus SC',serif;letter-spacing:.04em;color:#F3DFAE}
+.p{margin:0;font-size:13px;color:#AEB6C3;line-height:1.55}
+.foot{display:flex;gap:10px;align-items:center;justify-content:flex-end;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 18px;border-radius:10px;font:600 13px Inter,sans-serif;text-decoration:none;cursor:pointer;border:0}
+.pri{background:#D4AF6A;color:#0B0F14}
+.sec{background:transparent;border:1px solid rgba(212,175,106,.4);color:#F0D08E}
+.ghost{background:transparent;color:#AEB6C3}
+.card{padding:14px 16px;border-radius:12px;background:rgba(12,18,30,.8);border:1px solid rgba(212,175,106,.2)}
+.acc{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.cb{width:18px;height:18px;border-radius:5px;border:1.5px solid #D4AF6A;background:#D4AF6A;display:flex;align-items:center;justify-content:center}
+.mono{font:12px ui-monospace,Consolas,Menlo,monospace;color:#AEB6C3}
+.opt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.opt b{display:block;font-weight:500;font-size:14px;color:#E6E1D6}
+.opt span{display:block;font-size:12px;color:#8E98A8;margin-top:2px}
+.sw{position:relative;width:40px;height:22px;border-radius:11px;background:#D4AF6A;flex:none}
+.sw:after{content:"";position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#0B0F14}
+.sw.off{background:#2A3446}
+.sw.off:after{right:auto;left:3px;background:#8E98A8}
+.seg{display:flex;border:1px solid rgba(212,175,106,.3);border-radius:8px;overflow:hidden}
+.seg span{padding:6px 10px;font-size:12px;color:#AEB6C3}
+.seg span.on{background:rgba(212,175,106,.2);color:#F3EBDA;font-weight:600}
+.spin{animation:spin 1.2s linear infinite}
+.sweep{animation:sweep 3s linear infinite;transform-origin:50% 50%}
+.blink{animation:blink 1.6s ease-in-out infinite}
+.cap{font:14px 'Marcellus SC',serif;letter-spacing:.06em;color:#F0D08E;margin-bottom:10px}
+@media (prefers-reduced-motion: reduce){.spin,.sweep,.blink{animation:none}}
+</style>
+</helmet>
+<div style="width: 2400px; min-height: 640px; box-sizing: border-box; padding: 24px 0 0; background: #03060B; display: flex; gap: 60px; font-family: Inter, sans-serif">
+
+  <!-- STEP 1 -->
+  <div><div class="cap">1 · Connect (browser pairing)</div>
+  <section class="win" aria-label="Setup step 1 of 3">
+    <div class="tb"><svg width="16" height="16" viewBox="0 0 26 26" fill="none" stroke="#D4AF6A" stroke-width="1.8" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z"></path><path d="M13 7v12M8 12h10"></path></svg><span class="t">Doombringers Uploader</span><button class="wb" aria-label="Minimise"><svg width="10" height="10" viewBox="0 0 10 10" stroke="#AEB6C3"><path d="M1 5h8"></path></svg></button><button class="wb" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" stroke="#AEB6C3"><path d="M1 1l8 8M9 1L1 9"></path></svg></button></div>
+    <div class="body">
+      <nav class="rail" aria-label="Setup steps"><div class="st on"><i>1</i>Connect</div><div class="st"><i>2</i>Find World of Warcraft</div><div class="st"><i>3</i>How it runs</div></nav>
+      <div class="main">
+        <h1 class="h">Connect to Doombringers</h1>
+        <p class="p">The uploader sends your <span style="color: #E6E1D6">CommunitiesForever.lua</span> to wow.vestras.nl after you play. It only gets permission to upload; it can't see or change anything else.</p>
+        <div class="card" style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 16px; text-align: center">
+          <div style="font-size: 12px; color: #8E98A8">Your browser opened wow.vestras.nl. Check that it shows this code:</div>
+          <div style="font: 34px ui-monospace, Consolas, monospace; letter-spacing: .18em; color: #F3DFAE; padding: 6px 18px; border-radius: 10px; background: rgba(212,175,106,0.08); border: 1px solid rgba(212,175,106,0.35)">KXRT-7Q2M</div>
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #AEB6C3"><svg class="spin" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6" stroke="#1F2837" stroke-width="2"></circle><path d="M8 2a6 6 0 0 1 6 6" stroke="#D4AF6A" stroke-width="2" stroke-linecap="round"></path></svg>Waiting for you to approve it there…</div>
+          <a href="#" style="font-size: 12px">Browser didn't open? Copy the link</a>
+        </div>
+        <details style="font-size: 12px; color: #8E98A8"><summary style="cursor: pointer">Paste an upload token instead</summary></details>
+        <div style="flex: 1"></div>
+        <div class="foot"><button class="btn ghost">Cancel</button><button class="btn pri" disabled="" style="opacity: .5">Next</button></div>
+      </div>
+    </div>
+  </section></div>
+
+  <!-- STEP 2 -->
+  <div><div class="cap">2 · Find World of Warcraft (scan done)</div>
+  <section class="win" aria-label="Setup step 2 of 3">
+    <div class="tb"><svg width="16" height="16" viewBox="0 0 26 26" fill="none" stroke="#D4AF6A" stroke-width="1.8" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z"></path><path d="M13 7v12M8 12h10"></path></svg><span class="t">Doombringers Uploader</span><button class="wb" aria-label="Minimise"><svg width="10" height="10" viewBox="0 0 10 10" stroke="#AEB6C3"><path d="M1 5h8"></path></svg></button><button class="wb" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" stroke="#AEB6C3"><path d="M1 1l8 8M9 1L1 9"></path></svg></button></div>
+    <div class="body">
+      <nav class="rail" aria-label="Setup steps"><div class="st done"><i>✓</i>Connected as Nico#2201</div><div class="st on"><i>2</i>Find World of Warcraft</div><div class="st"><i>3</i>How it runs</div></nav>
+      <div class="main">
+        <div style="display: flex; align-items: center; gap: 14px">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true"><circle cx="22" cy="22" r="20" stroke="#D4AF6A" stroke-opacity=".35"></circle><circle cx="22" cy="22" r="12" stroke="#D4AF6A" stroke-opacity=".25"></circle><g class="sweep"><path d="M22 22 L22 2 A20 20 0 0 1 39 12 Z" fill="#D4AF6A" fill-opacity=".25"></path></g><circle cx="30" cy="14" r="2.5" fill="#F0D08E"></circle></svg>
+          <div><h1 class="h" style="font-size: 24px">Found your game</h1><div style="font-size: 12px; color: #9BE3B0">Scan complete · 1 install · 2 accounts</div></div>
+        </div>
+        <div class="card" style="padding: 10px 14px"><div style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #7E8898">Install</div><div class="mono" style="margin-top: 4px; color: #E6E1D6">C:\Program Files (x86)\World of Warcraft\[Forever folder]</div></div>
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #7E8898">Accounts to watch</div>
+        <div class="acc"><span class="cb"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#0B0F14" stroke-width="2"><path d="M2 6l3 3 5-6"></path></svg></span><div style="min-width: 0"><div class="mono" style="color: #E6E1D6">123456789#1</div><div style="font-size: 12px; color: #8E98A8">CommunitiesForever.lua · saved today 21:12 · 10 characters</div></div><span style="font-size: 11px; color: #9BE3B0">Ready</span></div>
+        <div class="acc" style="opacity: .6"><span class="cb" style="background: transparent; border-color: #3A4558"></span><div style="min-width: 0"><div class="mono">123456789#2</div><div style="font-size: 12px; color: #8E98A8">No addon file yet: log in once with the addon enabled</div></div><span style="font-size: 11px; color: #8E98A8">Not found</span></div>
+        <div style="display: flex; gap: 10px"><button class="btn sec" style="min-height: 34px">Scan again</button><button class="btn ghost" style="min-height: 34px">Choose folder…</button></div>
+        <div style="flex: 1"></div>
+        <div class="foot"><button class="btn ghost">Back</button><button class="btn pri">Next</button></div>
+      </div>
+    </div>
+  </section></div>
+
+  <!-- STEP 3 -->
+  <div><div class="cap">3 · How it runs</div>
+  <section class="win" aria-label="Setup step 3 of 3">
+    <div class="tb"><svg width="16" height="16" viewBox="0 0 26 26" fill="none" stroke="#D4AF6A" stroke-width="1.8" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z"></path><path d="M13 7v12M8 12h10"></path></svg><span class="t">Doombringers Uploader</span><button class="wb" aria-label="Minimise"><svg width="10" height="10" viewBox="0 0 10 10" stroke="#AEB6C3"><path d="M1 5h8"></path></svg></button><button class="wb" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" stroke="#AEB6C3"><path d="M1 1l8 8M9 1L1 9"></path></svg></button></div>
+    <div class="body">
+      <nav class="rail" aria-label="Setup steps"><div class="st done"><i>✓</i>Connected as Nico#2201</div><div class="st done"><i>✓</i>1 account watched</div><div class="st on"><i>3</i>How it runs</div></nav>
+      <div class="main">
+        <h1 class="h">How should it run?</h1>
+        <div>
+          <div class="opt"><div><b>Upload automatically</b><span>After the game saves the file (logout, /reload or quitting)</span></div><span class="sw" role="switch" aria-checked="true" aria-label="Upload automatically"></span></div>
+          <div class="opt"><div><b>Start with Windows</b><span>Quietly in the tray, so you never have to think about it</span></div><span class="sw" role="switch" aria-checked="true" aria-label="Start with Windows"></span></div>
+          <div class="opt"><div><b>Close button hides to the tray</b><span>Quit from the tray menu</span></div><span class="sw" role="switch" aria-checked="true" aria-label="Close hides to tray"></span></div>
+          <div class="opt" style="border-bottom: 0"><div><b>Notifications</b><span>A small Windows notification after an upload</span></div><div class="seg" role="radiogroup" aria-label="Notifications"><span class="on" role="radio" aria-checked="true">Every upload</span><span role="radio" aria-checked="false">Only problems</span><span role="radio" aria-checked="false">Off</span></div></div>
+        </div>
+        <div style="flex: 1"></div>
+        <div class="foot"><button class="btn ghost">Back</button><button class="btn pri">Start watching</button></div>
+      </div>
+    </div>
+  </section></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2400,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Uploader tray and notifications</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus+SC&amp;family=Marcellus&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#03060B}
+a{color:#D4AF6A}a:hover{color:#F0D08E}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 1.1s linear infinite;transform-origin:50% 50%}
+.cap{font:15px 'Marcellus SC',serif;letter-spacing:.06em;color:#F0D08E}
+.sub{font-size:12px;color:#7E8898}
+.ic{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 10px;border-radius:12px;background:#0B1220;border:1px solid rgba(212,175,106,.15)}
+.ic b{font-weight:500;font-size:13px;color:#E6E1D6}
+.ic span{font-size:11px;color:#8E98A8;text-align:center}
+.menu{width:280px;padding:6px;border-radius:10px;background:#0E1522;border:1px solid rgba(212,175,106,.3);box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.mi{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:13px;color:#E6E1D6}
+.mi.hl{background:rgba(212,175,106,.14)}
+.mi small{margin-left:auto;font-size:11px;color:#7E8898}
+.sep{height:1px;background:rgba(255,255,255,.08);margin:4px 6px}
+.toast{width:364px;padding:14px 16px;border-radius:10px;background:#0E1522;border:1px solid rgba(212,175,106,.25);box-shadow:0 18px 40px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:8px}
+.th{display:flex;align-items:center;gap:8px;font-size:12px;color:#8E98A8}
+.tt{font-size:14px;font-weight:600;color:#F3EBDA}
+.tb{font-size:13px;color:#AEB6C3;line-height:1.45}
+.ta{display:flex;gap:8px}
+.ta a{flex:1;display:flex;align-items:center;justify-content:center;min-height:32px;border-radius:6px;background:rgba(255,255,255,.06);font-size:12px;color:#E6E1D6;text-decoration:none}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+</style>
+</helmet>
+<div style="width: 1440px; min-height: 680px; box-sizing: border-box; padding: 36px 48px; background: radial-gradient(ellipse at 70% 100%, #0F1C2E, #03060B 70%); font-family: Inter, system-ui, sans-serif; color: #E6E1D6; display: grid; grid-template-columns: 440px 300px minmax(0, 1fr); gap: 48px; align-items: start">
+
+  <!-- ICON STATES -->
+  <section style="display: flex; flex-direction: column; gap: 12px">
+    <div class="cap">Tray icon</div><div class="sub">16 px in the tray; the shield always reads at a glance. Hover shows the tooltip line.</div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <div class="ic"><svg width="40" height="40" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#F0D08E" stroke-width="1.6"></path><path d="M13 7v12M8 12h10" stroke="#F0D08E" stroke-width="1.6"></path></svg><b>Watching</b><span>“Doombringers · last upload 21:14”</span></div>
+      <div class="ic"><svg width="40" height="40" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#F0D08E" stroke-width="1.6"></path><g class="spin"><path d="M13 7.5a5 5 0 0 1 5 5" stroke="#F3DFAE" stroke-width="2" fill="none" stroke-linecap="round"></path></g></svg><b>Uploading</b><span>“Uploading CommunitiesForever.lua…”</span></div>
+      <div class="ic"><svg width="40" height="40" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#7E8898" stroke-width="1.6"></path><path d="M10.5 9v7M15.5 9v7" stroke="#AEB6C3" stroke-width="2" stroke-linecap="round"></path></svg><b>Paused</b><span>“Paused until 22:30”</span></div>
+      <div class="ic"><svg width="40" height="40" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#F0D08E" stroke-width="1.6"></path><path d="M13 7v12M8 12h10" stroke="#F0D08E" stroke-width="1.6"></path><circle cx="20.5" cy="20" r="4.5" fill="#E08A4A" stroke="#03060B" stroke-width="1.5"></circle></svg><b>Needs attention</b><span>“Upload token no longer works”</span></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; background: #0B0F16; border: 1px solid rgba(255,255,255,0.06); width: fit-content">
+      <span class="sub" style="margin-right: 6px">Actual size</span>
+      <svg width="16" height="16" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#F0D08E" stroke-width="2.2"></path><path d="M13 7v12M8 12h10" stroke="#F0D08E" stroke-width="2.2"></path></svg>
+      <svg width="16" height="16" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#7E8898" stroke-width="2.2"></path><path d="M10.5 9v7M15.5 9v7" stroke="#AEB6C3" stroke-width="2.6"></path></svg>
+      <svg width="16" height="16" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#F0D08E" stroke-width="2.2"></path><circle cx="20" cy="19.5" r="5.5" fill="#E08A4A"></circle></svg>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section style="display: flex; flex-direction: column; gap: 12px">
+    <div class="cap">Right-click menu</div><div class="sub">Left-click opens the window.</div>
+    <div class="menu" role="menu" aria-label="Doombringers Uploader">
+      <div style="padding: 8px 10px 6px"><div style="font: 14px 'Marcellus SC', serif; letter-spacing: .06em; color: #F0D08E">Doombringers</div><div style="font-size: 12px; color: #9BE3B0; margin-top: 2px">● Watching · last upload 21:14</div></div>
+      <div class="sep"></div>
+      <div class="mi hl" role="menuitem">Upload now</div>
+      <div class="mi" role="menuitem">Pause uploads <small>▸</small></div>
+      <div class="sep"></div>
+      <div class="mi" role="menuitem">Open Doombringers site</div>
+      <div class="mi" role="menuitem">Show uploader</div>
+      <div class="sep"></div>
+      <div class="mi" role="menuitem" style="color: #AEB6C3">Quit</div>
+    </div>
+    <div class="menu" role="menu" aria-label="Pause uploads" style="width: 200px; margin-left: 80px">
+      <div class="mi hl" role="menuitem">For 1 hour</div>
+      <div class="mi" role="menuitem">Until tomorrow</div>
+    </div>
+  </section>
+
+  <!-- NOTIFICATIONS -->
+  <section style="display: flex; flex-direction: column; gap: 12px">
+    <div class="cap">Notifications</div><div class="sub">Windows toast notifications. "Only problems" keeps just the bottom two.</div>
+    <div class="toast"><div class="th"><svg width="14" height="14" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#F0D08E" stroke-width="2.2"></path></svg>Doombringers Uploader · now</div><div class="tt">Uploaded · 5 levels gained</div><div class="tb">Ves 37 → 39 · Tailoring 150 → 187 · 1 new character</div><div class="ta"><a href="UploadResult.dc.html">See what changed</a></div></div>
+    <div class="toast"><div class="th"><svg width="14" height="14" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#F0D08E" stroke-width="2.2"></path></svg>Doombringers Uploader · now</div><div class="tt">No connection: will try again</div><div class="tb">Your file is saved and goes up as soon as wow.vestras.nl is reachable.</div></div>
+    <div class="toast" style="border-color: rgba(224,138,74,0.55)"><div class="th"><svg width="14" height="14" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l9 4v7c0 6-4 9-9 11C8 22 4 19 4 13V6z" fill="#121B2A" stroke="#F0A774" stroke-width="2.2"></path></svg>Doombringers Uploader · now</div><div class="tt" style="color: #F0A774">Upload token no longer works</div><div class="tb">It was revoked on the site. Connect again to keep uploading.</div><div class="ta"><a href="AppSetup.dc.html">Reconnect</a><a href="#">Later</a></div></div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":680}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
