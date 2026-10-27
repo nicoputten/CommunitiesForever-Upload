@@ -11,7 +11,7 @@ public static class ContentHash
     public static async Task<string> ComputeAsync(Stream content, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(content);
-        var hash = await SHA256.HashDataAsync(content, cancellationToken).ConfigureAwait(false);
+        byte[] hash = await SHA256.HashDataAsync(content, cancellationToken).ConfigureAwait(false);
         return Convert.ToHexStringLower(hash);
     }
 }

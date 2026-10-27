@@ -7,6 +7,9 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\CommunitiesForever.Upload.App\CommunitiesForever.Upload.App.csproj" />
   </ItemGroup>
   <ItemGroup>

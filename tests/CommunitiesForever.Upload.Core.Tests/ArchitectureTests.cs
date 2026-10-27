@@ -78,7 +78,7 @@ internal static class CoreRules
 
         foreach (var handle in reader.AssemblyReferences)
         {
-            var name = reader.GetString(reader.GetAssemblyReference(handle).Name);
+            string name = reader.GetString(reader.GetAssemblyReference(handle).Name);
             if (ForbiddenAssemblyPrefixes.Any(p => name.StartsWith(p, StringComparison.Ordinal)))
             {
                 violations.Add($"assembly {name}");
@@ -88,7 +88,7 @@ internal static class CoreRules
         foreach (var handle in reader.TypeReferences)
         {
             var type = reader.GetTypeReference(handle);
-            var fullName = $"{reader.GetString(type.Namespace)}.{reader.GetString(type.Name)}";
+            string fullName = $"{reader.GetString(type.Namespace)}.{reader.GetString(type.Name)}";
             if (ForbiddenTypes.Contains(fullName)
                 || ForbiddenNamespacePrefixes.Any(p => fullName.StartsWith(p, StringComparison.Ordinal)))
             {

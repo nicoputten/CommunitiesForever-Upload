@@ -8,7 +8,7 @@ internal static class ForbiddenApiSamples
 {
     public static bool UsesFile(string path) => File.Exists(path);
 
-    public static int UsesProcess() => Process.GetCurrentProcess().Id;
+    public static int UsesProcess() => Process.GetProcessesByName("WowClassic").Length;
 
     [DllImport("kernel32.dll")]
     internal static extern uint GetTickCount();
