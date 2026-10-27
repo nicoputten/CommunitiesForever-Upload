@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:chrome="using:Avalonia.Controls.Chrome"
+             x:Class="CommunitiesForever.Upload.App.Controls.TitleBar">
+  <!-- main-window board: emblem, app name, minimise, close. Windows moves and snaps the window from here. -->
+  <Border Classes="titlebar" chrome:WindowDecorationProperties.ElementRole="TitleBar">
+    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+      <Image Source="/Assets/icon.png"
+             Width="{StaticResource SizeIcon}" Height="{StaticResource SizeIcon}"
+             Margin="{StaticResource AppTitleIconMargin}"
+             VerticalAlignment="Center" />
+      <TextBlock Grid.Column="1" Name="TitleText" Classes="window-title" />
+      <Button Grid.Column="2" Name="MinimiseButton" Classes="window"
+              AutomationProperties.Name="Minimise"
+              chrome:WindowDecorationProperties.ElementRole="User">
+        <Path Data="M1,5 H9" />
+      </Button>
+      <Button Grid.Column="3" Name="CloseButton" Classes="window"
+              AutomationProperties.Name="Close"
+              chrome:WindowDecorationProperties.ElementRole="User">
+        <Path Data="M1,1 L9,9 M9,1 L1,9" />
+      </Button>
+    </Grid>
+  </Border>
+</UserControl>

@@ -52,6 +52,7 @@ The site side is built in the web repo: WEB-33 (uploader API), WEB-34 (uploader 
 - The state machine of `docs/ARCHITECTURE.md` "The loop" in Core: watching, game running, file changed, settling 5 s, hash skip, uploading, uploaded, offline retry with back-off, token revoked, rejected newer format, game not found, paused.
 - File watcher and WoW process detection as Windows adapters; several accounts independently.
 - Local history (last 50 per account) with the site's summary line and report link.
+- Upload ledger per account: every finished upload is recorded by its SHA-256 with its outcome (`ok`, `nothing_new`, or `rejected` with the reason). A file whose hash is in the ledger is never uploaded again. Bounded (the last few hundred hashes) and versioned like the settings (CLAUDE.md rule 10). Open question for UP-06: may `rejected: newer_format` be retried once, after the site says it reads the newer format?
 - Unit tests for every transition with a fake clock, fake file system and fake site.
 
 ## E3 Screens

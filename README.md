@@ -18,7 +18,17 @@ dotnet test
 dotnet run --project src/CommunitiesForever.Upload.App
 ```
 
-The app opens its window and a tray icon (right-click: Open, Quit).
+The app opens its window and a tray icon (right-click: Open, Quit). In Debug builds, `--gallery` opens the component gallery instead (every base component in every state):
+
+```bash
+dotnet run --project src/CommunitiesForever.Upload.App -- --gallery
+```
+
+The design tokens mirror the web's `tokens.css`. When the web changes them, refresh the copy and run the tests:
+
+```bash
+powershell -File scripts/refresh-tokens.ps1
+```
 
 ## Projects
 | Project | What |
