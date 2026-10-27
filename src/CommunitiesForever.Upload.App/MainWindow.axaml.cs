@@ -9,6 +9,9 @@ internal sealed partial class MainWindow : Window
 {
     public MainWindow() => InitializeComponent();
 
+    /// <summary>"Close hides to the tray": the title bar's close button then reads "Hide to tray".</summary>
+    public bool HidesToTray { get; set; }
+
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);

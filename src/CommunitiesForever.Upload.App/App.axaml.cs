@@ -5,11 +5,13 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Platform;
 using Avalonia.Styling;
+using Avalonia.Threading;
+using CommunitiesForever.Upload.App.Tray;
 using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.App.Views;
 using CommunitiesForever.Upload.Core;
+using CommunitiesForever.Upload.Core.Notifications;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Core.Uploading;
@@ -36,8 +38,9 @@ internal sealed partial class App : Application
     };
 
     private ServiceProvider? _services;
-    private TrayIcon? _trayIcon;
+    private TrayController? _tray;
     private Window? _mainWindow;
+    private bool _quitting;
     private SetupViewModel? _setup;
     private MainViewModel? _main;
 
@@ -47,15 +50,39 @@ internal sealed partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // The app lives in the tray: it ends by "Quit", not by closing a window (UP-08).
+            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             string[] args = desktop.Args ?? [];
             _services = ConfigureServices(args);
-            _trayIcon = CreateTrayIcon(desktop);
+            RegisterWithWindows();
+            _tray = CreateTray(_services);
             // A tray icon only shows once it is registered on the Application.
-            TrayIcon.SetIcons(this, [_trayIcon]);
+            TrayIcon.SetIcons(this, [_tray.Icon]);
             desktop.Exit += OnExit;
 
-            SetMainWindow(desktop, FirstWindow(args, _services));
+            var first = FirstWindow(args, _services);
+            if (args.Contains(RegistryAutostart.TrayArgument) && first is MainWindow)
+            {
+                // Started with Windows: only the tray; the window opens from there.
+                _mainWindow = first;
+                Watch(first);
+            }
+            else
+            {
+                SetMainWindow(desktop, first);
+            }
+
             ApplyMotion();
+            SyncAutostart();
+            _tray.Start();
+            if (Instance is { } instance)
+            {
+                instance.ArgumentsReceived += OnArgumentsReceived;
+                instance.Listen();
+            }
+
+            // Started by a notification's link while the app wasn't running.
+            Dispatcher.UIThread.Post(() => HandleLinks(args));
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -80,6 +107,7 @@ internal sealed partial class App : Application
         services.AddTransient<MainViewModel>();
         services.AddTransient<WatchedAccountsViewModel>();
         services.AddTransient<ConnectWindowViewModel>();
+        services.AddSingleton<TrayController>();
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
     }
 
@@ -102,6 +130,9 @@ internal sealed partial class App : Application
             Styles.Remove(style);
         }
     }
+
+    /// <summary>The single-instance lock Program took; later starts send their arguments here.</summary>
+    internal static SingleInstance? Instance { get; set; }
 
     // Development switches (--gallery, --site) work in Debug builds only.
     private static readonly bool DevSwitchesAllowed = IsDebugBuild();
@@ -167,6 +198,7 @@ internal sealed partial class App : Application
         _main.AccountsChanged += OnAccountsChanged;
         var window = services.GetRequiredService<MainWindow>();
         window.DataContext = _main;
+        window.HidesToTray = Settings(services)?.CloseHidesToTray ?? true;
         return window;
     }
 
@@ -199,6 +231,7 @@ internal sealed partial class App : Application
         if (_services.GetRequiredService<ITokenStore>().Load() is not null)
         {
             RestartWatching();
+            _tray?.Reload();
         }
     }
 
@@ -249,6 +282,7 @@ internal sealed partial class App : Application
         var previous = _mainWindow;
         SetMainWindow(desktop, next);
         next.Show();
+        // No longer the app's window: closing it doesn't quit.
         previous?.Close();
     }
 
@@ -276,6 +310,8 @@ internal sealed partial class App : Application
             StartLoop(_services, settings);
         }
 
+        SyncAutostart();
+        _tray?.Reload();
         SwitchTo(desktop, CreateMain(_services));
     }
 
@@ -300,18 +336,139 @@ internal sealed partial class App : Application
         }
     }
 
-    // The window the app lives in; moves the activation handler along (CLAUDE.md rule 11).
+    // The window the app lives in; moves its handlers along (CLAUDE.md rule 11).
     private void SetMainWindow(IClassicDesktopStyleApplicationLifetime desktop, Window window)
     {
         if (_mainWindow is not null)
         {
-            _mainWindow.Activated -= OnMainWindowActivated;
+            Unwatch(_mainWindow);
         }
 
         _mainWindow = window;
-        _mainWindow.Activated += OnMainWindowActivated;
+        Watch(window);
         desktop.MainWindow = window;
     }
+
+    private void Watch(Window window)
+    {
+        window.Activated += OnMainWindowActivated;
+        window.Closing += OnMainWindowClosing;
+        window.Closed += OnMainWindowClosed;
+    }
+
+    private void Unwatch(Window window)
+    {
+        window.Activated -= OnMainWindowActivated;
+        window.Closing -= OnMainWindowClosing;
+        window.Closed -= OnMainWindowClosed;
+    }
+
+    // "Close hides to the tray" (setup step 3): the main window hides instead; Quit is in the tray menu.
+    private void OnMainWindowClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (!_quitting && e.CloseReason != WindowCloseReason.ApplicationShutdown && sender is MainWindow { HidesToTray: true } window)
+        {
+            e.Cancel = true;
+            window.Hide();
+        }
+    }
+
+    // Closing the window the app lives in (setup, or the main window without "hide to tray") quits.
+    private void OnMainWindowClosed(object? sender, EventArgs e)
+    {
+        if (ReferenceEquals(sender, _mainWindow))
+        {
+            Quit();
+        }
+    }
+
+    private void Quit()
+    {
+        _quitting = true;
+        (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();
+    }
+
+    private TrayController CreateTray(ServiceProvider services)
+    {
+        var tray = services.GetRequiredService<TrayController>();
+        tray.IsWindowInFront = () => _mainWindow is { IsVisible: true, IsActive: true };
+        tray.ShowRequested += OnShowRequested;
+        tray.QuitRequested += OnQuitRequested;
+        return tray;
+    }
+
+    private void OnShowRequested(object? sender, EventArgs e) => ShowMainWindow();
+
+    private void OnQuitRequested(object? sender, EventArgs e) => Quit();
+
+    // A later start (Start menu, a notification's link) hands its arguments over (Program, SingleInstance).
+    private void OnArgumentsReceived(object? sender, string[] args) => Dispatcher.UIThread.Post(() =>
+    {
+        if (!args.Contains(RegistryAutostart.TrayArgument))
+        {
+            ShowMainWindow();
+        }
+
+        HandleLinks(args);
+    });
+
+    // Notification links: …://open shows the window, …://reconnect also opens Connect.
+    private void HandleLinks(string[] args)
+    {
+        foreach (string arg in args)
+        {
+            if (!Uri.TryCreate(arg, UriKind.Absolute, out var link) || link.Scheme != AppIdentity.Scheme)
+            {
+                continue;
+            }
+
+            ShowMainWindow();
+            if (link.Host == AppIdentity.Reconnect.Host && _mainWindow is MainWindow)
+            {
+                OnReconnectRequested(this, EventArgs.Empty);
+            }
+        }
+    }
+
+    private void ShowMainWindow()
+    {
+        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop || _mainWindow is not { } window)
+        {
+            return;
+        }
+
+        desktop.MainWindow = window;
+        window.Show();
+        window.WindowState = WindowState.Normal;
+        window.Activate();
+    }
+
+    // The notification sender and the app link scheme, for this Windows user (UP-10 removes them on uninstall).
+    private static void RegisterWithWindows()
+    {
+        try
+        {
+            ShellRegistration.Register(Environment.ProcessPath ?? "", Path.Combine(AppContext.BaseDirectory, "app-icon.png"));
+            // Windows takes a notification's header (name, icon) from the Start menu shortcut.
+            StartMenuShortcut.Ensure(Environment.ProcessPath ?? "");
+        }
+        catch (Exception e) when (e is UnauthorizedAccessException or System.Security.SecurityException or IOException or System.Runtime.InteropServices.COMException)
+        {
+            // Without it there are no notifications; the app itself works.
+        }
+    }
+
+    // "Start with Windows" follows the setting. Debug builds leave the Run key alone (it would start a dev build).
+    private void SyncAutostart()
+    {
+        if (!IsDebugBuild() && _services is not null && Settings(_services) is { } settings)
+        {
+            _services.GetRequiredService<IAutostart>().Apply(settings.StartWithWindows);
+        }
+    }
+
+    private static AppSettings? Settings(ServiceProvider services) =>
+        (services.GetRequiredService<SettingsStore>().Load() as SettingsLoad.Loaded)?.Settings;
 
     private void ApplyMotion()
     {
@@ -324,36 +481,6 @@ internal sealed partial class App : Application
     // The setting can change while the app runs; checking on activation is enough and needs no system hook.
     private void OnMainWindowActivated(object? sender, EventArgs e) => ApplyMotion();
 
-    private static TrayIcon CreateTrayIcon(IClassicDesktopStyleApplicationLifetime desktop)
-    {
-        var open = new NativeMenuItem("Open");
-        open.Click += (_, _) => ShowMainWindow(desktop);
-        var quit = new NativeMenuItem("Quit");
-        quit.Click += (_, _) => desktop.Shutdown();
-
-        var trayIcon = new TrayIcon
-        {
-            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://CommunitiesForever.Upload.App/Assets/Icons/tray.ico"))),
-            ToolTipText = DefaultName,
-            Menu = new NativeMenu { Items = { open, quit } },
-        };
-        trayIcon.Clicked += (_, _) => ShowMainWindow(desktop);
-        trayIcon.IsVisible = true;
-        return trayIcon;
-    }
-
-    private static void ShowMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
-    {
-        if (desktop.MainWindow is not { } window)
-        {
-            return;
-        }
-
-        window.Show();
-        window.WindowState = WindowState.Normal;
-        window.Activate();
-    }
-
     private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         // Long-running app: release everything we created (CLAUDE.md rule 11).
@@ -364,15 +491,24 @@ internal sealed partial class App : Application
 
         if (_mainWindow is not null)
         {
-            _mainWindow.Activated -= OnMainWindowActivated;
+            Unwatch(_mainWindow);
             _mainWindow = null;
         }
 
         ForgetSetup();
         ForgetMain();
 
-        _trayIcon?.Dispose();
-        _trayIcon = null;
+        if (Instance is { } instance)
+        {
+            instance.ArgumentsReceived -= OnArgumentsReceived;
+        }
+
+        if (_tray is { } tray)
+        {
+            tray.ShowRequested -= OnShowRequested;
+            tray.QuitRequested -= OnQuitRequested;
+            _tray = null; // disposed with the container
+        }
         _services?.Dispose();
         _services = null;
     }

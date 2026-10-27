@@ -12,6 +12,8 @@
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <!-- On disk for Windows: the notification sender's icon and the notifications' app logo (UP-08) -->
+    <None Include="Assets\Icons\png\app-icon-96.png" Link="app-icon.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommunitiesForever.Upload.Core\CommunitiesForever.Upload.Core.csproj" />

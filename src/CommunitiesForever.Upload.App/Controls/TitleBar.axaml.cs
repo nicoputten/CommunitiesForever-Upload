@@ -22,6 +22,10 @@ internal sealed partial class TitleBar : UserControl
         _window = TopLevel.GetTopLevel(this) as Window;
         if (_window is not null)
         {
+            // Board main-window: "Hide to tray" when closing only hides (UP-08).
+            string close = _window is MainWindow { HidesToTray: true } ? "Hide to tray" : "Close";
+            Avalonia.Automation.AutomationProperties.SetName(CloseButton, close);
+            ToolTip.SetTip(CloseButton, close);
             TitleText.Text = _window.Title;
             _window.PropertyChanged += OnWindowPropertyChanged;
         }

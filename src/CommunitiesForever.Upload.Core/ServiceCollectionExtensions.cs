@@ -1,4 +1,5 @@
 using CommunitiesForever.Upload.Core.Game;
+using CommunitiesForever.Upload.Core.Notifications;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Core.Uploading;
@@ -20,6 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<SettingsStore>();
         services.AddTransient<GameScanner>();
         services.AddSingleton<UploadHistory>();
+        services.AddSingleton<NotificationPolicy>();
         services.AddSingleton<UploadLoop>();
         services.AddSingleton<IUploadLoop>(sp => sp.GetRequiredService<UploadLoop>());
         return services;
