@@ -1,0 +1,421 @@
+<!--
+  Base styles (UP-02): text roles, panels, list rows, status dot, badges. Only Tokens.axaml values.
+  Visual reference: design/boards/main-window and design/boards/settings; badges follow the web's data-age badge.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:t="using:CommunitiesForever.Upload.App.Styles">
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{StaticResource AppWindowBackground}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource FontUi}" />
+    <Setter Property="FontSize" Value="{StaticResource FsBody}" />
+    <Setter Property="FontFeatures" Value="+tnum" />
+  </Style>
+
+  <!-- Focus ring for every control: a style, so it wins over Fluent's dashed default -->
+  <Style Selector=":is(TemplatedControl)">
+    <Setter Property="FocusAdorner" Value="{StaticResource FocusRing}" />
+  </Style>
+
+  <!-- Text roles: TextBlock classes -->
+  <Style Selector="TextBlock.display">
+    <Setter Property="FontFamily" Value="{StaticResource FontDisplay}" />
+    <Setter Property="FontSize" Value="{StaticResource FsDisplay}" />
+    <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource LsDisplay}" />
+  </Style>
+  <Style Selector="TextBlock.title">
+    <Setter Property="FontFamily" Value="{StaticResource FontDisplay}" />
+    <Setter Property="FontSize" Value="{StaticResource FsTitle}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource LsTitle}" />
+  </Style>
+  <Style Selector="TextBlock.heading">
+    <Setter Property="FontFamily" Value="{StaticResource FontName}" />
+    <Setter Property="FontSize" Value="{StaticResource FsTitleLg}" />
+    <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+    <Setter Property="t:Typography.LineHeightEm" Value="{StaticResource LhName}" />
+  </Style>
+  <Style Selector="TextBlock.section">
+    <Setter Property="FontFamily" Value="{StaticResource FontDisplay}" />
+    <Setter Property="FontSize" Value="{StaticResource FsBody}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource LsSection}" />
+  </Style>
+  <Style Selector="TextBlock.label">
+    <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+    <Setter Property="FontWeight" Value="{StaticResource FwMedium}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.body-sm">
+    <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+  </Style>
+  <Style Selector="TextBlock.meta">
+    <Setter Property="FontSize" Value="{StaticResource FsMeta}" />
+    <Setter Property="Foreground" Value="{StaticResource TextDimBrush}" />
+  </Style>
+  <Style Selector="TextBlock.meta.small">
+    <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
+  </Style>
+  <Style Selector="TextBlock.overline">
+    <Setter Property="FontSize" Value="{StaticResource FsOverline}" />
+    <Setter Property="Foreground" Value="{StaticResource TextDimBrush}" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource LsOverline}" />
+  </Style>
+  <Style Selector="TextBlock.mono">
+    <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
+    <Setter Property="FontSize" Value="{StaticResource FsMeta}" />
+    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+  </Style>
+  <Style Selector="TextBlock.fresh">
+    <Setter Property="Foreground" Value="{StaticResource FreshTextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.stale">
+    <Setter Property="Foreground" Value="{StaticResource StaleTextBrush}" />
+  </Style>
+
+  <!-- Panel: main-window board .box -->
+  <Style Selector="Border.panel">
+    <Setter Property="Padding" Value="{StaticResource AppPanelPad}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RCard}" />
+    <Setter Property="Background" Value="{StaticResource SurfaceAsideBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+  </Style>
+
+  <!-- List row: main-window board .up, settings board .opt -->
+  <Style Selector="Border.row">
+    <Setter Property="Padding" Value="{StaticResource AppRowPad}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineRowBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppRowBorder}" />
+  </Style>
+
+  <!-- Status dot: main-window board .dot -->
+  <Style Selector="Ellipse.dot">
+    <Setter Property="Width" Value="{StaticResource AppDot}" />
+    <Setter Property="Height" Value="{StaticResource AppDot}" />
+    <Setter Property="Fill" Value="{StaticResource TextFaintBrush}" />
+  </Style>
+  <Style Selector="Ellipse.dot.fresh">
+    <Setter Property="Fill" Value="{StaticResource FreshBrush}" />
+  </Style>
+  <Style Selector="Ellipse.dot.stale">
+    <Setter Property="Fill" Value="{StaticResource StaleBrush}" />
+  </Style>
+  <Style Selector="Ellipse.dot.gold">
+    <Setter Property="Fill" Value="{StaticResource GoldBrush}" />
+  </Style>
+
+  <!-- Badge: the web's data-age badge -->
+  <Style Selector="Border.badge">
+    <Setter Property="Padding" Value="{StaticResource AppBadgePad}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RBadge}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineNeutralBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+  </Style>
+  <Style Selector="Border.badge > TextBlock">
+    <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
+    <Setter Property="Foreground" Value="{StaticResource TextChipBrush}" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource LsTag}" />
+  </Style>
+  <Style Selector="Border.badge.fresh">
+    <Setter Property="BorderBrush" Value="{StaticResource FreshLineBrush}" />
+  </Style>
+  <Style Selector="Border.badge.fresh > TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource FreshTextBrush}" />
+  </Style>
+  <Style Selector="Border.badge.stale">
+    <Setter Property="BorderBrush" Value="{StaticResource StaleLineBrush}" />
+    <Setter Property="Background" Value="{StaticResource StaleTintBrush}" />
+  </Style>
+  <Style Selector="Border.badge.stale > TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource StaleTextBrush}" />
+  </Style>
+
+  <!-- Title bar: main-window board, 36px -->
+  <Style Selector="Border.titlebar">
+    <Setter Property="Height" Value="{StaticResource AppTitleBarH}" />
+    <Setter Property="Padding" Value="{StaticResource AppTitleBarPad}" />
+    <Setter Property="Background" Value="{StaticResource BgAbyssBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineBarBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppTitleBarBorder}" />
+  </Style>
+  <Style Selector="Border.titlebar TextBlock.window-title">
+    <Setter Property="FontFamily" Value="{StaticResource FontDisplay}" />
+    <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource LsTitle}" />
+  </Style>
+  <Style Selector="Button.window Path">
+    <Setter Property="Width" Value="{StaticResource AppWindowIcon}" />
+    <Setter Property="Height" Value="{StaticResource AppWindowIcon}" />
+    <Setter Property="Stroke" Value="{Binding $parent[Button].Foreground}" />
+    <Setter Property="StrokeThickness" Value="{StaticResource Border}" />
+  </Style>
+  <!-- Main window (UP-07): main-window and states boards -->
+  <Style Selector="Border.hero">
+    <Setter Property="Padding" Value="{StaticResource AppHeroPad}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RPanel}" />
+    <Setter Property="Background" Value="{StaticResource AppHeroBackground}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+  </Style>
+  <Style Selector="Border.hero.warn">
+    <Setter Property="Background" Value="{StaticResource AppHeroWarnBackground}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppLineWarnBrush}" />
+  </Style>
+  <Style Selector="TextBlock.status">
+    <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource AppLsStatus}" />
+  </Style>
+  <Style Selector="TextBlock.gold">
+    <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+  </Style>
+  <Style Selector="TextBlock.playing">
+    <Setter Property="Foreground" Value="{StaticResource AllianceTextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.dim">
+    <Setter Property="Foreground" Value="{StaticResource TextDimBrush}" />
+  </Style>
+  <Style Selector="TextBlock.warn">
+    <Setter Property="Foreground" Value="{StaticResource StaleTextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.hero-title">
+    <Setter Property="FontFamily" Value="{StaticResource FontName}" />
+    <Setter Property="FontSize" Value="{StaticResource AppFsHero}" />
+    <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="t:Typography.LineHeightEm" Value="{StaticResource LhName}" />
+  </Style>
+  <Style Selector="TextBlock.step-number">
+    <Setter Property="FontFamily" Value="{StaticResource FontName}" />
+    <Setter Property="FontSize" Value="{StaticResource AppFsStepNumber}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+  </Style>
+  <Style Selector="Ellipse.ring">
+    <Setter Property="Stroke" Value="{StaticResource GoldBrush}" />
+    <Setter Property="StrokeThickness" Value="{StaticResource AppLineThin}" />
+    <Setter Property="Opacity" Value="{StaticResource AppDimmedRing}" />
+  </Style>
+  <Style Selector="Ellipse.dot.dim">
+    <Setter Property="Fill" Value="{StaticResource TextDimBrush}" />
+  </Style>
+  <Style Selector="Border.pill">
+    <Setter Property="Padding" Value="{StaticResource AppPillPad}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RPill}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.pill TextBlock">
+    <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
+  </Style>
+  <Style Selector="Border.pill.fresh">
+    <Setter Property="Background" Value="{StaticResource AppFreshTintBrush}" />
+  </Style>
+  <Style Selector="Border.pill.fresh TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource FreshTextBrush}" />
+  </Style>
+  <Style Selector="Border.pill.gold">
+    <Setter Property="Background" Value="{StaticResource TintActiveBrush}" />
+  </Style>
+  <Style Selector="Border.pill.gold TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+  </Style>
+  <Style Selector="Border.pill.warn">
+    <Setter Property="Background" Value="{StaticResource StaleTintBrush}" />
+  </Style>
+  <Style Selector="Border.pill.warn TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource StaleTextBrush}" />
+  </Style>
+  <Style Selector="Border.explainer">
+    <Setter Property="Padding" Value="{StaticResource AppExplainerPad}" />
+  </Style>
+  <Style Selector="Border.statusbar">
+    <Setter Property="Height" Value="{StaticResource AppStatusBarH}" />
+    <Setter Property="Padding" Value="{StaticResource AppStatusBarPad}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppTintSoftBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppFooterBorder}" />
+  </Style>
+  <Style Selector="Border.bar">
+    <Setter Property="Height" Value="{StaticResource AppBarH}" />
+    <Setter Property="CornerRadius" Value="{StaticResource AppBarRadius}" />
+    <Setter Property="Background" Value="{StaticResource TrackBrush}" />
+  </Style>
+  <Style Selector="Border.bar > Border">
+    <Setter Property="CornerRadius" Value="{StaticResource AppBarRadius}" />
+    <Setter Property="Background" Value="{StaticResource GoldBrush}" />
+  </Style>
+  <Style Selector="Button.plain:pointerover">
+    <Setter Property="Background" Value="{StaticResource TintHoverBrush}" />
+  </Style>
+
+  <!-- Settings (UP-09): settings board -->
+  <Style Selector="Border.settings-nav">
+    <Setter Property="Width" Value="{StaticResource AppNavW}" />
+    <Setter Property="Padding" Value="{StaticResource AppNavPad}" />
+    <Setter Property="Background" Value="{StaticResource AppRailBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppTintSoftBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppRailBorder}" />
+  </Style>
+  <Style Selector="TextBlock.section.settings">
+    <Setter Property="FontSize" Value="{StaticResource FsNameSm}" />
+    <Setter Property="Margin" Value="{StaticResource AppSectionTitleMargin}" />
+  </Style>
+
+  <!-- Updates (UP-10): settings-updates and update-states boards -->
+  <Style Selector="Border.update">
+    <Setter Property="Padding" Value="{StaticResource S4Thickness}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RCard}" />
+    <Setter Property="Background" Value="{StaticResource AppUpdatePanelBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppLineUpdateBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+  </Style>
+  <Style Selector="Border.split">
+    <Setter Property="Padding" Value="{StaticResource AppSplitPad}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineRowBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppSplitBorder}" />
+  </Style>
+  <Style Selector="TextBlock.update-name">
+    <Setter Property="FontFamily" Value="{StaticResource FontName}" />
+    <Setter Property="FontSize" Value="{StaticResource FsNameSm}" />
+    <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+  </Style>
+  <Style Selector="Border.pill.dim">
+    <Setter Property="Background" Value="{StaticResource AppMuteTintBrush}" />
+  </Style>
+  <Style Selector="Border.pill.dim TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+  </Style>
+
+  <!-- Text box sizes (colours: Themes.axaml) -->
+  <Style Selector="TextBox">
+    <Setter Property="Padding" Value="{StaticResource AppInputPad}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RControl}" />
+    <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+  </Style>
+  <Style Selector="TextBox.mono">
+    <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
+    <Setter Property="FontSize" Value="{StaticResource FsMeta}" />
+  </Style>
+
+  <!-- Setup board (UP-05) -->
+  <Style Selector="Border.rail">
+    <Setter Property="Width" Value="{StaticResource AppRailW}" />
+    <Setter Property="Padding" Value="{StaticResource AppRailPad}" />
+    <Setter Property="Background" Value="{StaticResource AppRailBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppTintSoftBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppRailBorder}" />
+  </Style>
+  <Style Selector="Border.step">
+    <Setter Property="Padding" Value="{StaticResource AppStepPad}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RNav}" />
+  </Style>
+  <Style Selector="Border.step TextBlock.step-label">
+    <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+    <Setter Property="Foreground" Value="{StaticResource TextFaintBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+  <Style Selector="Border.step Border.step-dot">
+    <Setter Property="Width" Value="{StaticResource AppStepDot}" />
+    <Setter Property="Height" Value="{StaticResource AppStepDot}" />
+    <Setter Property="CornerRadius" Value="{StaticResource AppStepDotRadius}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppLineThinThickness}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppLineDimBrush}" />
+  </Style>
+  <Style Selector="Border.step Border.step-dot TextBlock">
+    <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
+    <Setter Property="FontWeight" Value="{StaticResource FwSemibold}" />
+    <Setter Property="Foreground" Value="{StaticResource TextFaintBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.step.on">
+    <Setter Property="Background" Value="{StaticResource AppTintSoftBrush}" />
+  </Style>
+  <Style Selector="Border.step.on TextBlock.step-label">
+    <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+  </Style>
+  <Style Selector="Border.step.on Border.step-dot">
+    <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+  </Style>
+  <Style Selector="Border.step.on Border.step-dot TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+  </Style>
+  <Style Selector="Border.step.done TextBlock.step-label">
+    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+  </Style>
+  <Style Selector="Border.step.done Border.step-dot">
+    <Setter Property="Background" Value="{StaticResource GoldBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+  </Style>
+  <Style Selector="Border.step.done Border.step-dot TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource OnGoldBrush}" />
+  </Style>
+
+  <Style Selector="TextBlock.setup-title">
+    <Setter Property="FontFamily" Value="{StaticResource FontDisplay}" />
+    <Setter Property="FontSize" Value="{StaticResource AppFsSetupTitle}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldPaleBrush}" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource LsTag}" />
+  </Style>
+  <Style Selector="TextBlock.setup-title.small">
+    <Setter Property="FontSize" Value="{StaticResource AppFsSetupTitleSm}" />
+  </Style>
+  <Style Selector="TextBlock.lead">
+    <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="t:Typography.LineHeightEm" Value="{StaticResource AppLhLead}" />
+  </Style>
+  <Style Selector="TextBlock.faint">
+    <Setter Property="Foreground" Value="{StaticResource TextFaintBrush}" />
+  </Style>
+  <Style Selector="TextBlock.fine">
+    <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
+  </Style>
+  <!-- update-states board .bar: the download -->
+  <Style Selector="ProgressBar.update">
+    <Setter Property="Height" Value="{StaticResource AppBarH}" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource AppBarRadius}" />
+    <Setter Property="Background" Value="{StaticResource TrackBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldBrush}" />
+  </Style>
+  <Style Selector="TextBlock.code">
+    <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
+    <Setter Property="FontSize" Value="{StaticResource FsDisplay}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldPaleBrush}" />
+    <Setter Property="t:Typography.LetterSpacingEm" Value="{StaticResource AppLsCode}" />
+  </Style>
+  <Style Selector="Border.code">
+    <Setter Property="Padding" Value="{StaticResource AppCodePad}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RBtn}" />
+    <Setter Property="Background" Value="{StaticResource AppCodeBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+  </Style>
+  <Style Selector="Border.account">
+    <Setter Property="Padding" Value="{StaticResource AppAccountPad}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RBtn}" />
+    <Setter Property="Background" Value="{StaticResource SurfaceRowBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppLineFooterBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+  </Style>
+  <Style Selector="Border.account.missing">
+    <Setter Property="Opacity" Value="{StaticResource AppDimmed}" />
+  </Style>
+  <Style Selector="Border.row.roomy">
+    <Setter Property="Padding" Value="{StaticResource AppRowRoomyPad}" />
+  </Style>
+  <Style Selector="Border.footer">
+    <Setter Property="Padding" Value="{StaticResource AppFooterPad}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppLineFooterBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppFooterBorder}" />
+  </Style>
+</Styles>

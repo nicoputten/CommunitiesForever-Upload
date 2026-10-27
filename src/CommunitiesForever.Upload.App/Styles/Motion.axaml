@@ -1,0 +1,83 @@
+<!--
+  Looping animations. App adds these styles only while Windows' "Animation effects" is on (App.ApplyMotion),
+  so with reduced motion, and in the design checks, everything stands still.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- setup board .spin: the waiting spinner -->
+  <Style Selector=":is(Control).spin">
+    <Style.Animations>
+      <Animation Duration="{StaticResource AppDurSpin}" IterationCount="Infinite">
+        <KeyFrame Cue="0%">
+          <Setter Property="RotateTransform.Angle" Value="0" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="RotateTransform.Angle" Value="360" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!-- setup board .sweep: the radar while scanning -->
+  <Style Selector=":is(Control).sweep">
+    <Style.Animations>
+      <Animation Duration="{StaticResource AppDurSweep}" IterationCount="Infinite">
+        <KeyFrame Cue="0%">
+          <Setter Property="RotateTransform.Angle" Value="0" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="RotateTransform.Angle" Value="360" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!-- main-window board .ring: two rings pulse out from the shield while all is well -->
+  <Style Selector="Ellipse.ring">
+    <Style.Animations>
+      <Animation Duration="{StaticResource AppDurRing}" IterationCount="Infinite" Easing="{StaticResource EaseOut}">
+        <KeyFrame Cue="0%">
+          <Setter Property="ScaleTransform.ScaleX" Value="0.85" />
+          <Setter Property="ScaleTransform.ScaleY" Value="0.85" />
+          <Setter Property="Opacity" Value="{StaticResource AppRingStartOpacity}" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="ScaleTransform.ScaleX" Value="1.6" />
+          <Setter Property="ScaleTransform.ScaleY" Value="1.6" />
+          <Setter Property="Opacity" Value="0" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+  <Style Selector="Ellipse.ring.late">
+    <Style.Animations>
+      <Animation Duration="{StaticResource AppDurRing}" Delay="{StaticResource AppDurRingHalf}" IterationCount="Infinite" Easing="{StaticResource EaseOut}">
+        <KeyFrame Cue="0%">
+          <Setter Property="ScaleTransform.ScaleX" Value="0.85" />
+          <Setter Property="ScaleTransform.ScaleY" Value="0.85" />
+          <Setter Property="Opacity" Value="{StaticResource AppRingStartOpacity}" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="ScaleTransform.ScaleX" Value="1.6" />
+          <Setter Property="ScaleTransform.ScaleY" Value="1.6" />
+          <Setter Property="Opacity" Value="0" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!-- states board .fill: the upload bar -->
+  <Style Selector="Border.fill">
+    <Style.Animations>
+      <Animation Duration="{StaticResource AppDurFill}" IterationCount="Infinite" PlaybackDirection="Alternate" Easing="{StaticResource EaseOut}">
+        <KeyFrame Cue="0%">
+          <Setter Property="ScaleTransform.ScaleX" Value="0.1" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="ScaleTransform.ScaleX" Value="0.85" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+</Styles>

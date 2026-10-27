@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:CommunitiesForever.Upload.App.Controls"
+        xmlns:v="using:CommunitiesForever.Upload.App.Views"
+        xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+        x:Class="CommunitiesForever.Upload.App.Views.ConnectWindow"
+        x:DataType="vm:ConnectWindowViewModel"
+        Title="Connect"
+        Icon="/Assets/Icons/app.ico"
+        Width="{StaticResource AppDialogW}" Height="{StaticResource AppDialogH}"
+        MinWidth="{StaticResource AppWindowMinW}" MinHeight="{StaticResource AppWindowMinH}"
+        WindowStartupLocation="CenterOwner"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly">
+  <!-- "Reconnect" in the main window: setup step 1 on its own (board setup); closes once connected (docs/DESIGN-NOTES.md) -->
+  <Border BorderBrush="{StaticResource AppLineWindowBrush}" BorderThickness="{StaticResource BorderThickness}">
+    <DockPanel>
+      <c:TitleBar DockPanel.Dock="Top" />
+      <DockPanel Margin="{StaticResource AppSetupMainPad}">
+        <Border Classes="footer" DockPanel.Dock="Bottom">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Classes="ghost" Content="Cancel" Command="{Binding CancelCommand}" />
+          </StackPanel>
+        </Border>
+        <v:ConnectView DataContext="{Binding Connect}" />
+      </DockPanel>
+    </DockPanel>
+  </Border>
+</Window>

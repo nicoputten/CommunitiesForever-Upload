@@ -1,0 +1,54 @@
+# Keep dependencies fresh (UP-11). Dependabot opens PRs into develop; CI decides whether an update is safe and Nico
+# merges. A changed screenshot fails the design checks and waits for his OK on the look (CLAUDE.md rule 7).
+# Pins and their reasons: docs/ARCHITECTURE.md "Dependencies". Keep the two lists in step.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Amsterdam
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: "chore(deps)"
+    ignore:
+      # Avalonia.Headless.XUnit 12.x is built against xunit.v3 3.x; lift when Avalonia moves to xunit.v3 4.
+      - dependency-name: "xunit.v3"
+        update-types: ["version-update:semver-major"]
+      # 11.x belongs to .NET 11; the app is on .NET 10 LTS. Moving to a new .NET is a deliberate story.
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "System.Security.Cryptography.ProtectedData"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # The four Avalonia packages must match: always one PR, majors included.
+      avalonia:
+        patterns: ["Avalonia*"]
+        update-types: [major, minor, patch]
+      # The .NET 10 extensions and DPAPI move together.
+      dotnet:
+        patterns: ["Microsoft.Extensions.*", "System.Security.Cryptography.ProtectedData"]
+        update-types: [minor, patch]
+      # Everything else: minor and patch in one PR a week; majors get their own.
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Amsterdam
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      actions-minor-and-patch:
+        update-types: [minor, patch]

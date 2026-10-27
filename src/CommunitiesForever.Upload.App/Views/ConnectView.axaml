@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:CommunitiesForever.Upload.App.Controls"
+             xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+             x:Class="CommunitiesForever.Upload.App.Views.ConnectView"
+             x:DataType="vm:ConnectStepViewModel">
+  <!-- Connecting (setup step 1 and the Connect window): board setup, step 1 -->
+  <StackPanel Spacing="{StaticResource S3_5}">
+    <TextBlock Classes="setup-title" Text="{Binding Heading}" />
+    <TextBlock Classes="lead">
+      <Run Text="The uploader sends your " /><Run Foreground="{StaticResource TextBrush}" Text="CommunitiesForever.lua" /><Run Text="{Binding ExplainerEnd}" />
+    </TextBlock>
+
+    <Border Classes="panel" Padding="{StaticResource AppCodeCardPad}">
+      <StackPanel Spacing="{StaticResource S2_5}" HorizontalAlignment="Center">
+        <!-- Getting a code -->
+        <StackPanel IsVisible="{Binding IsStarting}" Orientation="Horizontal" Spacing="{StaticResource S2}" HorizontalAlignment="Center">
+          <c:Spinner />
+          <TextBlock Classes="body-sm" Text="Getting a code from the site…" />
+        </StackPanel>
+        <!-- Waiting for the browser (board) -->
+        <StackPanel IsVisible="{Binding IsWaiting}" Spacing="{StaticResource S2_5}">
+          <TextBlock Classes="meta" HorizontalAlignment="Center" Text="{Binding BrowserOpened}" />
+          <Border Classes="code" HorizontalAlignment="Center">
+            <TextBlock Classes="code" Text="{Binding UserCode}" AutomationProperties.Name="{Binding UserCode, StringFormat='Code {0}'}" />
+          </Border>
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" HorizontalAlignment="Center" AutomationProperties.LiveSetting="Polite">
+            <c:Spinner />
+            <TextBlock Classes="body-sm" Text="Waiting for you to approve it there…" />
+          </StackPanel>
+          <Button Classes="link" HorizontalAlignment="Center" Command="{Binding CopyLinkCommand}"
+                  Content="{Binding LinkCopied, Converter={x:Static c:Choose.CopyLink}}" />
+        </StackPanel>
+        <!-- Connected -->
+        <TextBlock IsVisible="{Binding IsConnected}" Classes="body-sm fresh" HorizontalAlignment="Center"
+                   Text="{Binding ConnectedText}" />
+        <!-- Not on the board: expired, denied, unreachable (docs/DESIGN-NOTES.md) -->
+        <StackPanel IsVisible="{Binding HasProblem}" Spacing="{StaticResource S2_5}" AutomationProperties.LiveSetting="Assertive">
+          <TextBlock Classes="body-sm stale" HorizontalAlignment="Center" Text="{Binding Problem}" />
+          <Button Classes="small" HorizontalAlignment="Center" Content="Try again" Command="{Binding StartCommand}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <StackPanel Spacing="{StaticResource S2}">
+      <Button Classes="link dim" HorizontalAlignment="Left" Content="Paste an upload token instead"
+              Command="{Binding TogglePasteCommand}" />
+      <StackPanel IsVisible="{Binding IsPasteOpen}" Spacing="{StaticResource S1_5}">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S2}">
+          <TextBox Classes="mono" Text="{Binding PasteText}" PlaceholderText="cfu_…"
+                   AutomationProperties.Name="Upload token" />
+          <Button Grid.Column="1" Classes="small" Content="Use this token"
+                  Command="{Binding UsePastedTokenCommand}" IsEnabled="{Binding !IsPasting}" />
+        </Grid>
+        <TextBlock Classes="meta stale" Text="{Binding PasteError}" IsVisible="{Binding PasteError, Converter={x:Static ObjectConverters.IsNotNull}}" TextWrapping="Wrap" />
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,138 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:CommunitiesForever.Upload.App.Controls"
+        xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+        xmlns:v="using:CommunitiesForever.Upload.App.Views"
+        x:Class="CommunitiesForever.Upload.App.Views.SetupWindow"
+        x:DataType="vm:SetupViewModel"
+        Title="{Binding Title}"
+        Icon="/Assets/Icons/app.ico"
+        Width="{StaticResource AppSetupW}" Height="{StaticResource AppSetupH}"
+        MinWidth="{StaticResource AppWindowMinW}" MinHeight="{StaticResource AppWindowMinH}"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly">
+  <!-- Board: design/boards/setup (UP-05) -->
+  <Border BorderBrush="{StaticResource AppLineWindowBrush}" BorderThickness="{StaticResource BorderThickness}">
+    <DockPanel>
+      <c:TitleBar DockPanel.Dock="Top" />
+
+      <!-- Step rail -->
+      <Border Classes="rail" DockPanel.Dock="Left">
+        <StackPanel Spacing="{StaticResource S1_5}" AutomationProperties.Name="Setup steps">
+          <Border Classes="step" Classes.on="{Binding IsStep1}" Classes.done="{Binding Step1Done}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource S2_5}">
+              <Border Classes="step-dot"><TextBlock Text="{Binding Step1Done, Converter={x:Static c:StepMark.One}}" /></Border>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Classes="step-label" Text="{Binding Step1Text}" />
+                <TextBlock Classes="meta" Text="{Binding ConnectedAs}" TextTrimming="CharacterEllipsis"
+                           IsVisible="{Binding ConnectedAs, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              </StackPanel>
+            </Grid>
+          </Border>
+          <Border Classes="step" Classes.on="{Binding IsStep2}" Classes.done="{Binding Step2Done}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource S2_5}">
+              <Border Classes="step-dot"><TextBlock Text="{Binding Step2Done, Converter={x:Static c:StepMark.Two}}" /></Border>
+              <TextBlock Grid.Column="1" Classes="step-label" Text="{Binding Step2Text}" />
+            </Grid>
+          </Border>
+          <Border Classes="step" Classes.on="{Binding IsStep3}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource S2_5}">
+              <Border Classes="step-dot"><TextBlock Text="3" /></Border>
+              <TextBlock Grid.Column="1" Classes="step-label" Text="How it runs" />
+            </Grid>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <Panel Margin="{StaticResource AppSetupMainPad}">
+
+        <!-- Step 1: Connect -->
+        <Panel IsVisible="{Binding IsStep1}">
+        <DockPanel DataContext="{Binding Connect}" x:DataType="vm:ConnectStepViewModel">
+          <Border Classes="footer" DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="{StaticResource S2_5}">
+              <Button Classes="ghost" Content="Cancel" Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).CancelCommand}" />
+              <Button Classes="primary" Content="Next" IsEnabled="{Binding IsConnected}"
+                      Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).NextCommand}" />
+            </StackPanel>
+          </Border>
+          <v:ConnectView />
+        </DockPanel>
+        </Panel>
+
+        <!-- Step 2: Find World of Warcraft -->
+        <Panel IsVisible="{Binding IsStep2}">
+        <DockPanel DataContext="{Binding Find}" x:DataType="vm:FindGameStepViewModel">
+          <Border Classes="footer" DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="{StaticResource S2_5}">
+              <Button Classes="ghost" Content="Back" Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).BackCommand}" />
+              <Button Classes="primary" Content="Next" IsEnabled="{Binding CanContinue}"
+                      Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).NextCommand}" />
+            </StackPanel>
+          </Border>
+          <v:FindGameView />
+        </DockPanel>
+        </Panel>
+
+        <!-- Step 3: How it runs -->
+        <Panel IsVisible="{Binding IsStep3}">
+        <DockPanel DataContext="{Binding HowItRuns}" x:DataType="vm:HowItRunsStepViewModel">
+          <Border Classes="footer" DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="{StaticResource S2_5}">
+              <Button Classes="ghost" Content="Back" Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).BackCommand}" />
+              <Button Classes="primary" Content="Start watching" Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).StartWatchingCommand}" />
+            </StackPanel>
+          </Border>
+          <StackPanel Spacing="{StaticResource S3_5}">
+            <TextBlock Classes="setup-title" Text="How should it run?" />
+            <StackPanel>
+              <Border Classes="row roomy">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                  <StackPanel>
+                    <TextBlock Classes="label" FontSize="{StaticResource FsBody}" Text="Upload automatically" />
+                    <TextBlock Classes="meta" Text="After the game saves the file (logout, /reload or quitting)" />
+                  </StackPanel>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding UploadAutomatically}" AutomationProperties.Name="Upload automatically" />
+                </Grid>
+              </Border>
+              <Border Classes="row roomy">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                  <StackPanel>
+                    <TextBlock Classes="label" FontSize="{StaticResource FsBody}" Text="Start with Windows" />
+                    <TextBlock Classes="meta" Text="Quietly in the tray, so you never have to think about it" />
+                  </StackPanel>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding StartWithWindows}" AutomationProperties.Name="Start with Windows" />
+                </Grid>
+              </Border>
+              <Border Classes="row roomy">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                  <StackPanel>
+                    <TextBlock Classes="label" FontSize="{StaticResource FsBody}" Text="Close button hides to the tray" />
+                    <TextBlock Classes="meta" Text="Quit from the tray menu" />
+                  </StackPanel>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding CloseHidesToTray}" AutomationProperties.Name="Close hides to tray" />
+                </Grid>
+              </Border>
+              <Border Classes="row roomy" BorderThickness="0">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                  <StackPanel>
+                    <TextBlock Classes="label" FontSize="{StaticResource FsBody}" Text="Notifications" />
+                    <TextBlock Classes="meta" TextWrapping="Wrap" Text="A small Windows notification after an upload" />
+                  </StackPanel>
+                  <ListBox Grid.Column="1" Theme="{StaticResource Segmented}" VerticalAlignment="Center"
+                           SelectedIndex="{Binding Notifications}" AutomationProperties.Name="Notifications">
+                    <ListBoxItem Content="Every upload" />
+                    <ListBoxItem Content="Only problems" />
+                    <ListBoxItem Content="Off" />
+                  </ListBox>
+                </Grid>
+              </Border>
+            </StackPanel>
+          </StackPanel>
+        </DockPanel>
+        </Panel>
+      </Panel>
+    </DockPanel>
+  </Border>
+</Window>

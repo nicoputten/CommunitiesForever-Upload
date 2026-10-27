@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets/Icons/app.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AssemblyName>CommunitiesForever.Upload.App</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+    <!-- On disk for Windows: the notification sender's icon and the notifications' app logo (UP-08) -->
+    <None Include="Assets\Icons\png\app-icon-96.png" Link="app-icon.png" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Settings › About & updates › Licences (UP-10) -->
+    <None Include="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommunitiesForever.Upload.Core\CommunitiesForever.Upload.Core.csproj" />
+    <ProjectReference Include="..\CommunitiesForever.Upload.Windows\CommunitiesForever.Upload.Windows.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Velopack" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="CommunitiesForever.Upload.App.Tests" />
+    <InternalsVisibleTo Include="CommunitiesForever.Upload.App.DesignChecks" />
+  </ItemGroup>
+</Project>
