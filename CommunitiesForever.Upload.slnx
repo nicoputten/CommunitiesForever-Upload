@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CommunitiesForever.Upload.App/CommunitiesForever.Upload.App.csproj" />
+    <Project Path="src/CommunitiesForever.Upload.Core/CommunitiesForever.Upload.Core.csproj" />
+    <Project Path="src/CommunitiesForever.Upload.Windows/CommunitiesForever.Upload.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CommunitiesForever.Upload.App.Tests/CommunitiesForever.Upload.App.Tests.csproj" />
+    <Project Path="tests/CommunitiesForever.Upload.Core.Tests/CommunitiesForever.Upload.Core.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -10,16 +10,36 @@
 | Part | Choice | Why |
 |---|---|---|
 | Runtime | .NET 10 (LTS), C# | Nico's choice |
-| UI | Avalonia 11 (MVVM with CommunityToolkit.Mvvm) | styleable to the shared tokens, headless rendering for screenshot tests |
+| UI | Avalonia 12 (MVVM with CommunityToolkit.Mvvm), compiled bindings | styleable to the shared tokens, headless rendering for screenshot tests |
 | Tray icon | Avalonia `TrayIcon` | built in |
 | Notifications | Windows toast notifications (UP-08 picks the package, ask first) | |
 | HTTP | `HttpClient` | |
+| Dependency injection | Microsoft.Extensions.DependencyInjection, container built only in App | interfaces everywhere, Core and Windows each offer one `AddCore()` / `AddWindowsAdapters()` |
+| Logging | Microsoft.Extensions.Logging (Core sees `ILogger` only), small rolling file sink of our own in Windows | no Serilog; a test checks no token reaches the log |
+| Time | `TimeProvider` (BCL) for every timer in Core; `FakeTimeProvider` (Microsoft.Extensions.TimeProvider.Testing) in tests | settle, retry and pause tests run instantly |
+| JSON | System.Text.Json with source generation | no package |
 | Token storage | DPAPI (`System.Security.Cryptography.ProtectedData`, current user) | CLAUDE.md rule 4 |
 | Packaging and updates | Velopack | per-user install without admin rights, delta updates, feed served by the site (WEB-35) |
-| Tests | xUnit, Avalonia.Headless for UI and screenshots | |
+| Tests | xUnit v3, Avalonia.Headless for UI and screenshots, hand-written fakes, plain `Assert` | no mocking or assertion library |
 | CI | GitHub Actions on `windows-latest` | |
 
 Every package at an exact version. Anything not listed needs Nico's OK (CLAUDE.md rule 9). UP-01 checks the current versions.
+
+### Techniques (agreed with Nico, 2026-10-27)
+- No generic Host: plain DI plus one class of our own that starts and stops the loop; settings stay in our versioned `settings.json`.
+- Retry and backoff are our own small state machine in Core, not Polly.
+- File watching: `FileSystemWatcher` as the trigger plus a 30 s poll as the safety net; both feed the same settle step.
+- Fake site: a fake `HttpMessageHandler` in unit tests, and `tools/FakeSite` (ASP.NET Core minimal API, no package) for trying pairing and uploads by hand, until WEB-33 is live.
+- Windows bits without packages: named mutex + named pipe for single instance, HKCU `Run` key for autostart, the WinRT notification API through the `net10.0-windows10.0.19041.0` target framework for toasts (UP-08 confirms).
+- Startup: ReadyToRun on publish; no Native AOT.
+- Core targets plain `net10.0`, so Windows APIs are not even available there; `ArchitectureTests` in Core.Tests reads Core's metadata and fails on Avalonia, Windows APIs, the other projects, direct file system, process, registry or socket use and P/Invoke. `HttpClient` is allowed in Core but always injected.
+
+## Long running (CLAUDE.md rule 11)
+The app lives for weeks in the tray, so memory must stay flat:
+- Whoever creates something with a lifetime disposes it: timers, watchers, `CancellationTokenSource`s, DI scopes, the tray icon. App disposes the service provider on exit.
+- Every subscribed event handler is unsubscribed (or a weak event is used); no static events.
+- One shared `HttpClient`; no caches or collections without a maximum (history 50 per account, a bounded queue, rolling logs).
+- Tests: every view, view model and loop component that can be created more than once is checked to be collected after close or stop (`WeakReference` + GC); the loop gets a soak test in UP-06.
 
 ## Layering
 ```
@@ -29,6 +49,7 @@ src/CommunitiesForever.Upload.Windows/  thin adapters: WoW folder discovery (reg
                                         autostart, DPAPI token store, toasts, single-instance
 src/CommunitiesForever.Upload.App/      Avalonia app: views, view models, tray, styles (Tokens.axaml)
 tests/                                  Core unit tests, Windows adapter tests, UI tests and screenshot checks
+tools/FakeSite/                         fake site following UPLOADER-API.md, for local runs until WEB-33 is live (UP-04)
 design/                                 Claude Design boards (reference only, never built)
 ```
 - Core depends on nothing of the others; Windows and App depend on Core; App wires everything up.
