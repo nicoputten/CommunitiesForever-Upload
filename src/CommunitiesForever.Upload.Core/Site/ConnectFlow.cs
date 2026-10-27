@@ -9,8 +9,11 @@ public abstract record ConnectProgress
 
     public sealed record RequestingCode : ConnectProgress;
 
-    /// <summary>The browser was opened; show <paramref name="UserCode"/> until <paramref name="ExpiresAt"/>.</summary>
-    public sealed record WaitingForBrowser(string UserCode, Uri VerificationUri, DateTimeOffset ExpiresAt) : ConnectProgress;
+    /// <summary>
+    /// The browser was opened at <paramref name="Page"/> (the complete verification URL, for "Copy the link");
+    /// show <paramref name="UserCode"/> until <paramref name="ExpiresAt"/>.
+    /// </summary>
+    public sealed record WaitingForBrowser(string UserCode, Uri Page, DateTimeOffset ExpiresAt) : ConnectProgress;
 }
 
 public abstract record ConnectOutcome
@@ -65,7 +68,7 @@ public sealed class ConnectFlow(ISiteClient site, ITokenStore tokens, IBrowser b
         }
 
         browser.Open(page);
-        progress?.Report(new ConnectProgress.WaitingForBrowser(authorization.UserCode, authorization.VerificationUri, expiresAt));
+        progress?.Report(new ConnectProgress.WaitingForBrowser(authorization.UserCode, page, expiresAt));
 
         while (true)
         {

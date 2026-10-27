@@ -1,0 +1,10 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CommunitiesForever.Upload.App.Controls.Spinner"
+             Width="{StaticResource SizeIcon}" Height="{StaticResource SizeIcon}">
+  <!-- setup board: track and gold arc; turns only with motion on (Styles/Motion.axaml) -->
+  <Panel Classes="spin" RenderTransform="rotate(0deg)">
+    <Ellipse Margin="{StaticResource BorderThickness}" Stroke="{StaticResource TrackBrush}" StrokeThickness="{StaticResource BorderStrong}" />
+    <Path Data="M8,2 A6,6 0 0 1 14,8" Stroke="{StaticResource GoldBrush}" StrokeThickness="{StaticResource BorderStrong}" StrokeLineCap="Round" />
+  </Panel>
+</UserControl>

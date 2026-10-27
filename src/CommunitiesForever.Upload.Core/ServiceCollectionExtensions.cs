@@ -1,3 +1,5 @@
+using CommunitiesForever.Upload.Core.Game;
+using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +16,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ISiteClient, SiteClient>();
         services.AddTransient<ConnectFlow>();
+        services.AddSingleton<SettingsStore>();
+        services.AddTransient<GameScanner>();
         return services;
     }
 }

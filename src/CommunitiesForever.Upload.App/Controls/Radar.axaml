@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CommunitiesForever.Upload.App.Controls.Radar"
+             Width="{StaticResource AppRadar}" Height="{StaticResource AppRadar}">
+  <!-- setup board step 2: rings, a sweep that turns while scanning, the found dot -->
+  <Canvas Width="{StaticResource AppRadar}" Height="{StaticResource AppRadar}">
+    <Path Data="M22,2 A20,20 0 1 1 21.99,2 Z" Stroke="{StaticResource LineStrongBrush}" StrokeThickness="{StaticResource Border}" />
+    <Path Data="M22,10 A12,12 0 1 1 21.99,10 Z" Stroke="{StaticResource LineBrush}" StrokeThickness="{StaticResource Border}" />
+    <Canvas Name="Sweep" Width="{StaticResource AppRadar}" Height="{StaticResource AppRadar}" RenderTransform="rotate(0deg)">
+      <Path Data="M22,22 L22,2 A20,20 0 0 1 39,12 Z" Fill="{StaticResource LineBrush}" />
+    </Canvas>
+    <Path Data="M32.5,14 A2.5,2.5 0 1 1 32.49,14 Z" Fill="{StaticResource GoldBrightBrush}" />
+  </Canvas>
+</UserControl>

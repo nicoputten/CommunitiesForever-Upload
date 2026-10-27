@@ -11,10 +11,15 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The setup fakes, shared with App.Tests -->
+    <Compile Include="..\CommunitiesForever.Upload.App.Tests\Setup\SetupHarness.cs" Link="Setup\SetupHarness.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\CommunitiesForever.Upload.App\CommunitiesForever.Upload.App.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Headless.XUnit" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />

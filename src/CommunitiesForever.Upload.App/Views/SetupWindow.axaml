@@ -1,0 +1,243 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:CommunitiesForever.Upload.App.Controls"
+        xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+        x:Class="CommunitiesForever.Upload.App.Views.SetupWindow"
+        x:DataType="vm:SetupViewModel"
+        Title="{Binding Title}"
+        Icon="/Assets/Icons/app.ico"
+        Width="{StaticResource AppSetupW}" Height="{StaticResource AppSetupH}"
+        MinWidth="{StaticResource AppWindowMinW}" MinHeight="{StaticResource AppWindowMinH}"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly">
+  <!-- Board: design/boards/setup (UP-05) -->
+  <Border BorderBrush="{StaticResource AppLineWindowBrush}" BorderThickness="{StaticResource BorderThickness}">
+    <DockPanel>
+      <c:TitleBar DockPanel.Dock="Top" />
+
+      <!-- Step rail -->
+      <Border Classes="rail" DockPanel.Dock="Left">
+        <StackPanel Spacing="{StaticResource S1_5}" AutomationProperties.Name="Setup steps">
+          <Border Classes="step" Classes.on="{Binding IsStep1}" Classes.done="{Binding Step1Done}">
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2_5}">
+              <Border Classes="step-dot"><TextBlock Text="{Binding Step1Done, Converter={x:Static c:StepMark.One}}" /></Border>
+              <TextBlock Classes="step-label" Text="{Binding Step1Text}" />
+            </StackPanel>
+          </Border>
+          <Border Classes="step" Classes.on="{Binding IsStep2}" Classes.done="{Binding Step2Done}">
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2_5}">
+              <Border Classes="step-dot"><TextBlock Text="{Binding Step2Done, Converter={x:Static c:StepMark.Two}}" /></Border>
+              <TextBlock Classes="step-label" Text="{Binding Step2Text}" />
+            </StackPanel>
+          </Border>
+          <Border Classes="step" Classes.on="{Binding IsStep3}">
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2_5}">
+              <Border Classes="step-dot"><TextBlock Text="3" /></Border>
+              <TextBlock Classes="step-label" Text="How it runs" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <Panel Margin="{StaticResource AppSetupMainPad}">
+
+        <!-- Step 1: Connect -->
+        <Panel IsVisible="{Binding IsStep1}">
+        <DockPanel DataContext="{Binding Connect}" x:DataType="vm:ConnectStepViewModel">
+          <Border Classes="footer" DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="{StaticResource S2_5}">
+              <Button Classes="ghost" Content="Cancel" Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).CancelCommand}" />
+              <Button Classes="primary" Content="Next" IsEnabled="{Binding IsConnected}"
+                      Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).NextCommand}" />
+            </StackPanel>
+          </Border>
+          <StackPanel Spacing="{StaticResource S3_5}">
+            <TextBlock Classes="setup-title" Text="{Binding Heading}" />
+            <TextBlock Classes="lead">
+              <Run Text="The uploader sends your " /><Run Foreground="{StaticResource TextBrush}" Text="CommunitiesForever.lua" /><Run Text="{Binding ExplainerEnd}" />
+            </TextBlock>
+
+            <Border Classes="panel" Padding="{StaticResource AppCodeCardPad}">
+              <StackPanel Spacing="{StaticResource S2_5}" HorizontalAlignment="Center">
+                <!-- Getting a code -->
+                <StackPanel IsVisible="{Binding IsStarting}" Orientation="Horizontal" Spacing="{StaticResource S2}" HorizontalAlignment="Center">
+                  <c:Spinner />
+                  <TextBlock Classes="body-sm" Text="Getting a code from the site…" />
+                </StackPanel>
+                <!-- Waiting for the browser (board) -->
+                <StackPanel IsVisible="{Binding IsWaiting}" Spacing="{StaticResource S2_5}">
+                  <TextBlock Classes="meta" HorizontalAlignment="Center" Text="{Binding BrowserOpened}" />
+                  <Border Classes="code" HorizontalAlignment="Center">
+                    <TextBlock Classes="code" Text="{Binding UserCode}" AutomationProperties.Name="{Binding UserCode, StringFormat='Code {0}'}" />
+                  </Border>
+                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" HorizontalAlignment="Center" AutomationProperties.LiveSetting="Polite">
+                    <c:Spinner />
+                    <TextBlock Classes="body-sm" Text="Waiting for you to approve it there…" />
+                  </StackPanel>
+                  <Button Classes="link" HorizontalAlignment="Center" Command="{Binding CopyLinkCommand}"
+                          Content="{Binding LinkCopied, Converter={x:Static c:Choose.CopyLink}}" />
+                </StackPanel>
+                <!-- Connected (back from step 2) -->
+                <TextBlock IsVisible="{Binding IsConnected}" Classes="body-sm fresh" HorizontalAlignment="Center"
+                           Text="{Binding $parent[Window].((vm:SetupViewModel)DataContext).Step1Text}" />
+                <!-- Not on the board: expired, denied, unreachable (docs/DESIGN-NOTES.md) -->
+                <StackPanel IsVisible="{Binding HasProblem}" Spacing="{StaticResource S2_5}" AutomationProperties.LiveSetting="Assertive">
+                  <TextBlock Classes="body-sm stale" HorizontalAlignment="Center" Text="{Binding Problem}" />
+                  <Button Classes="small" HorizontalAlignment="Center" Content="Try again" Command="{Binding StartCommand}" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <StackPanel Spacing="{StaticResource S2}">
+              <Button Classes="link dim" HorizontalAlignment="Left" Content="Paste an upload token instead"
+                      Command="{Binding TogglePasteCommand}" />
+              <StackPanel IsVisible="{Binding IsPasteOpen}" Spacing="{StaticResource S1_5}">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S2}">
+                  <TextBox Classes="mono" Text="{Binding PasteText}" PlaceholderText="cfu_…"
+                           AutomationProperties.Name="Upload token" />
+                  <Button Grid.Column="1" Classes="small" Content="Use this token"
+                          Command="{Binding UsePastedTokenCommand}" IsEnabled="{Binding !IsPasting}" />
+                </Grid>
+                <TextBlock Classes="meta stale" Text="{Binding PasteError}" IsVisible="{Binding PasteError, Converter={x:Static ObjectConverters.IsNotNull}}" TextWrapping="Wrap" />
+              </StackPanel>
+            </StackPanel>
+          </StackPanel>
+        </DockPanel>
+        </Panel>
+
+        <!-- Step 2: Find World of Warcraft -->
+        <Panel IsVisible="{Binding IsStep2}">
+        <DockPanel DataContext="{Binding Find}" x:DataType="vm:FindGameStepViewModel">
+          <Border Classes="footer" DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="{StaticResource S2_5}">
+              <Button Classes="ghost" Content="Back" Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).BackCommand}" />
+              <Button Classes="primary" Content="Next" IsEnabled="{Binding CanContinue}"
+                      Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).NextCommand}" />
+            </StackPanel>
+          </Border>
+          <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="{StaticResource S2_5}" Margin="{StaticResource AppFooterPad}">
+            <Button Classes="small" Content="Scan again" Command="{Binding ScanCommand}" IsEnabled="{Binding !IsScanning}" />
+            <Button Classes="small ghost" Content="Choose folder…" Command="{Binding ChooseFolderCommand}" IsEnabled="{Binding !IsScanning}" />
+          </StackPanel>
+          <TextBlock DockPanel.Dock="Bottom" Classes="meta stale" TextWrapping="Wrap" Margin="{StaticResource AppFooterPad}"
+                     Text="{Binding FolderProblem}" IsVisible="{Binding FolderProblem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+          <StackPanel Spacing="{StaticResource S3_5}">
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S3_5}">
+              <c:Radar Scanning="{Binding IsScanning}" />
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock Classes="setup-title small" Text="{Binding IsScanning, Converter={x:Static c:Choose.ScanTitle}}" IsVisible="{Binding !NothingFound}" />
+                <TextBlock Classes="setup-title small" Text="Where is World of Warcraft?" IsVisible="{Binding NothingFound}" />
+                <TextBlock Classes="meta fresh" Text="{Binding Summary}" IsVisible="{Binding Found}" />
+              </StackPanel>
+            </StackPanel>
+
+            <!-- Not on the board: nothing found (wording from the states board) -->
+            <TextBlock Classes="lead" IsVisible="{Binding NothingFound}"
+                       Text="No World of Warcraft: Forever found on this PC. Scan again after installing it, or choose its folder yourself." />
+
+            <ScrollViewer IsVisible="{Binding Found}" MaxHeight="{StaticResource AppSetupListH}">
+              <ItemsControl ItemsSource="{Binding Installs}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:InstallItem">
+                    <StackPanel Spacing="{StaticResource S2_5}">
+                      <Border Classes="panel" Padding="{StaticResource AppInstallPad}">
+                        <StackPanel>
+                          <TextBlock Classes="overline faint" Text="INSTALL" />
+                          <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding ForeverPath}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                      </Border>
+                      <TextBlock Classes="overline faint" Text="ACCOUNTS TO WATCH" />
+                      <ItemsControl ItemsSource="{Binding Accounts}">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate>
+                            <StackPanel Spacing="{StaticResource S2}" />
+                          </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:AccountItem">
+                            <Border Classes="account" Classes.missing="{Binding !IsReady}">
+                              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S3}">
+                                <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Center"
+                                          AutomationProperties.Name="{Binding Name, StringFormat='Watch {0}'}" />
+                                <StackPanel Grid.Column="1">
+                                  <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding Name}" />
+                                  <TextBlock Classes="meta" Text="{Binding Detail}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Classes="meta small" Classes.fresh="{Binding IsReady}" VerticalAlignment="Center" Text="{Binding Status}" />
+                              </Grid>
+                            </Border>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </StackPanel>
+        </DockPanel>
+        </Panel>
+
+        <!-- Step 3: How it runs -->
+        <Panel IsVisible="{Binding IsStep3}">
+        <DockPanel DataContext="{Binding HowItRuns}" x:DataType="vm:HowItRunsStepViewModel">
+          <Border Classes="footer" DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="{StaticResource S2_5}">
+              <Button Classes="ghost" Content="Back" Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).BackCommand}" />
+              <Button Classes="primary" Content="Start watching" Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).StartWatchingCommand}" />
+            </StackPanel>
+          </Border>
+          <StackPanel Spacing="{StaticResource S3_5}">
+            <TextBlock Classes="setup-title" Text="How should it run?" />
+            <StackPanel>
+              <Border Classes="row roomy">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                  <StackPanel>
+                    <TextBlock Classes="label" FontSize="{StaticResource FsBody}" Text="Upload automatically" />
+                    <TextBlock Classes="meta" Text="After the game saves the file (logout, /reload or quitting)" />
+                  </StackPanel>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding UploadAutomatically}" AutomationProperties.Name="Upload automatically" />
+                </Grid>
+              </Border>
+              <Border Classes="row roomy">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                  <StackPanel>
+                    <TextBlock Classes="label" FontSize="{StaticResource FsBody}" Text="Start with Windows" />
+                    <TextBlock Classes="meta" Text="Quietly in the tray, so you never have to think about it" />
+                  </StackPanel>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding StartWithWindows}" AutomationProperties.Name="Start with Windows" />
+                </Grid>
+              </Border>
+              <Border Classes="row roomy">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                  <StackPanel>
+                    <TextBlock Classes="label" FontSize="{StaticResource FsBody}" Text="Close button hides to the tray" />
+                    <TextBlock Classes="meta" Text="Quit from the tray menu" />
+                  </StackPanel>
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding CloseHidesToTray}" AutomationProperties.Name="Close hides to tray" />
+                </Grid>
+              </Border>
+              <Border Classes="row roomy" BorderThickness="0">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                  <StackPanel>
+                    <TextBlock Classes="label" FontSize="{StaticResource FsBody}" Text="Notifications" />
+                    <TextBlock Classes="meta" TextWrapping="Wrap" Text="A small Windows notification after an upload" />
+                  </StackPanel>
+                  <ListBox Grid.Column="1" Theme="{StaticResource Segmented}" VerticalAlignment="Center"
+                           SelectedIndex="{Binding Notifications}" AutomationProperties.Name="Notifications">
+                    <ListBoxItem Content="Every upload" />
+                    <ListBoxItem Content="Only problems" />
+                    <ListBoxItem Content="Off" />
+                  </ListBox>
+                </Grid>
+              </Border>
+            </StackPanel>
+          </StackPanel>
+        </DockPanel>
+        </Panel>
+      </Panel>
+    </DockPanel>
+  </Border>
+</Window>
