@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## v0.1.0 (2026-10-27)
 - Updates download only what changed since your version, when you're at most two versions behind; otherwise the whole app as before.
 - Installs from the site and keeps itself up to date: it checks once a day, downloads quietly and installs when you quit, when Windows restarts or when World of Warcraft is closed (a setting). Never during an upload, no pop-ups. Settings › About & updates shows what it's doing; after an update the window says so once, with a link to what's new.
