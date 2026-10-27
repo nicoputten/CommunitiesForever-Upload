@@ -73,3 +73,11 @@ Built after UP-07 (small; like WEB-37 in the web repo).
 - Not code-signed (decided with Nico); README explains the SmartScreen warning.
 - Manual: install from the site on a clean PC, update to a newer tag.
 - Done (PR #14): self-contained Velopack packaging (pack id `CommunitiesForever.Uploader`, own shortcut), the release workflow on `v*` tags in the `release` environment with a signed feed (ECDSA P-256), `UpdateChecker` with the boards' states (quiet download, install on quit, at start or when WoW is closed; never mid-upload; retry in an hour; failed install; required updates hold uploads), settings v2 ("Install updates when WoW is closed"), Settings › About & updates, "Updated to … · What's new" in the footer, the required-update banner and tray item, uninstall cleanup, README install guide (SmartScreen, Smart App Control). Needs the web side for `GET updates/status`, the `.sig` file and the What's new page (proposed in the PR).
+
+### UP-13 The feed from the site before packing
+Nico, 2026-10-27: "the ideal route", the Velopack way; with web WEB-35b (the site keeps the signed feed as sent).
+- Before `vpk pack` the release workflow pulls the site's current feed and its newest full package, so pack builds a delta and a complete feed; then it signs the feed and publishes (with the delta when there is one).
+- The first release has nothing to pull (404) and still works.
+- How many versions stay is decided here: the pulled feed is trimmed to the 2 newest earlier versions (3 with the new one); the site keeps exactly what the feed lists.
+- Manual: the next release after this one is the first to pull and make a delta; check its log ("Pulled the feed … and …-full.nupkg") and that an installed app updates.
+- Done (PR #16; the site: web PR #55).

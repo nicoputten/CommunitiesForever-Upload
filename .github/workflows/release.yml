@@ -61,6 +61,34 @@ jobs:
           awk -v tag="## $GITHUB_REF_NAME" 'index($0, tag) == 1 { on = 1; next } on && /^## / { exit } on' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
           [ -s "$RUNNER_TEMP/notes.md" ] || { echo "CHANGELOG.md has no section for $GITHUB_REF_NAME"; exit 1; }
 
+      # The Velopack way (UP-13, web WEB-35b): the workflow owns the feed. Pull the site's feed and its newest full
+      # package, so `vpk pack` makes a delta and a complete feed, which is then signed and kept by the site as is.
+      # The site keeps exactly the packages the feed lists, so trimming the feed here decides what stays: the 2 newest
+      # earlier versions, 3 with this one. The first release finds nothing (404) and packs from scratch.
+      - name: Pull the current feed from the site
+        env:
+          DEPLOY_SECRET: ${{ secrets.UPLOADER_DEPLOY_SECRET }}
+          SITE: https://wow.vestras.nl
+          KEEP_EARLIER: 2
+        run: |
+          mkdir -p Releases
+          pull() { curl -sS -o "$2" -w '%{http_code}' -H "Authorization: Bearer $DEPLOY_SECRET" "$SITE/api/uploader/v1/releases/$1"; }
+          code=$(pull releases.win.json "$RUNNER_TEMP/site-feed.json")
+          if [ "$code" = 404 ]; then echo "No release on the site yet: packing the first one."; exit 0; fi
+          [ "$code" = 200 ] || { echo "Pulling the feed failed (HTTP $code)"; exit 1; }
+          jq --argjson keep "$KEEP_EARLIER" '
+            def v: split(".") | map(tonumber);
+            ([.Assets[].Version] | unique | sort_by(v) | if length > $keep then .[length - $keep:] else . end) as $kept
+            | .Assets |= map(select(.Version | IN($kept[])))' "$RUNNER_TEMP/site-feed.json" > Releases/releases.win.json
+          latest=$(jq -r '[.Assets[] | select(.Type == "Full")] | sort_by(.Version | split(".") | map(tonumber)) | last | .FileName // empty' Releases/releases.win.json)
+          [ -n "$latest" ] || { echo "The site's feed has no full package"; exit 1; }
+          code=$(pull "$latest" "Releases/$latest")
+          [ "$code" = 200 ] || { echo "Pulling $latest failed (HTTP $code)"; exit 1; }
+          want=$(jq -r --arg f "$latest" '.Assets[] | select(.FileName == $f) | .SHA256' Releases/releases.win.json)
+          have=$(sha256sum "Releases/$latest" | cut -d' ' -f1)
+          [ "${have,,}" = "${want,,}" ] || { echo "$latest doesn't match the feed's SHA256"; exit 1; }
+          echo "Pulled the feed ($(jq '.Assets | length' Releases/releases.win.json) packages kept) and $latest."
+
       - name: Pack
         run: |
           dotnet tool install --global vpk --version 1.2.161
@@ -84,9 +112,13 @@ jobs:
           SITE: https://wow.vestras.nl
         run: |
           cd Releases
+          # The delta exists from the second release on (UP-13).
+          delta=()
+          [ -f "${PACK_ID}-${VERSION}-delta.nupkg" ] && delta=(-F "delta=@${PACK_ID}-${VERSION}-delta.nupkg")
           curl -fsS -H "Authorization: Bearer $DEPLOY_SECRET" \
             -F "setup=@${PACK_ID}-win-Setup.exe" \
             -F "full=@${PACK_ID}-${VERSION}-full.nupkg" \
+            "${delta[@]}" \
             -F "feed=@releases.win.json" \
             -F "signature=@releases.win.json.sig" \
             "$SITE/api/uploader/v1/releases"
