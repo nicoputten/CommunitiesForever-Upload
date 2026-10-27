@@ -14,6 +14,8 @@ View them: `python -m http.server 4400 --directory design`, then open http://loc
 | `tray` | `AppTray.dc.html` | Tray icon per state, right-click menu, toast notifications |
 | `settings` | `AppSettings.dc.html` | Behaviour, game folders, connection, about |
 | `site-uploader-page` | `SiteUploader.dc.html` | The website's uploader page (built in the web repo, WEB-34; copied there too) |
+| `main-window-runs` | `AppMain-runs.dc.html` | Main window with the Runs block: runs sent to the game, next check, the /reload hint (UP-12; a copy of `main-window`, which stays as it is) |
+| `runs-flow` | `RunsFlow.dc.html` | Planned runs across game, uploader, site and Discord (overview; from the web repo) |
 
 ## Icons
 Supplied by Nico on 2026-10-27 as `doombringers-uploader-icons.zip`: a shield with a cross in the "Night over Azeroth" colours.
