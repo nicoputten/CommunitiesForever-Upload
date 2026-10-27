@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- UI-free and OS-free (CLAUDE.md rule 2): plain net10.0, no project references.
+       ArchitectureTests in Core.Tests guards what this assembly may touch. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="CommunitiesForever.Upload.Core.Tests" />
+  </ItemGroup>
+</Project>

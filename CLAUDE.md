@@ -25,9 +25,15 @@ A small Windows app for the friends who play **World of Warcraft: Forever** with
 8. English strings, hardcoded. No localization system.
 9. No dependencies beyond those listed in `docs/ARCHITECTURE.md` without asking. Every package at an exact version.
 10. **Backwards compatible settings.** Settings and local history are versioned; every change keeps working with files from earlier releases (a migration step per version), because friends update on different days.
+11. **No memory leaks.** The app runs for weeks in the tray. Everything with a lifetime is owned and disposed: unsubscribe every event handler you subscribe (or use weak events), dispose timers, watchers, `CancellationTokenSource`s and DI scopes, no static events or caches that grow without a bound, one shared `HttpClient`. Long-living collections (history, queue, logs) have a fixed maximum. Every view, view model and loop component that can be created more than once gets a test that it is collected after it is closed or stopped (`WeakReference` + GC), and the loop gets a soak test (UP-06).
 
 ## Commands
-(Filled in by UP-01.)
+```bash
+dotnet build                                    # build everything (warnings are errors)
+dotnet test                                     # all tests: Core, architecture, headless UI
+dotnet format --verify-no-changes               # style check, as in CI; drop the flag to fix
+dotnet run --project src/CommunitiesForever.Upload.App   # start the app
+```
 
 ## Branches
 Gitflow: `feature/up-XX-<slug>` off `develop`, PRs into `develop`. `main` receives releases.
