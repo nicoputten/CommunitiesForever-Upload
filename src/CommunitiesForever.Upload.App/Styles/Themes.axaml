@@ -7,10 +7,12 @@
 
   <!-- Focus ring: 2px gold-bright, 2px outside the control (web DESIGN.md focus) -->
   <FocusAdornerTemplate x:Key="FocusRing">
+    <!-- Not clipped to the control, so the ring can sit outside it; radius = button radius + offset -->
     <Border Margin="{StaticResource AppFocusMargin}"
+            AdornerLayer.IsClipEnabled="False"
             BorderThickness="{StaticResource FocusWidthThickness}"
             BorderBrush="{StaticResource GoldBrightBrush}"
-            CornerRadius="{StaticResource RBtn}" />
+            CornerRadius="{StaticResource RPanel}" />
   </FocusAdornerTemplate>
 
   <!-- Button: secondary (outline) by default; classes: primary (gold), small, danger, window (title bar) -->
@@ -28,7 +30,6 @@
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusAdorner" Value="{StaticResource FocusRing}" />
     <Setter Property="Transitions">
       <Transitions>
         <BrushTransition Property="Background" Duration="{StaticResource DurFast}" Easing="{StaticResource EaseOut}" />
@@ -115,7 +116,6 @@
   <!-- Switch: settings board .sw, 40 x 22, gold when on -->
   <ControlTheme x:Key="{x:Type ToggleSwitch}" TargetType="ToggleSwitch">
     <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusAdorner" Value="{StaticResource FocusRing}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border Name="PART_Track"
@@ -172,7 +172,6 @@
     <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusAdorner" Value="{StaticResource FocusRing}" />
     <Setter Property="Template">
       <ControlTemplate>
         <ContentPresenter Name="PART_ContentPresenter"

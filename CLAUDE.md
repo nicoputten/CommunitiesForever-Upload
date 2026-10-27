@@ -32,6 +32,7 @@ A small Windows app for the friends who play **World of Warcraft: Forever** with
 dotnet build                                    # build everything (warnings are errors)
 dotnet test                                     # all tests: Core, architecture, headless UI
 dotnet format --verify-no-changes               # style check, as in CI; drop the flag to fix
+UPDATE_BASELINES=1 dotnet test tests/CommunitiesForever.Upload.App.DesignChecks   # rewrite screenshot baselines (local only; commit only Nico-approved CI images)
 dotnet run --project src/CommunitiesForever.Upload.App   # start the app
 ```
 

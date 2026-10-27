@@ -36,9 +36,9 @@ The site side is built in the web repo: WEB-33 (uploader API), WEB-34 (uploader 
 
 ## E2 Core
 
-### UP-04 Site client and pairing
-- Typed client for `UPLOADER-API.md`: pair start and poll, upload, me, disconnect; error mapping (offline, 401 revoked, 413, rejected reasons) to Core results. A fake server for tests.
-- Pairing flow: start, open the browser at the verify URL, show the code, poll until approved, denied or expired; "Paste an upload token instead".
+### UP-04 Site client and connecting
+- Typed client for `UPLOADER-API.md`: device authorization and token polling (RFC 8628), upload, identity, revoke (RFC 7009); error mapping of the Bearer errors (RFC 6750) and the site's codes (offline, revoked token, may not upload, too large, rejected reasons) to Core results. A fake server for tests that follows the document's examples.
+- Connect flow (RFC 8628): request a device code, open the browser at the complete verification URL, show the user code, poll at the given interval (`slow_down` adds 5 s) until allowed, denied or expired; the device code stays in memory only. "Paste an upload token instead".
 - Token store with DPAPI; "Disconnect" revokes on the site and deletes it.
 - Unit tests for every outcome.
 

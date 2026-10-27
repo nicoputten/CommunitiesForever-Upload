@@ -39,6 +39,14 @@ jobs:
       - name: Test
         run: dotnet test --no-build --configuration Release --logger trx --results-directory TestResults
 
+      - name: Upload design check images
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-checks
+          path: TestResults/design-checks
+          if-no-files-found: ignore
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

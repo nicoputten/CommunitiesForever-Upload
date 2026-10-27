@@ -14,7 +14,7 @@ You are the lead developer of **CommunitiesForever-Upload** (`D:\repos\Communiti
 Friends who play WoW: Forever run the addon. The game saves the addon's data in `WTF\Account\<ACCOUNT>\SavedVariables\CommunitiesForever.lua` when they log out or `/reload`. Today Nico uploads that file by hand on the site; afterwards the site shows a living map, the roster, professions and a session report of what changed.
 
 This app does the uploading automatically:
-- it pairs with the site through the browser
+- it connects to the site through the browser (OAuth 2.0 device flow)
 - it finds World of Warcraft
 - it watches the file and waits until the game has finished writing it
 - it uploads it with an upload-only token
@@ -33,10 +33,10 @@ This app does the uploading automatically:
 ## Decisions already made with Nico (don't reopen these)
 - **Tech and scope:**
   - .NET 10. The UI framework is yours to choose; the docs propose Avalonia 11, and Nico has no preference.
-  - Everything on the boards is v1: pairing, scan, watcher, auto-upload, offline retry, tray, toasts, autostart, pause, settings, updates.
+  - Everything on the boards is v1: connecting, scan, watcher, auto-upload, offline retry, tray, toasts, autostart, pause, settings, updates.
 - **No parsing:** the app hashes and uploads bytes. Counts, level ups and format errors come from the site's response. The setup scan shows no character count.
-- **Pairing and tokens:** browser pairing with a user code, plus "Paste an upload token instead". One upload-only token per device.
-- **App name:** the community's name from the site after pairing ("Doombringers Uploader"), "CommunitiesForever Uploader" before.
+- **Connecting and tokens:** the OAuth 2.0 device authorization flow (RFC 8628) in the browser with a user code, plus "Paste an upload token instead". One upload-only token per device, revocable (RFC 7009). (Updated 2026-10-27: the contract moved from custom pairing to the device flow, web PR #37.)
+- **App name:** the community's name from the site after connecting ("Doombringers Uploader"), "CommunitiesForever Uploader" before.
 - **Finding WoW:** the registry and the Battle.net launcher config, then the `_forever_` folder, then every account under `WTF\Account`.
 - **Distribution:**
   - the site hosts the installer and the Velopack update feed (WEB-35), because the repos are private

@@ -24,6 +24,15 @@ The app opens its window and a tray icon (right-click: Open, Quit). In Debug bui
 dotnet run --project src/CommunitiesForever.Upload.App -- --gallery
 ```
 
+## Design checks
+`tests/…App.DesignChecks` renders every screen headless with Skia and compares it with `Baselines/*.png` (a pixel may differ by 8 of 255 per channel, at most 0.1% of the pixels may differ). On a difference the actual, expected and diff images land in `TestResults/design-checks/`; CI uploads them as the `design-checks` artifact. Baselines are made on CI (windows-latest) and committed only after Nico approved the look. For local iteration only:
+
+```bash
+UPDATE_BASELINES=1 dotnet test tests/CommunitiesForever.Upload.App.DesignChecks
+```
+
+App.Tests also checks that no `.axaml` or App code uses raw colours, sizes or durations (`TokenLintTests`) and that text tokens meet WCAG AA contrast (`ContrastTests`).
+
 The design tokens mirror the web's `tokens.css`. When the web changes them, refresh the copy and run the tests:
 
 ```bash
@@ -37,6 +46,7 @@ powershell -File scripts/refresh-tokens.ps1
 | `src/CommunitiesForever.Upload.Windows` | Thin Windows adapters behind Core's interfaces |
 | `src/CommunitiesForever.Upload.App` | Avalonia app, composition root (DI) |
 | `tests/…Core.Tests` | Core unit tests and the architecture test |
-| `tests/…App.Tests` | Headless UI tests |
+| `tests/…App.Tests` | Headless UI tests, token drift, token lint, contrast |
+| `tests/…App.DesignChecks` | Screenshot design checks against `Baselines/` |
 
 Package versions live in `Directory.Packages.props`, shared build settings (nullable, warnings as errors, analyzers) in `Directory.Build.props`, style in `.editorconfig`. CI (`.github/workflows/ci.yml`) runs restore, build, format check and tests on `windows-latest`.

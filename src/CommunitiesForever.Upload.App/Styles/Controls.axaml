@@ -14,6 +14,11 @@
     <Setter Property="FontFeatures" Value="+tnum" />
   </Style>
 
+  <!-- Focus ring for every control: a style, so it wins over Fluent's dashed default -->
+  <Style Selector=":is(TemplatedControl)">
+    <Setter Property="FocusAdorner" Value="{StaticResource FocusRing}" />
+  </Style>
+
   <!-- Text roles: TextBlock classes -->
   <Style Selector="TextBlock.display">
     <Setter Property="FontFamily" Value="{StaticResource FontDisplay}" />

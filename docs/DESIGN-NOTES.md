@@ -3,7 +3,7 @@
 The look is the web's "Night over Azeroth" design system: tokens, type and data age come from the web repo's `docs/DESIGN.md` and `src/styles/tokens.css`. The app's screens are in `design/boards/` (index: `design/README.md`). This file holds what is specific to the app.
 
 ## Decisions
-- App name: the community's name from the site after pairing ("Doombringers Uploader"), "CommunitiesForever Uploader" before (Nico, 2026-10-27).
+- App name: the community's name from the site after connecting ("Doombringers Uploader"), "CommunitiesForever Uploader" before (Nico, 2026-10-27).
 - No character count in the setup scan: the app doesn't parse the file (CLAUDE.md rule 1, Nico, 2026-10-27).
 - "Told Nico automatically" on the newer-format state is left out (Nico, 2026-10-27).
 - Tokens (UP-02, Nico, 2026-10-27): `src/CommunitiesForever.Upload.App/Styles/Tokens.axaml` mirrors Part 1 and the general blocks of Part 2 of the web's `tokens.css` (up to the page-specific blocks). Names are the CSS name in PascalCase (`--text-muted` is `TextMuted`, `--s-0-5` is `S0_5`), colours also as `<Name>Brush`, spacing also as `<Name>Thickness`. `TokenDriftTests` compares them with `design/tokens/web-tokens.css`, refreshed by `scripts/refresh-tokens.ps1`.

@@ -25,5 +25,6 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="CommunitiesForever.Upload.App.Tests" />
+    <InternalsVisibleTo Include="CommunitiesForever.Upload.App.DesignChecks" />
   </ItemGroup>
 </Project>
