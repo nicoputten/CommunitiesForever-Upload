@@ -14,3 +14,11 @@ View them: `python -m http.server 4400 --directory design`, then open http://loc
 | `tray` | `AppTray.dc.html` | Tray icon per state, right-click menu, toast notifications |
 | `settings` | `AppSettings.dc.html` | Behaviour, game folders, connection, about |
 | `site-uploader-page` | `SiteUploader.dc.html` | The website's uploader page (built in the web repo, WEB-34; copied there too) |
+
+## Icons
+Supplied by Nico on 2026-10-27 as `doombringers-uploader-icons.zip`: a shield with a cross in the "Night over Azeroth" colours.
+- `src/CommunitiesForever.Upload.App/Assets/Icons/png/`: the supplied PNGs, unchanged.
+  - App: `app-icon-<size>` at 40, 48, 64, 96, 128, 256 and `app-icon-small-<size>` (thicker lines) at 16, 20, 24, 32.
+  - Tray: `tray`, `tray-paused`, `tray-attention`, `tray-uploading-1..4` (animation frames), each at 16, 20, 24, 32, 64.
+- `design/icons/`: the supplied SVG sources and the preview sheet `doombringers-icons-preview.png` (dark and light taskbar), unchanged.
+- The `.ico` files next to `png/` are built from the PNGs by `scripts/build-icons.ps1` (the zip's own `.ico` files are not used: they hold fewer sizes). `app.ico` is the exe, taskbar and window icon; the tray `.ico` files are for UP-08 (watching, uploading frames, paused, needs attention).

@@ -59,7 +59,7 @@ design/                                 Claude Design boards (reference only, ne
 ```
 Watching ─▶ game running (WoW process seen) ─▶ file changed ─▶ settling (unchanged for 5 s)
    ▲                                                                  │
-   │                         same hash as last upload ─▶ skip ◀───────┤
+   │                         hash already in ledger ─▶ skip ◀─────────┤
    │                                                                  ▼
    └──── report + notification ◀── uploaded ◀── uploading ◀───────────┘
                                        │
@@ -69,7 +69,7 @@ Watching ─▶ game running (WoW process seen) ─▶ file changed ─▶ settl
             file or folder gone: Not watching, "Scan again / Choose folder"
 ```
 - Settling: the file must be unchanged (size and write time) for 5 s before it's read; the read is retried if the game still holds it.
-- The hash (SHA-256) of the last uploaded file per account is kept, so an unchanged file is skipped without a request.
+- An upload ledger per account records every finished upload by SHA-256 with its outcome (`ok`, `nothing_new`, `rejected` + reason); a file whose hash is in the ledger is never uploaded again, without a request. Bounded (last few hundred hashes), versioned (rule 10). Why: several friends upload, the site merges out-of-sync files (newer data wins), so re-sending a file it already judged only costs requests and noise. Whether `rejected: newer_format` is retried once after a site update is decided in UP-06.
 - Pause: no uploads until the pause ends; changes are noted and the newest file goes up after.
 - Several accounts are watched independently.
 

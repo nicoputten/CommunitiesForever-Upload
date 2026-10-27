@@ -1,9 +1,19 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:CommunitiesForever.Upload.App.Controls"
         x:Class="CommunitiesForever.Upload.App.MainWindow"
         Title="CommunitiesForever Uploader"
-        Icon="/Assets/icon.png"
-        Width="900" Height="620"
-        MinWidth="640" MinHeight="480"
-        WindowStartupLocation="CenterScreen">
+        Icon="/Assets/Icons/app.ico"
+        Width="{StaticResource AppWindowW}" Height="{StaticResource AppWindowH}"
+        MinWidth="{StaticResource AppWindowMinW}" MinHeight="{StaticResource AppWindowMinH}"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly">
+  <Border BorderBrush="{StaticResource AppLineWindowBrush}" BorderThickness="{StaticResource BorderThickness}">
+    <DockPanel>
+      <c:TitleBar DockPanel.Dock="Top" />
+      <!-- Screen content: UP-07 -->
+      <Panel />
+    </DockPanel>
+  </Border>
 </Window>

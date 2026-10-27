@@ -1,0 +1,116 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:CommunitiesForever.Upload.App.Controls"
+        x:Class="CommunitiesForever.Upload.App.GalleryWindow"
+        Title="Component gallery"
+        Icon="/Assets/Icons/app.ico"
+        Width="{StaticResource AppWindowW}" Height="{StaticResource AppWindowH}"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly">
+  <!-- Every base component in every state, for the design checks (UP-03). Debug builds: start with the gallery switch. -->
+  <Border BorderBrush="{StaticResource AppLineWindowBrush}" BorderThickness="{StaticResource BorderThickness}">
+    <DockPanel>
+      <c:TitleBar DockPanel.Dock="Top" />
+      <ScrollViewer>
+        <StackPanel Margin="{StaticResource S5Thickness}" Spacing="{StaticResource S4}">
+          <StackPanel Spacing="{StaticResource S1}">
+            <TextBlock Classes="display" Text="Doombringers Uploader" />
+            <TextBlock Classes="title" Text="Title, Marcellus SC" />
+            <TextBlock Classes="heading" Text="All caught up" />
+            <TextBlock Classes="section" Text="Watched accounts" />
+            <TextBlock Classes="label" Text="Label, Inter medium 13" />
+            <TextBlock Text="Body, Inter 14: 5 levels gained, Ves 37 → 39" />
+            <TextBlock Classes="body-sm" Text="Last upload today at 21:14 · World of Warcraft is not running" />
+            <TextBlock Classes="meta" Text="Meta, Inter 12, text dim" />
+            <TextBlock Classes="overline fresh" Text="● WATCHING" />
+            <TextBlock Classes="mono" Text="C:\Program Files (x86)\World of Warcraft\_forever_\WTF\Account\NICO" />
+          </StackPanel>
+
+          <Border Classes="panel">
+            <StackPanel Spacing="{StaticResource S2_5}">
+              <TextBlock Classes="section" Text="Buttons" />
+              <WrapPanel ItemSpacing="{StaticResource S2}" LineSpacing="{StaticResource S2}">
+                <Button Classes="primary" Content="Upload now" />
+                <Button Content="Open site" />
+                <Button Classes="primary" Content="Disabled" IsEnabled="False" />
+                <Button Content="Disabled" IsEnabled="False" />
+                <Button Classes="small" Content="Choose folder" />
+                <Button Classes="small danger" Content="Disconnect" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="panel">
+            <StackPanel Spacing="{StaticResource S2_5}">
+              <TextBlock Classes="section" Text="Controls" />
+              <Border Classes="row">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel>
+                    <TextBlock Classes="label" Text="Start with Windows" />
+                    <TextBlock Classes="meta" Text="Switch on" />
+                  </StackPanel>
+                  <ToggleSwitch Grid.Column="1" IsChecked="True" AutomationProperties.Name="Start with Windows" />
+                </Grid>
+              </Border>
+              <Border Classes="row">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel>
+                    <TextBlock Classes="label" Text="Upload automatically" />
+                    <TextBlock Classes="meta" Text="Switch off" />
+                  </StackPanel>
+                  <ToggleSwitch Grid.Column="1" IsChecked="False" AutomationProperties.Name="Upload automatically" />
+                </Grid>
+              </Border>
+              <Border Classes="row">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="label" Text="Notifications" VerticalAlignment="Center" />
+                  <ListBox Grid.Column="1" Theme="{StaticResource Segmented}" SelectedIndex="1"
+                           AutomationProperties.Name="Notifications">
+                    <ListBoxItem Content="All" />
+                    <ListBoxItem Content="Level ups" />
+                    <ListBoxItem Content="Problems" />
+                    <ListBoxItem Content="Off" />
+                  </ListBox>
+                </Grid>
+              </Border>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="panel">
+            <StackPanel Spacing="{StaticResource S2_5}">
+              <TextBlock Classes="section" Text="Status" />
+              <WrapPanel ItemSpacing="{StaticResource S4}" LineSpacing="{StaticResource S2}">
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
+                  <Ellipse Classes="dot fresh" VerticalAlignment="Center" />
+                  <TextBlock Classes="meta" Text="Uploaded" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
+                  <Ellipse Classes="dot gold" VerticalAlignment="Center" />
+                  <TextBlock Classes="meta" Text="Uploading" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
+                  <Ellipse Classes="dot stale" VerticalAlignment="Center" />
+                  <TextBlock Classes="meta" Text="Not uploaded" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
+                  <Ellipse Classes="dot" VerticalAlignment="Center" />
+                  <TextBlock Classes="meta" Text="Paused" />
+                </StackPanel>
+                <Border Classes="badge"><TextBlock Text="nothing new" /></Border>
+                <Border Classes="badge fresh"><TextBlock Text="today" /></Border>
+                <Border Classes="badge stale"><TextBlock Text="3 days old" /></Border>
+              </WrapPanel>
+              <Border Classes="row">
+                <StackPanel>
+                  <TextBlock Classes="label" Text="Today 21:14 · NICO" />
+                  <TextBlock Classes="meta" Text="5 levels gained · Ves 37 → 39" />
+                </StackPanel>
+              </Border>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+    </DockPanel>
+  </Border>
+</Window>

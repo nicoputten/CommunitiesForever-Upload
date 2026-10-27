@@ -1,0 +1,218 @@
+<!--
+  Control themes for the base components (UP-02), built only from Tokens.axaml.
+  Visual reference: design/boards/main-window and design/boards/settings.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Focus ring: 2px gold-bright, 2px outside the control (web DESIGN.md focus) -->
+  <FocusAdornerTemplate x:Key="FocusRing">
+    <Border Margin="{StaticResource AppFocusMargin}"
+            BorderThickness="{StaticResource FocusWidthThickness}"
+            BorderBrush="{StaticResource GoldBrightBrush}"
+            CornerRadius="{StaticResource RBtn}" />
+  </FocusAdornerTemplate>
+
+  <!-- Button: secondary (outline) by default; classes: primary (gold), small, danger, window (title bar) -->
+  <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineChipOnBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RBtn}" />
+    <Setter Property="Padding" Value="{StaticResource AppButtonPad}" />
+    <Setter Property="MinHeight" Value="{StaticResource S10}" />
+    <Setter Property="FontFamily" Value="{StaticResource FontUi}" />
+    <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+    <Setter Property="FontWeight" Value="{StaticResource FwSemibold}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner" Value="{StaticResource FocusRing}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="{StaticResource DurFast}" Easing="{StaticResource EaseOut}" />
+      </Transitions>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Name="PART_ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          Padding="{TemplateBinding Padding}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Foreground="{TemplateBinding Foreground}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                          RecognizesAccessKey="True" />
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{StaticResource TintHoverBrush}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{StaticResource TintPressedBrush}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{StaticResource TextFaintBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineNeutralBrush}" />
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+
+    <Style Selector="^.primary">
+      <Setter Property="Background" Value="{StaticResource GoldBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource OnGoldBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+    </Style>
+    <Style Selector="^.primary:pointerover">
+      <Setter Property="Background" Value="{StaticResource GoldBrightBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GoldBrightBrush}" />
+    </Style>
+    <Style Selector="^.primary:pressed">
+      <Setter Property="Background" Value="{StaticResource GoldPaleBrush}" />
+    </Style>
+    <Style Selector="^.primary:disabled">
+      <Setter Property="Background" Value="{StaticResource TrackBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource TrackBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextFaintBrush}" />
+    </Style>
+
+    <Style Selector="^.small">
+      <Setter Property="MinHeight" Value="{StaticResource AppButtonSmH}" />
+      <Setter Property="Padding" Value="{StaticResource AppButtonSmPad}" />
+      <Setter Property="CornerRadius" Value="{StaticResource RNav}" />
+      <Setter Property="FontSize" Value="{StaticResource FsMeta}" />
+    </Style>
+
+    <Style Selector="^.danger">
+      <Setter Property="BorderBrush" Value="{StaticResource StaleLineBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource StaleTextBrush}" />
+    </Style>
+    <Style Selector="^.danger:pointerover">
+      <Setter Property="Background" Value="{StaticResource StaleTintBrush}" />
+    </Style>
+
+    <Style Selector="^.window">
+      <Setter Property="Width" Value="{StaticResource AppWindowButtonW}" />
+      <Setter Property="Height" Value="{StaticResource AppTitleBarH}" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+    <Style Selector="^.window:pointerover">
+      <Setter Property="Background" Value="{StaticResource TintActiveBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- Switch: settings board .sw, 40 x 22, gold when on -->
+  <ControlTheme x:Key="{x:Type ToggleSwitch}" TargetType="ToggleSwitch">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner" Value="{StaticResource FocusRing}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Track"
+                Width="{StaticResource AppSwitchW}"
+                Height="{StaticResource AppSwitchH}"
+                CornerRadius="{StaticResource AppSwitchRadius}"
+                Background="{StaticResource AvatarBrush}">
+          <!-- ToggleSwitch moves the knob by this canvas's width -->
+          <Canvas Name="PART_SwitchKnob" Width="{StaticResource AppSwitchTravel}" HorizontalAlignment="Left"
+                  Margin="{StaticResource S0_75Thickness}">
+            <Panel Name="PART_MovingKnobs" Width="{StaticResource AppSwitchKnob}" Height="{StaticResource AppSwitchKnob}">
+              <Ellipse Name="Knob" Fill="{StaticResource TextDimBrush}" />
+            </Panel>
+          </Canvas>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <!-- Transitions as setters, so reduced motion can switch them off (App.ApplyMotion) -->
+    <Style Selector="^ /template/ Border#PART_Track">
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="{StaticResource DurFast}" Easing="{StaticResource EaseOut}" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="^ /template/ Panel#PART_MovingKnobs">
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Canvas.Left" Duration="{StaticResource DurFast}" Easing="{StaticResource EaseOut}" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="^:checked /template/ Border#PART_Track">
+      <Setter Property="Background" Value="{StaticResource GoldBrush}" />
+    </Style>
+    <Style Selector="^:checked /template/ Panel#PART_MovingKnobs">
+      <Setter Property="Canvas.Left" Value="{StaticResource AppSwitchTravel}" />
+    </Style>
+    <Style Selector="^:checked /template/ Ellipse#Knob">
+      <Setter Property="Fill" Value="{StaticResource OnGoldBrush}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#PART_Track">
+      <Setter Property="Background" Value="{StaticResource TrackBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- Segmented control: settings board .seg; a ListBox with Theme="{StaticResource Segmented}" -->
+  <ControlTheme x:Key="SegmentedItem" TargetType="ListBoxItem">
+    <Setter Property="Padding" Value="{StaticResource AppSegmentPad}" />
+    <Setter Property="FontSize" Value="{StaticResource FsMeta}" />
+    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner" Value="{StaticResource FocusRing}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Name="PART_ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          Padding="{TemplateBinding Padding}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Foreground="{TemplateBinding Foreground}" />
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{StaticResource TintHoverBrush}" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Background" Value="{StaticResource TintSelectedBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+      <Setter Property="FontWeight" Value="{StaticResource FwSemibold}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="Segmented" TargetType="ListBox">
+    <Setter Property="SelectionMode" Value="Single,AlwaysSelected" />
+    <!-- Never scroll the page to the selected option -->
+    <Setter Property="AutoScrollToSelectedItem" Value="False" />
+    <Setter Property="ItemContainerTheme" Value="{StaticResource SegmentedItem}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Horizontal" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border BorderBrush="{StaticResource LineControlBrush}"
+                BorderThickness="{StaticResource BorderThickness}"
+                CornerRadius="{StaticResource RNav}"
+                ClipToBounds="True">
+          <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

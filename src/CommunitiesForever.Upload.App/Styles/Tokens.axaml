@@ -1,0 +1,375 @@
+<!--
+  Design tokens: the web's "Night over Azeroth" tokens (web docs/DESIGN.md §3, src/styles/tokens.css), mirrored.
+  The only place in the app with raw colours, sizes, spacing, radii, shadows and durations (CLAUDE.md rule 6).
+  Names: the CSS name in PascalCase ("-text-muted" becomes TextMuted), "_" between two numbers ("-s-0-5" becomes S0_5).
+  Colours also as <Name>Brush, spacing also as <Name>Thickness.
+  TokenDriftTests compares this file with design/tokens/web-tokens.css (refresh: scripts/refresh-tokens.ps1).
+  Not mirrored: fonts (embedded below), blur and glow (approved deviation, docs/DESIGN-NOTES.md),
+  and the page-specific blocks of tokens.css (roster, map, atmosphere ...).
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+
+  <!-- surfaces -->
+  <Color x:Key="BgAbyss">#FF050A12</Color>
+  <SolidColorBrush x:Key="BgAbyssBrush" Color="#FF050A12" />
+  <Color x:Key="BgNight">#FF070C15</Color>
+  <SolidColorBrush x:Key="BgNightBrush" Color="#FF070C15" />
+  <Color x:Key="Surface">#C70C121E</Color>
+  <SolidColorBrush x:Key="SurfaceBrush" Color="#C70C121E" />
+  <Color x:Key="SurfaceStrong">#D60C121E</Color>
+  <SolidColorBrush x:Key="SurfaceStrongBrush" Color="#D60C121E" />
+  <Color x:Key="SurfaceRaised">#FF121B2A</Color>
+  <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="#FF121B2A" />
+  <Color x:Key="Track">#FF1F2837</Color>
+  <SolidColorBrush x:Key="TrackBrush" Color="#FF1F2837" />
+  <Color x:Key="Line">#33D4AF6A</Color>
+  <SolidColorBrush x:Key="LineBrush" Color="#33D4AF6A" />
+  <Color x:Key="LineStrong">#59D4AF6A</Color>
+  <SolidColorBrush x:Key="LineStrongBrush" Color="#59D4AF6A" />
+
+  <!-- sea & land -->
+  <Color x:Key="SeaLight">#FF10233A</Color>
+  <SolidColorBrush x:Key="SeaLightBrush" Color="#FF10233A" />
+  <Color x:Key="Sea">#FF0A172A</Color>
+  <SolidColorBrush x:Key="SeaBrush" Color="#FF0A172A" />
+  <Color x:Key="SeaDeep">#FF040811</Color>
+  <SolidColorBrush x:Key="SeaDeepBrush" Color="#FF040811" />
+  <Color x:Key="LandTop">#FF26354D</Color>
+  <SolidColorBrush x:Key="LandTopBrush" Color="#FF26354D" />
+  <Color x:Key="LandBottom">#FF151E2E</Color>
+  <SolidColorBrush x:Key="LandBottomBrush" Color="#FF151E2E" />
+  <Color x:Key="Terrain">#FF0C121B</Color>
+  <SolidColorBrush x:Key="TerrainBrush" Color="#FF0C121B" />
+  <Color x:Key="ZoneLine">#5CC9A45C</Color>
+  <SolidColorBrush x:Key="ZoneLineBrush" Color="#5CC9A45C" />
+  <Color x:Key="Coast">#FFA9C8EA</Color>
+  <SolidColorBrush x:Key="CoastBrush" Color="#FFA9C8EA" />
+  <Color x:Key="Surf">#FF5E93C9</Color>
+  <SolidColorBrush x:Key="SurfBrush" Color="#FF5E93C9" />
+  <Color x:Key="Wave">#FF7FA9D6</Color>
+  <SolidColorBrush x:Key="WaveBrush" Color="#FF7FA9D6" />
+  <Color x:Key="Foam">#FFCFE3F7</Color>
+  <SolidColorBrush x:Key="FoamBrush" Color="#FFCFE3F7" />
+
+  <!-- gold -->
+  <Color x:Key="Gold">#FFD4AF6A</Color>
+  <SolidColorBrush x:Key="GoldBrush" Color="#FFD4AF6A" />
+  <Color x:Key="GoldBright">#FFF0D08E</Color>
+  <SolidColorBrush x:Key="GoldBrightBrush" Color="#FFF0D08E" />
+  <Color x:Key="GoldPale">#FFF3DFAE</Color>
+  <SolidColorBrush x:Key="GoldPaleBrush" Color="#FFF3DFAE" />
+
+  <!-- text -->
+  <Color x:Key="TextStrong">#FFF3EBDA</Color>
+  <SolidColorBrush x:Key="TextStrongBrush" Color="#FFF3EBDA" />
+  <Color x:Key="Text">#FFE6E1D6</Color>
+  <SolidColorBrush x:Key="TextBrush" Color="#FFE6E1D6" />
+  <Color x:Key="TextMuted">#FFAEB6C3</Color>
+  <SolidColorBrush x:Key="TextMutedBrush" Color="#FFAEB6C3" />
+  <Color x:Key="TextDim">#FF8E98A8</Color>
+  <SolidColorBrush x:Key="TextDimBrush" Color="#FF8E98A8" />
+  <Color x:Key="TextFaint">#FF7E8898</Color>
+  <SolidColorBrush x:Key="TextFaintBrush" Color="#FF7E8898" />
+  <Color x:Key="OnGold">#FF0B0F14</Color>
+  <SolidColorBrush x:Key="OnGoldBrush" Color="#FF0B0F14" />
+
+  <!-- status -->
+  <Color x:Key="Fresh">#FF7FD99A</Color>
+  <SolidColorBrush x:Key="FreshBrush" Color="#FF7FD99A" />
+  <Color x:Key="FreshText">#FF9BE3B0</Color>
+  <SolidColorBrush x:Key="FreshTextBrush" Color="#FF9BE3B0" />
+  <Color x:Key="Stale">#FFE08A4A</Color>
+  <SolidColorBrush x:Key="StaleBrush" Color="#FFE08A4A" />
+  <Color x:Key="StaleText">#FFF0A774</Color>
+  <SolidColorBrush x:Key="StaleTextBrush" Color="#FFF0A774" />
+  <Color x:Key="Horde">#FFB5302A</Color>
+  <SolidColorBrush x:Key="HordeBrush" Color="#FFB5302A" />
+  <Color x:Key="HordeText">#FFF08A80</Color>
+  <SolidColorBrush x:Key="HordeTextBrush" Color="#FFF08A80" />
+  <Color x:Key="Alliance">#FF3A6BD6</Color>
+  <SolidColorBrush x:Key="AllianceBrush" Color="#FF3A6BD6" />
+  <Color x:Key="AllianceText">#FF8DB0FF</Color>
+  <SolidColorBrush x:Key="AllianceTextBrush" Color="#FF8DB0FF" />
+  <Color x:Key="BnetTop">#FF1A8CFF</Color>
+  <SolidColorBrush x:Key="BnetTopBrush" Color="#FF1A8CFF" />
+  <Color x:Key="BnetBottom">#FF0B66D6</Color>
+  <SolidColorBrush x:Key="BnetBottomBrush" Color="#FF0B66D6" />
+  <Color x:Key="Ember">#FFF2B866</Color>
+  <SolidColorBrush x:Key="EmberBrush" Color="#FFF2B866" />
+
+  <!-- class: fill / text on dark -->
+  <Color x:Key="Warrior">#FFC69B6D</Color>
+  <SolidColorBrush x:Key="WarriorBrush" Color="#FFC69B6D" />
+  <Color x:Key="Paladin">#FFF48CBA</Color>
+  <SolidColorBrush x:Key="PaladinBrush" Color="#FFF48CBA" />
+  <Color x:Key="Hunter">#FFAAD372</Color>
+  <SolidColorBrush x:Key="HunterBrush" Color="#FFAAD372" />
+  <Color x:Key="Rogue">#FFFFF468</Color>
+  <SolidColorBrush x:Key="RogueBrush" Color="#FFFFF468" />
+  <Color x:Key="Priest">#FFFFFFFF</Color>
+  <SolidColorBrush x:Key="PriestBrush" Color="#FFFFFFFF" />
+  <Color x:Key="Shaman">#FF0070DD</Color>
+  <SolidColorBrush x:Key="ShamanBrush" Color="#FF0070DD" />
+  <Color x:Key="ShamanText">#FF4DA3FF</Color>
+  <SolidColorBrush x:Key="ShamanTextBrush" Color="#FF4DA3FF" />
+  <Color x:Key="Mage">#FF3FC7EB</Color>
+  <SolidColorBrush x:Key="MageBrush" Color="#FF3FC7EB" />
+  <Color x:Key="Warlock">#FF8788EE</Color>
+  <SolidColorBrush x:Key="WarlockBrush" Color="#FF8788EE" />
+  <Color x:Key="WarlockText">#FFA9AAF5</Color>
+  <SolidColorBrush x:Key="WarlockTextBrush" Color="#FFA9AAF5" />
+  <Color x:Key="Druid">#FFFF7C0A</Color>
+  <SolidColorBrush x:Key="DruidBrush" Color="#FFFF7C0A" />
+  <Color x:Key="DruidText">#FFFF9A45</Color>
+  <SolidColorBrush x:Key="DruidTextBrush" Color="#FFFF9A45" />
+
+  <!-- space, radius -->
+  <x:Double x:Key="S1">4</x:Double>
+  <Thickness x:Key="S1Thickness">4</Thickness>
+  <x:Double x:Key="S2">8</x:Double>
+  <Thickness x:Key="S2Thickness">8</Thickness>
+  <x:Double x:Key="S3">12</x:Double>
+  <Thickness x:Key="S3Thickness">12</Thickness>
+  <x:Double x:Key="S4">16</x:Double>
+  <Thickness x:Key="S4Thickness">16</Thickness>
+  <x:Double x:Key="S5">20</x:Double>
+  <Thickness x:Key="S5Thickness">20</Thickness>
+  <x:Double x:Key="S6">24</x:Double>
+  <Thickness x:Key="S6Thickness">24</Thickness>
+  <x:Double x:Key="S8">32</x:Double>
+  <Thickness x:Key="S8Thickness">32</Thickness>
+  <x:Double x:Key="S12">48</x:Double>
+  <Thickness x:Key="S12Thickness">48</Thickness>
+  <CornerRadius x:Key="RTag">6</CornerRadius>
+  <CornerRadius x:Key="RBtn">10</CornerRadius>
+  <CornerRadius x:Key="RPanel">14</CornerRadius>
+  <CornerRadius x:Key="RSheet">18</CornerRadius>
+  <CornerRadius x:Key="RModal">20</CornerRadius>
+  <CornerRadius x:Key="RPill">999</CornerRadius>
+
+  <!-- elevation -->
+  <BoxShadows x:Key="ShadowCard">0 18 40 0 #80000000</BoxShadows>
+  <BoxShadows x:Key="ShadowModal">0 30 80 0 #99000000, inset 0 1 0 0 #26F0D08E</BoxShadows>
+  <BoxShadows x:Key="ShadowSheet">0 -12 30 0 #73000000</BoxShadows>
+
+  <!-- motion -->
+  <sys:TimeSpan x:Key="DurInstant">0:0:0.08</sys:TimeSpan>
+  <sys:TimeSpan x:Key="DurFast">0:0:0.12</sys:TimeSpan>
+  <sys:TimeSpan x:Key="DurCard">0:0:0.16</sys:TimeSpan>
+  <sys:TimeSpan x:Key="DurFan">0:0:0.22</sys:TimeSpan>
+  <sys:TimeSpan x:Key="DurZone">0:0:0.25</sys:TimeSpan>
+  <sys:TimeSpan x:Key="DurSheet">0:0:0.28</sys:TimeSpan>
+  <sys:TimeSpan x:Key="DurDrop">0:0:0.4</sys:TimeSpan>
+  <sys:TimeSpan x:Key="DurFly">0:0:0.6</sys:TimeSpan>
+  <SplineEasing x:Key="EaseOut" X1="0.2" Y1="0.8" X2="0.2" Y2="1" />
+  <SplineEasing x:Key="EaseSpring" X1="0.34" Y1="1.56" X2="0.64" Y2="1" />
+
+  <!-- type scale (DESIGN.md §3 "Type scale"; sizes inside a range are the ones the boards use) -->
+  <x:Double x:Key="FsDisplayXl">48</x:Double>
+  <x:Double x:Key="FsDisplay">34</x:Double>
+  <x:Double x:Key="FsTitleLg">22</x:Double>
+  <x:Double x:Key="FsTitle">20</x:Double>
+  <x:Double x:Key="FsHeading">28</x:Double>
+  <x:Double x:Key="FsNameLg">21</x:Double>
+  <x:Double x:Key="FsName">17</x:Double>
+  <x:Double x:Key="FsNameSm">15</x:Double>
+  <x:Double x:Key="FsBrandPhone">17</x:Double>
+  <x:Double x:Key="FsSection">16</x:Double>
+  <x:Double x:Key="FsCta">15</x:Double>
+  <x:Double x:Key="FsBody">14</x:Double>
+  <x:Double x:Key="FsBodySm">13</x:Double>
+  <x:Double x:Key="FsMeta">12</x:Double>
+  <x:Double x:Key="FsMetaSm">11</x:Double>
+  <x:Double x:Key="FsOverline">11</x:Double>
+  <x:Double x:Key="FsTiny">10</x:Double>
+  <FontWeight x:Key="FwRegular">Normal</FontWeight>
+  <FontWeight x:Key="FwMedium">Medium</FontWeight>
+  <FontWeight x:Key="FwSemibold">SemiBold</FontWeight>
+  <x:Double x:Key="LhTight">1</x:Double>
+  <x:Double x:Key="LhName">1.15</x:Double>
+  <x:Double x:Key="LhBody">1.5</x:Double>
+  <x:Double x:Key="LhRelaxed">1.6</x:Double>
+  <x:Double x:Key="LsDisplayXl">0.06</x:Double>
+  <x:Double x:Key="LsDisplay">0.05</x:Double>
+  <x:Double x:Key="LsTitle">0.06</x:Double>
+  <x:Double x:Key="LsBrand">0.08</x:Double>
+  <x:Double x:Key="LsSection">0.08</x:Double>
+  <x:Double x:Key="LsOverline">0.12</x:Double>
+  <x:Double x:Key="LsTag">0.04</x:Double>
+
+  <!-- tints and lines (gold, status, faction) -->
+  <Color x:Key="TintActive">#24D4AF6A</Color>
+  <SolidColorBrush x:Key="TintActiveBrush" Color="#24D4AF6A" />
+  <Color x:Key="TintPressed">#29D4AF6A</Color>
+  <SolidColorBrush x:Key="TintPressedBrush" Color="#29D4AF6A" />
+  <Color x:Key="TintSelected">#33D4AF6A</Color>
+  <SolidColorBrush x:Key="TintSelectedBrush" Color="#33D4AF6A" />
+  <Color x:Key="TintHover">#12D4AF6A</Color>
+  <SolidColorBrush x:Key="TintHoverBrush" Color="#12D4AF6A" />
+  <Color x:Key="LineBar">#26D4AF6A</Color>
+  <SolidColorBrush x:Key="LineBarBrush" Color="#26D4AF6A" />
+  <Color x:Key="LineBarPhone">#2ED4AF6A</Color>
+  <SolidColorBrush x:Key="LineBarPhoneBrush" Color="#2ED4AF6A" />
+  <Color x:Key="LineControl">#4CD4AF6A</Color>
+  <SolidColorBrush x:Key="LineControlBrush" Color="#4CD4AF6A" />
+  <Color x:Key="LineChipOn">#66D4AF6A</Color>
+  <SolidColorBrush x:Key="LineChipOnBrush" Color="#66D4AF6A" />
+  <Color x:Key="LineModal">#66D4AF6A</Color>
+  <SolidColorBrush x:Key="LineModalBrush" Color="#66D4AF6A" />
+  <Color x:Key="LineNeutral">#40AEB6C3</Color>
+  <SolidColorBrush x:Key="LineNeutralBrush" Color="#40AEB6C3" />
+  <Color x:Key="TextChip">#FFC9CFD9</Color>
+  <SolidColorBrush x:Key="TextChipBrush" Color="#FFC9CFD9" />
+  <Color x:Key="FreshLine">#667FD99A</Color>
+  <SolidColorBrush x:Key="FreshLineBrush" Color="#667FD99A" />
+  <Color x:Key="StaleLine">#80E08A4A</Color>
+  <SolidColorBrush x:Key="StaleLineBrush" Color="#80E08A4A" />
+  <Color x:Key="StaleBannerLine">#73E08A4A</Color>
+  <SolidColorBrush x:Key="StaleBannerLineBrush" Color="#73E08A4A" />
+  <Color x:Key="StaleTint">#24E08A4A</Color>
+  <SolidColorBrush x:Key="StaleTintBrush" Color="#24E08A4A" />
+  <Color x:Key="HordeTint">#2EB5302A</Color>
+  <SolidColorBrush x:Key="HordeTintBrush" Color="#2EB5302A" />
+  <Color x:Key="AllianceTint">#333A6BD6</Color>
+  <SolidColorBrush x:Key="AllianceTintBrush" Color="#333A6BD6" />
+
+  <!-- surfaces of controls and bars -->
+  <Color x:Key="ControlBg">#990C121E</Color>
+  <SolidColorBrush x:Key="ControlBgBrush" Color="#990C121E" />
+  <Color x:Key="SurfaceModal">#C70A101C</Color>
+  <SolidColorBrush x:Key="SurfaceModalBrush" Color="#C70A101C" />
+  <Color x:Key="SurfacePanel">#BF0C121E</Color>
+  <SolidColorBrush x:Key="SurfacePanelBrush" Color="#BF0C121E" />
+  <Color x:Key="SurfaceAside">#CC0C121E</Color>
+  <SolidColorBrush x:Key="SurfaceAsideBrush" Color="#CC0C121E" />
+  <Color x:Key="SurfaceRow">#06FFFFFF</Color>
+  <SolidColorBrush x:Key="SurfaceRowBrush" Color="#06FFFFFF" />
+  <Color x:Key="LineRow">#0DFFFFFF</Color>
+  <SolidColorBrush x:Key="LineRowBrush" Color="#0DFFFFFF" />
+  <Color x:Key="BarFadeTop">#F2050A12</Color>
+  <SolidColorBrush x:Key="BarFadeTopBrush" Color="#F2050A12" />
+  <Color x:Key="BarFadeEnd">#00050A12</Color>
+  <SolidColorBrush x:Key="BarFadeEndBrush" Color="#00050A12" />
+  <Color x:Key="BarPhoneTop">#F5050A12</Color>
+  <SolidColorBrush x:Key="BarPhoneTopBrush" Color="#F5050A12" />
+  <Color x:Key="BarPhoneEnd">#BF050A12</Color>
+  <SolidColorBrush x:Key="BarPhoneEndBrush" Color="#BF050A12" />
+  <Color x:Key="Avatar">#FF2A3446</Color>
+  <SolidColorBrush x:Key="AvatarBrush" Color="#FF2A3446" />
+  <Color x:Key="AvatarMuted">#FF1C2433</Color>
+  <SolidColorBrush x:Key="AvatarMutedBrush" Color="#FF1C2433" />
+  <Color x:Key="OnShaman">#FFFFFFFF</Color>
+  <SolidColorBrush x:Key="OnShamanBrush" Color="#FFFFFFFF" />
+  <Color x:Key="SkeletonBase">#FF141C2A</Color>
+  <SolidColorBrush x:Key="SkeletonBaseBrush" Color="#FF141C2A" />
+  <Color x:Key="SkeletonShine">#FF1E2838</Color>
+  <SolidColorBrush x:Key="SkeletonShineBrush" Color="#FF1E2838" />
+  <Color x:Key="PageGlow">#FF12233A</Color>
+  <SolidColorBrush x:Key="PageGlowBrush" Color="#FF12233A" />
+
+  <!-- blur -->
+
+  <!-- extra steps on the space and radius scales -->
+  <x:Double x:Key="SPx">1</x:Double>
+  <Thickness x:Key="SPxThickness">1</Thickness>
+  <x:Double x:Key="S0_5">2</x:Double>
+  <Thickness x:Key="S0_5Thickness">2</Thickness>
+  <x:Double x:Key="S0_75">3</x:Double>
+  <Thickness x:Key="S0_75Thickness">3</Thickness>
+  <x:Double x:Key="S1_5">6</x:Double>
+  <Thickness x:Key="S1_5Thickness">6</Thickness>
+  <x:Double x:Key="S2_5">10</x:Double>
+  <Thickness x:Key="S2_5Thickness">10</Thickness>
+  <x:Double x:Key="S3_5">14</x:Double>
+  <Thickness x:Key="S3_5Thickness">14</Thickness>
+  <x:Double x:Key="S7">28</x:Double>
+  <Thickness x:Key="S7Thickness">28</Thickness>
+  <x:Double x:Key="S10">40</x:Double>
+  <Thickness x:Key="S10Thickness">40</Thickness>
+  <CornerRadius x:Key="RBadge">4</CornerRadius>
+  <CornerRadius x:Key="RNav">8</CornerRadius>
+  <CornerRadius x:Key="RControl">9</CornerRadius>
+  <CornerRadius x:Key="RCard">12</CornerRadius>
+
+  <!-- glow (class colour is added by the component): roster-cards disc, design-system marker -->
+
+  <!-- sizes -->
+  <x:Double x:Key="SizeTouch">44</x:Double>
+  <x:Double x:Key="SizeBar">64</x:Double>
+  <x:Double x:Key="SizeBarPhone">56</x:Double>
+  <x:Double x:Key="SizeTabbar">72</x:Double>
+  <x:Double x:Key="SizeTabbarInset">14</x:Double>
+  <x:Double x:Key="SizeEmblem">26</x:Double>
+  <x:Double x:Key="SizeEmblemPhone">22</x:Double>
+  <x:Double x:Key="SizeAvatar">30</x:Double>
+  <x:Double x:Key="SizeAvatarPhone">32</x:Double>
+  <x:Double x:Key="SizeDisc">44</x:Double>
+  <x:Double x:Key="SizeDiscSm">28</x:Double>
+  <x:Double x:Key="SizeLevelW">22</x:Double>
+  <x:Double x:Key="SizeLevelH">18</x:Double>
+  <x:Double x:Key="SizeIcon">16</x:Double>
+  <x:Double x:Key="SizeIconSm">14</x:Double>
+  <x:Double x:Key="SizeTabIcon">22</x:Double>
+  <x:Double x:Key="SizeCta">48</x:Double>
+  <x:Double x:Key="SizeMenu">220</x:Double>
+  <x:Double x:Key="SizeEmpty">440</x:Double>
+  <x:Double x:Key="PageMax">1280</x:Double>
+  <x:Double x:Key="Gutter">24</x:Double>
+  <x:Double x:Key="GutterPhone">16</x:Double>
+  <x:Double x:Key="Border">1</x:Double>
+  <Thickness x:Key="BorderThickness">1</Thickness>
+  <x:Double x:Key="BorderStrong">2</x:Double>
+  <Thickness x:Key="BorderStrongThickness">2</Thickness>
+  <x:Double x:Key="FocusWidth">2</x:Double>
+  <Thickness x:Key="FocusWidthThickness">2</Thickness>
+  <x:Double x:Key="FocusOffset">2</x:Double>
+
+  <!-- motion -->
+  <sys:TimeSpan x:Key="DurShimmer">0:0:1.6</sys:TimeSpan>
+  <sys:TimeSpan x:Key="DurPulse">0:0:2.6</sys:TimeSpan>
+
+  <!-- ── App-only: values from the app boards with no web token (docs/DESIGN-NOTES.md "App tokens") ── -->
+  <!-- type -->
+  <FontFamily x:Key="FontDisplay">avares://CommunitiesForever.Upload.App/Assets/Fonts#Marcellus SC</FontFamily>
+  <FontFamily x:Key="FontName">avares://CommunitiesForever.Upload.App/Assets/Fonts#Marcellus</FontFamily>
+  <FontFamily x:Key="FontUi">avares://CommunitiesForever.Upload.App/Assets/Fonts#Inter</FontFamily>
+  <FontFamily x:Key="FontMono">Consolas, Cascadia Mono, Courier New</FontFamily>
+  <!-- window: main-window board -->
+  <x:Double x:Key="AppWindowW">900</x:Double>
+  <x:Double x:Key="AppWindowH">620</x:Double>
+  <x:Double x:Key="AppWindowMinW">640</x:Double>
+  <x:Double x:Key="AppWindowMinH">480</x:Double>
+  <x:Double x:Key="AppTitleBarH">36</x:Double>
+  <x:Double x:Key="AppWindowButtonW">46</x:Double>
+  <x:Double x:Key="AppWindowIcon">10</x:Double>
+  <Color x:Key="AppLineWindow">#47D4AF6A</Color>
+  <SolidColorBrush x:Key="AppLineWindowBrush" Color="#47D4AF6A" />
+  <!-- controls: main-window and settings boards -->
+  <x:Double x:Key="AppButtonSmH">32</x:Double>
+  <x:Double x:Key="AppRowPadY">9</x:Double>
+  <Thickness x:Key="AppSegmentPad">9,5</Thickness>
+  <x:Double x:Key="AppDot">8</x:Double>
+  <x:Double x:Key="AppSwitchW">40</x:Double>
+  <x:Double x:Key="AppSwitchH">22</x:Double>
+  <x:Double x:Key="AppSwitchKnob">16</x:Double>
+  <CornerRadius x:Key="AppSwitchRadius">11</CornerRadius>
+  <x:Double x:Key="AppSwitchTravel">18</x:Double>
+  <!-- paddings and borders composed from the scales above -->
+  <Thickness x:Key="AppPanelPad">16,14</Thickness>
+  <Thickness x:Key="AppButtonPad">16,0</Thickness>
+  <Thickness x:Key="AppButtonSmPad">12,0</Thickness>
+  <Thickness x:Key="AppRowPad">0,9</Thickness>
+  <Thickness x:Key="AppRowBorder">0,0,0,1</Thickness>
+  <Thickness x:Key="AppTitleBarBorder">0,0,0,1</Thickness>
+  <Thickness x:Key="AppTitleBarPad">12,0,0,0</Thickness>
+  <Thickness x:Key="AppTitleIconMargin">0,0,8,0</Thickness>
+  <Thickness x:Key="AppBadgePad">6,2</Thickness>
+  <Thickness x:Key="AppFocusMargin">-2</Thickness>
+  <!-- window background: main-window board, page glow top left over the night -->
+  <RadialGradientBrush x:Key="AppWindowBackground" Center="20%,-10%" GradientOrigin="20%,-10%" RadiusX="78%" RadiusY="48%">
+    <GradientStop Color="{StaticResource PageGlow}" Offset="0" />
+    <GradientStop Color="{StaticResource BgNight}" Offset="0.7" />
+  </RadialGradientBrush>
+</ResourceDictionary>
