@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Runs flow</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus+SC&amp;family=Marcellus&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#070C15}
+.path{display:flex;flex-direction:column;gap:10px}
+.ph{display:flex;align-items:baseline;gap:14px}
+.ph h2{margin:0;font:22px 'Marcellus SC',serif;letter-spacing:.06em;color:#F0D08E}
+.ph span{font-size:13px;color:#8E98A8}
+.sw{display:grid;grid-template-columns:150px repeat(6,minmax(0,1fr));grid-template-rows:repeat(4,86px);gap:6px 14px;position:relative}
+.lane{grid-column:1 / -1;border-radius:10px;background:rgba(12,18,30,.55);border:1px solid rgba(255,255,255,.04)}
+.ln{grid-column:1;display:flex;align-items:center;gap:10px;padding-left:16px;font:15px 'Marcellus SC',serif;letter-spacing:.08em;z-index:1}
+.ln i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.st{z-index:1;margin:6px 0;position:relative;border-radius:10px;background:#0E1626;border:1px solid rgba(174,182,195,.16);border-left:3px solid var(--c);padding:8px 12px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.st b{font-size:13px;font-weight:600;color:#F3EBDA;line-height:1.3}
+.st small{font-size:12px;color:#AEB6C3;line-height:1.35}
+.n{position:absolute;top:-9px;left:-9px;width:20px;height:20px;border-radius:50%;background:var(--c);color:#0B0F14;font:700 11px/20px Inter,sans-serif;text-align:center}
+.dl{position:absolute;right:8px;top:-9px;font:600 11px/1 Inter,sans-serif;padding:4px 7px;border-radius:999px;background:#1A2436;color:#D9E2F0;border:1px solid rgba(174,182,195,.25)}
+.rl{position:absolute;right:8px;bottom:-9px;font:700 11px/1 ui-monospace,Consolas,monospace;padding:4px 7px;border-radius:999px;background:#3A2A10;color:#F3DFAE;border:1px solid #D4AF6A}
+.arr{position:absolute;right:-14px;top:50%;width:14px;height:1px;background:rgba(212,175,106,.5)}
+.tot{display:flex;gap:18px;align-items:center;font-size:13px;color:#AEB6C3;padding:10px 16px;border-radius:10px;background:rgba(212,175,106,.07);border:1px solid rgba(212,175,106,.22)}
+.tot b{color:#F3DFAE;font-weight:600}
+.g{--c:#9BE3B0}.u{--c:#7FB2E5}.s{--c:#D4AF6A}.d{--c:#8C95F5}
+</style>
+</helmet>
+<div style="width: 2400px; box-sizing: border-box; padding: 44px 48px 56px; background: radial-gradient(1400px 500px at 30% -10%, #12233A, rgba(7,12,21,0) 70%), #070C15; font-family: Inter, sans-serif; color: #E6E1D6; display: flex; flex-direction: column; gap: 30px">
+  <div style="display: flex; align-items: flex-end; gap: 40px">
+    <div style="flex: 1">
+      <h1 style="margin: 0; font: 40px 'Marcellus SC', serif; letter-spacing: .05em; color: #F3DFAE">Runs · how it travels</h1>
+      <p style="margin: 6px 0 0; font-size: 15px; color: #8E98A8; max-width: 1200px; line-height: 1.5"><b style="color: #E6E1D6">Ask now</b> lives in the game and is answered within minutes. A <b style="color: #E6E1D6">planned run</b> is owned by the website, talked about in Discord, and turns into a party invite in the game at start time. The game never talks to the internet itself: it only learns new things at login or <b style="color: #F3DFAE">/reload</b>, from a file the uploader writes, or from a friend's addon.</p>
+    </div>
+    <div style="display: flex; gap: 18px; font-size: 13px; color: #AEB6C3; align-items: center; flex-wrap: wrap">
+      <span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #9BE3B0"></span> Game (addon)</span>
+      <span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #7FB2E5"></span> Uploader</span>
+      <span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #D4AF6A"></span> Website</span>
+      <span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #8C95F5"></span> Discord</span>
+      <span style="font: 600 11px/1 Inter, sans-serif; padding: 4px 7px; border-radius: 999px; background: #1A2436; border: 1px solid rgba(174,182,195,.25); color: #D9E2F0">~2 s</span> typical delay
+      <span style="font: 700 11px/1 ui-monospace, monospace; padding: 4px 7px; border-radius: 999px; background: #3A2A10; color: #F3DFAE; border: 1px solid #D4AF6A">/reload</span> needs a reload or login
+    </div>
+  </div>
+
+  <!-- PATH A -->
+  <section class="path">
+    <div class="ph"><h2>a · A run planned on the website</h2><span>Nico plans Scarlet Monastery: Armory for tonight 20:30 on the Runs page</span></div>
+    <div class="sw">
+      <div class="lane" style="grid-row: 1"></div><div class="lane" style="grid-row: 2"></div><div class="lane" style="grid-row: 3"></div><div class="lane" style="grid-row: 4"></div>
+      <div class="ln" style="grid-row: 1; color: #9BE3B0"><i style="background: #9BE3B0"></i>Game</div>
+      <div class="ln" style="grid-row: 2; color: #7FB2E5"><i style="background: #7FB2E5"></i>Uploader</div>
+      <div class="ln" style="grid-row: 3; color: #D4AF6A"><i style="background: #D4AF6A"></i>Website</div>
+      <div class="ln" style="grid-row: 4; color: #8C95F5"><i style="background: #8C95F5"></i>Discord</div>
+      <div class="st s" style="grid-row: 3; grid-column: 2"><span class="n">1</span><span class="dl">instant</span><b>Run saved</b><small>Scarlet Monastery: Armory · today 20:30 (stored in UTC) · organiser Ves Doombringer</small><span class="arr"></span></div>
+      <div class="st d" style="grid-row: 4; grid-column: 3"><span class="n">2</span><span class="dl">~2 s</span><b>Planned-run post in #doombringers-runs</b><small>Five slots, buttons, timestamp shown in each reader's own time</small><span class="arr"></span></div>
+      <div class="st u" style="grid-row: 2; grid-column: 4"><span class="n">3</span><span class="dl">≤ 5 min</span><b>Fetches upcoming runs</b><small>Every 5 min while WoW runs, and right after each upload. Writes Runs.lua in the addon folder</small><span class="arr"></span></div>
+      <div class="st g" style="grid-row: 1; grid-column: 5"><span class="n">4</span><span class="rl">/reload</span><b>Dungeons tab shows the run</b><small>Read at login or /reload · “Runs updated at 21:04 · /reload for newer”</small><span class="arr"></span></div>
+      <div class="st g" style="grid-row: 1; grid-column: 6"><span class="n">5</span><span class="dl">seconds, when online</span><b>Friends without the uploader</b><small>Get the run from a friend's addon over addon sync</small><span class="arr"></span></div>
+      <div class="st d" style="grid-row: 4; grid-column: 7"><span class="n">6</span><span class="dl">20:00 · 20:30</span><b>Reminder &amp; Starting now</b><small>Mentions only sign-ups. In game: toast for online signed-up friends, then Invite all</small></div>
+    </div>
+  </section>
+
+  <!-- PATH B -->
+  <section class="path">
+    <div class="ph"><h2>b · Ask now, also posted on Discord</h2><span>Nico asks for Deadmines from the Dungeons tab and ticks “Also post on Discord”</span></div>
+    <div class="sw">
+      <div class="lane" style="grid-row: 1"></div><div class="lane" style="grid-row: 2"></div><div class="lane" style="grid-row: 3"></div><div class="lane" style="grid-row: 4"></div>
+      <div class="ln" style="grid-row: 1; color: #9BE3B0"><i style="background: #9BE3B0"></i>Game</div>
+      <div class="ln" style="grid-row: 2; color: #7FB2E5"><i style="background: #7FB2E5"></i>Uploader</div>
+      <div class="ln" style="grid-row: 3; color: #D4AF6A"><i style="background: #D4AF6A"></i>Website</div>
+      <div class="ln" style="grid-row: 4; color: #8C95F5"><i style="background: #8C95F5"></i>Discord</div>
+      <div class="st g" style="grid-row: 1; grid-column: 2"><span class="n">1</span><span class="dl">instant</span><b>Battle.net whisper to online friends who fit</b><small>They answer in game within minutes; the ask ends in a party invite</small><span class="arr"></span></div>
+      <div class="st g" style="grid-row: 1; grid-column: 3"><span class="n">2</span><span class="rl">/reload</span><span class="dl">3–5 s</span><b>“Reload now to post on Discord”</b><small>Reload makes the game write its saved file. “Later” posts at the next reload or logout</small><span class="arr"></span></div>
+      <div class="st u" style="grid-row: 2; grid-column: 4"><span class="n">3</span><span class="dl">5 s + 1–2 s</span><b>Sees the saved file, settles, uploads</b><small>Waits 5 s for the game to finish writing, then sends</small><span class="arr"></span></div>
+      <div class="st s" style="grid-row: 3; grid-column: 5"><span class="n">4</span><span class="dl">&lt; 1 s</span><b>Stores the ask, pushes to the bot</b><small>Ask expires 10 min after it was made in game</small><span class="arr"></span></div>
+      <div class="st d" style="grid-row: 4; grid-column: 6"><span class="n">5</span><span class="dl">~1 s</span><b>Ask posted · “asked from the game · via /reload”</b><small>Friends not in game answer with buttons</small><span class="arr"></span></div>
+      <div class="st g" style="grid-row: 1; grid-column: 7"><span class="n">6</span><span class="rl">/reload</span><b>Discord answers show in game</b><small>After the next upload/sync, marked “answered on Discord”</small></div>
+    </div>
+    <div class="tot"><b>Total from tick to Discord: about 10–15 s</b> (reload 3–5 s · uploader settles 5 s · upload and push 1–2 s), well under 30 s. In-game answers stay live the whole time.</div>
+  </section>
+
+  <!-- PATH C -->
+  <section class="path">
+    <div class="ph"><h2>c · A sign-up on Discord reaching the game</h2><span>Femke taps I'm in on the planned run and picks Lia Thornwhisper</span></div>
+    <div class="sw">
+      <div class="lane" style="grid-row: 1"></div><div class="lane" style="grid-row: 2"></div><div class="lane" style="grid-row: 3"></div><div class="lane" style="grid-row: 4"></div>
+      <div class="ln" style="grid-row: 1; color: #9BE3B0"><i style="background: #9BE3B0"></i>Game</div>
+      <div class="ln" style="grid-row: 2; color: #7FB2E5"><i style="background: #7FB2E5"></i>Uploader</div>
+      <div class="ln" style="grid-row: 3; color: #D4AF6A"><i style="background: #D4AF6A"></i>Website</div>
+      <div class="ln" style="grid-row: 4; color: #8C95F5"><i style="background: #8C95F5"></i>Discord</div>
+      <div class="st d" style="grid-row: 4; grid-column: 2"><span class="n">1</span><span class="dl">instant</span><b>I'm in → Pick my character</b><small>Select menu lists only Femke's characters in the level range</small><span class="arr"></span></div>
+      <div class="st s" style="grid-row: 3; grid-column: 3"><span class="n">2</span><span class="dl">&lt; 1 s</span><b>Sign-up stored, healer slot filled</b><small>Run page updates live for anyone looking</small><span class="arr"></span></div>
+      <div class="st d" style="grid-row: 4; grid-column: 4"><span class="n">3</span><span class="dl">~1 s</span><b>Post edits itself · “3 in · 1 maybe”</b><small>Ephemeral reply to Femke: “You're in as Lia Thornwhisper (healer)”</small><span class="arr"></span></div>
+      <div class="st u" style="grid-row: 2; grid-column: 5"><span class="n">4</span><span class="dl">≤ 5 min</span><b>Nico's uploader fetches runs again</b><small>Or straight after his next upload</small><span class="arr"></span></div>
+      <div class="st g" style="grid-row: 1; grid-column: 6"><span class="n">5</span><span class="rl">/reload</span><b>Nico's addon shows Lia signed up</b><small>“answered on Discord” · until then the tab says when runs were last updated</small><span class="arr"></span></div>
+      <div class="st g" style="grid-row: 1; grid-column: 7"><span class="n">6</span><span class="dl">seconds, when online</span><b>Shared to friends' addons</b><small>Addon sync passes the newer copy on; never during encounters or PvP matches</small></div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2400,"height":1550}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
