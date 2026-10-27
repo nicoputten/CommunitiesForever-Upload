@@ -34,5 +34,6 @@ Built after UP-07 (small; like WEB-37 in the web repo).
 ### UP-10 Packaging and updates
 - Velopack: per-user installer and update packages; the app checks the site's feed (with its token) at start and daily, "Check for updates" in settings.
 - Release workflow on tag `v*` on `main`: build, test, pack, publish installer and packages to the site (WEB-35's publish endpoint with a deploy secret).
+- The repo may be public (decided with Nico, 2026-10-27): the release workflow triggers only on `v*` tags (never `pull_request` or `pull_request_target`), the deploy secret lives in a protected GitHub environment (`release`, only `main`, Nico approves), and nothing prints it. Fork PRs keep running CI without secrets.
 - Not code-signed (decided with Nico); README explains the SmartScreen warning.
 - Manual: install from the site on a clean PC, update to a newer tag.

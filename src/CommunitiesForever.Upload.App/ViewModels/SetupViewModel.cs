@@ -90,7 +90,7 @@ public sealed partial class SetupViewModel : ObservableObject, IDisposable
 
     public bool Step2Done => Step > 2;
 
-    // "Connected" with the BattleTag on its own line: "Connected as Vestras#2858" doesn't fit the 210px rail.
+    // "Connected" with the BattleTag on its own line: "Connected as" plus a long BattleTag doesn't fit the 210px rail.
     public string Step1Text => Identity is null ? "Connect" : "Connected";
 
     public string? ConnectedAs => Identity?.BattleTag;
