@@ -1,6 +1,7 @@
 using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Uploading;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CommunitiesForever.Upload.Core;
@@ -18,6 +19,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ConnectFlow>();
         services.AddSingleton<SettingsStore>();
         services.AddTransient<GameScanner>();
+        services.AddSingleton<UploadHistory>();
+        services.AddSingleton<UploadLoop>();
         return services;
     }
 }

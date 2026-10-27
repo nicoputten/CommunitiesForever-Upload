@@ -84,3 +84,5 @@ dotnet_naming_style.i_prefix.required_prefix = I
 dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1515.severity = none
+dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA1873.severity = none

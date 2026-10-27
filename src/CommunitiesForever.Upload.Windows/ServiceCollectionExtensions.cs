@@ -2,6 +2,7 @@ using CommunitiesForever.Upload.Core;
 using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Uploading;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CommunitiesForever.Upload.Windows;
@@ -18,6 +19,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IFileSystem, PhysicalFileSystem>();
         services.AddSingleton<IInstallHints, WindowsInstallHints>();
         services.AddSingleton<ISettingsFile>(_ => new SettingsFile(AppPaths.DataDirectory));
+        services.AddSingleton<IHistoryFile>(_ => new HistoryFile(AppPaths.DataDirectory));
+        services.AddSingleton<IAddonFileReader, AddonFileReader>();
+        services.AddSingleton<IFileWatcherFactory, FileWatcherFactory>();
+        services.AddSingleton<IGameProcesses, GameProcesses>();
         return services;
     }
 }
