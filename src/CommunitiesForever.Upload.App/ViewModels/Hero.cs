@@ -167,7 +167,7 @@ public sealed record Hero(Tone Tone, string Status, string Title, string Line, H
                     Tone.Fresh,
                     "● Watching",
                     "All caught up",
-                    For($"{lastLine} · World of Warcraft isn't running"),
+                    For(lastLine),
                     HeroActions.UploadNow | HeroActions.OpenSite);
         }
     }

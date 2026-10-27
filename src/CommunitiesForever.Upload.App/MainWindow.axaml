@@ -34,12 +34,24 @@
           <Border Classes="hero" Classes.warn="{Binding Hero.IsWarn}" AutomationProperties.LiveSetting="Polite">
             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S5}">
               <Panel Width="{StaticResource AppHeroIcon}" Height="{StaticResource AppHeroIcon}" VerticalAlignment="Center">
-                <Ellipse Classes="ring" RenderTransform="scale(1)" IsVisible="{Binding Hero.IsCalm}" />
-                <Ellipse Classes="ring late" RenderTransform="scale(1)" IsVisible="{Binding Hero.IsCalm}" />
+                <!-- The pulse grows from the shield's centre (Styles/Motion.axaml animates the ScaleTransform) -->
+                <Ellipse Classes="ring" RenderTransformOrigin="50%,50%" IsVisible="{Binding Hero.IsCalm}">
+                  <Ellipse.RenderTransform>
+                    <ScaleTransform />
+                  </Ellipse.RenderTransform>
+                </Ellipse>
+                <Ellipse Classes="ring late" RenderTransformOrigin="50%,50%" IsVisible="{Binding Hero.IsCalm}">
+                  <Ellipse.RenderTransform>
+                    <ScaleTransform />
+                  </Ellipse.RenderTransform>
+                </Ellipse>
+                <!-- The board's 26 x 26 icon box, scaled: keeps the shield centred in the rings -->
                 <Viewbox>
-                  <Path Data="M13,3 L21,6.5 V13 C21,18.4 17.4,21.2 13,23 C8.6,21.2 5,18.4 5,13 V6.5 Z M13,7.5 V18.5 M8.8,12 H17.2"
-                        Fill="{StaticResource SurfaceRaisedBrush}" Stroke="{StaticResource GoldBrightBrush}"
-                        StrokeThickness="{StaticResource AppShieldStroke}" />
+                  <Canvas Width="{StaticResource AppShieldBox}" Height="{StaticResource AppShieldBox}">
+                    <Path Data="M13,3 L21,6.5 V13 C21,18.4 17.4,21.2 13,23 C8.6,21.2 5,18.4 5,13 V6.5 Z M13,7.5 V18.5 M8.8,12 H17.2"
+                          Fill="{StaticResource SurfaceRaisedBrush}" Stroke="{StaticResource GoldBrightBrush}"
+                          StrokeThickness="{StaticResource AppShieldStroke}" />
+                  </Canvas>
                 </Viewbox>
               </Panel>
 
@@ -62,11 +74,11 @@
                 <Button Classes="primary" Content="Upload now" Command="{Binding UploadNowCommand}" IsVisible="{Binding Hero.ShowUploadNow}" />
                 <Button Classes="primary" Content="Try now" Command="{Binding TryNowCommand}" IsVisible="{Binding Hero.ShowTryNow}" />
                 <Button Classes="primary" Content="Reconnect" Command="{Binding ReconnectCommand}" IsVisible="{Binding Hero.ShowReconnect}" />
-                <Button Classes="primary" Content="Scan again" Command="{Binding FindGameCommand}" IsVisible="{Binding Hero.ShowFindGame}" />
-                <Button Content="Choose folder…" Command="{Binding FindGameCommand}" IsVisible="{Binding Hero.ShowFindGame}" />
+                <Button Classes="primary" Content="Scan again" Command="{Binding ScanAgainCommand}" IsVisible="{Binding Hero.ShowFindGame}" />
+                <Button Content="Choose folder…" Command="{Binding ChooseFolderCommand}" IsVisible="{Binding Hero.ShowFindGame}" />
                 <Button Classes="primary" Content="Resume" Command="{Binding EndPauseCommand}" IsVisible="{Binding Hero.ShowResume}" />
                 <Button Content="Skip this one" Command="{Binding SkipCommand}" IsVisible="{Binding Hero.ShowSkip}" />
-                <Button Content="See the session report" Command="{Binding OpenReportCommand}" IsVisible="{Binding Hero.ShowReport}" />
+                <Button Content="Session report" Command="{Binding OpenReportCommand}" IsVisible="{Binding Hero.ShowReport}" />
                 <Button Content="Open site" Command="{Binding OpenSiteCommand}" IsVisible="{Binding Hero.ShowOpenSite}" />
               </StackPanel>
             </Grid>
@@ -77,7 +89,7 @@
             <StackPanel Spacing="{StaticResource S2_5}">
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Classes="section" Text="Watched" />
-                <Button Grid.Column="1" Classes="link" Content="Change…" Command="{Binding FindGameCommand}" />
+                <Button Grid.Column="1" Classes="link" Content="Change…" Command="{Binding ChangeAccountsCommand}" />
               </Grid>
               <ItemsControl ItemsSource="{Binding Accounts}">
                 <ItemsControl.ItemsPanel>
@@ -87,15 +99,17 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:AccountRow">
-                    <StackPanel Spacing="{StaticResource S1_5}">
-                      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S3}">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S3}" Background="Transparent"
+                          ToolTip.Tip="{Binding Details}">
                         <Viewbox Width="{StaticResource AppFileIcon}" Height="{StaticResource AppFileIcon}">
-                          <Path Data="M22,12 H52 L64,24 V72 H22 Z M52,12 V24 H64" Fill="{StaticResource SurfaceRaisedBrush}"
-                                Stroke="{StaticResource GoldBrush}" StrokeThickness="{StaticResource AppLineThin}" StrokeJoin="Round" />
+                          <Canvas Width="{StaticResource AppFileIconBox}" Height="{StaticResource AppFileIconBox}">
+                            <Path Data="M22,12 H52 L64,24 V72 H22 Z M52,12 V24 H64" Fill="{StaticResource SurfaceRaisedBrush}"
+                                  Stroke="{StaticResource GoldBrush}" StrokeThickness="{StaticResource AppFileIconStroke}" StrokeJoin="Round" />
+                          </Canvas>
                         </Viewbox>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                          <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding FileLine}" TextTrimming="CharacterEllipsis" />
-                          <TextBlock Classes="meta" Text="{Binding Detail}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Classes="meta" Text="{Binding Line}" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <Border Grid.Column="2" Classes="pill"
                                 Classes.fresh="{Binding BadgeTone, Converter={x:Static c:Tones.Fresh}}"
@@ -103,17 +117,15 @@
                                 Classes.warn="{Binding BadgeTone, Converter={x:Static c:Tones.Warn}}">
                           <TextBlock Text="{Binding Badge}" />
                         </Border>
-                      </Grid>
-                      <TextBlock Classes="mono faint" FontSize="{StaticResource FsMetaSm}" Text="{Binding Folder}" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
+                    </Grid>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
             </StackPanel>
           </Border>
 
-          <!-- How it works -->
-          <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource S2_5}">
+          <!-- How it works: only until the first upload (docs/DESIGN-NOTES.md) -->
+          <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource S2_5}" IsVisible="{Binding !HasRecent}">
             <Border Classes="panel explainer">
               <StackPanel Spacing="{StaticResource S1}">
                 <TextBlock Classes="step-number" Text="1" />

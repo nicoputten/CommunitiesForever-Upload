@@ -77,7 +77,7 @@ public sealed partial class SetupViewModel : ObservableObject, IDisposable
     public partial int Step { get; set; } = 1;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Step1Text), nameof(Title))]
+    [NotifyPropertyChangedFor(nameof(Step1Text), nameof(ConnectedAs), nameof(Title))]
     public partial SiteIdentity? Identity { get; set; }
 
     public bool IsStep1 => Step == 1;
@@ -90,15 +90,16 @@ public sealed partial class SetupViewModel : ObservableObject, IDisposable
 
     public bool Step2Done => Step > 2;
 
-    public string Step1Text => Identity is { } me ? $"Connected as {me.BattleTag}" : "Connect";
+    // "Connected" with the BattleTag on its own line: "Connected as Vestras#2858" doesn't fit the 210px rail.
+    public string Step1Text => Identity is null ? "Connect" : "Connected";
 
-    public string Step2Text => Step > 2 ? WatchedText(Find.Chosen.Count) : "Find World of Warcraft";
+    public string? ConnectedAs => Identity?.BattleTag;
+
+    // Shorter than the board's "Find World of Warcraft", which doesn't fit the 210px rail (docs/DESIGN-NOTES.md).
+    public string Step2Text => Step > 2 ? WatchedText(Find.Chosen.Count) : "Find your game";
 
     /// <summary>"CommunitiesForever Uploader" until the site's name is known (docs/DESIGN-NOTES.md).</summary>
     public string Title => Identity is { SiteName.Length: > 0 } me ? $"{me.SiteName} Uploader" : App.DefaultName;
-
-    /// <summary>"Reconnect": start at step 1 even with a (revoked) token.</summary>
-    public bool ConnectFirst { get; set; }
 
     /// <summary>Settings from an earlier run (setup reopened because no account is watched), or null.</summary>
     public AppSettings? Existing { get; set; }
@@ -108,7 +109,7 @@ public sealed partial class SetupViewModel : ObservableObject, IDisposable
     {
         _existing = Existing ?? new AppSettings();
         HowItRuns.Load(_existing);
-        if (!ConnectFirst && _tokens.Load() is { } token)
+        if (_tokens.Load() is { } token)
         {
             await ShowFindStepAsync();
             // Best effort: show who is connected; offline leaves the plain title.

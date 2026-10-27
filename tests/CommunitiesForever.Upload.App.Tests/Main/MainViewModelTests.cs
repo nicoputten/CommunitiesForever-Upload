@@ -3,6 +3,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using CommunitiesForever.Upload.App.ViewModels;
+using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Core.Uploading;
 
@@ -72,7 +73,7 @@ public sealed class MainViewModelTests
         Assert.Equal("Ves 37 → 39 · Lia 35 → 37", recent.Line);
         Assert.True(recent.ShowReport);
         Assert.Equal("All caught up", later.Title);
-        Assert.Equal("Last upload today at 21:14 · World of Warcraft isn't running", later.Line);
+        Assert.Equal("Last upload today at 21:14", later.Line);
     }
 
     [AvaloniaFact]
@@ -90,8 +91,10 @@ public sealed class MainViewModelTests
         Assert.Equal("Can't reach wow.vestras.nl", vm.Hero.Title);
         Assert.StartsWith("123456789#2 · ", vm.Hero.Line, StringComparison.Ordinal);
         Assert.Equal(2, vm.Accounts.Count);
-        Assert.Equal("123456789#1 · CommunitiesForever.lua", vm.Accounts[0].FileLine);
-        Assert.Equal("Saved by the game 21:12 · uploaded 21:14 · 48 KB", vm.Accounts[0].Detail);
+        Assert.Equal("123456789#1", vm.Accounts[0].Name);
+        Assert.Equal("Uploaded today 21:14", vm.Accounts[0].Line);
+        Assert.EndsWith("Saved by the game today 21:12 · 48 KB", vm.Accounts[0].Details, StringComparison.Ordinal);
+        Assert.StartsWith(@"C:\Program Files (x86)\World of Warcraft\_forever_\WTF\Account\123456789#1\SavedVariables\CommunitiesForever.lua", vm.Accounts[0].Details, StringComparison.Ordinal);
         Assert.Equal("Up to date", vm.Accounts[0].Badge);
         Assert.Equal("Waiting to send", vm.Accounts[1].Badge);
         Assert.Equal(
@@ -146,12 +149,51 @@ public sealed class MainViewModelTests
         var vm = h.Create();
         var asked = new List<string>();
         vm.ReconnectRequested += (_, _) => asked.Add("reconnect");
-        vm.FindGameRequested += (_, _) => asked.Add("find");
+        vm.WatchedAccountsRequested += (_, _) => asked.Add("accounts");
 
         vm.ReconnectCommand.Execute(null);
-        vm.FindGameCommand.Execute(null);
+        vm.ChangeAccountsCommand.Execute(null);
 
-        Assert.Equal(["reconnect", "find"], asked);
+        Assert.Equal(["reconnect", "accounts"], asked);
+    }
+
+    [AvaloniaFact]
+    public async Task ScanAgainFollowsTheGameToItsNewFolder()
+    {
+        var h = new MainHarness();
+        h.Disk.AddAccount(@"D:\Games\World of Warcraft\_forever_", "123456789#1", h.Now);
+        var vm = h.Create();
+        vm.Attach();
+        h.Status(MainHarness.First, AccountState.NotWatching);
+        Dispatcher.UIThread.RunJobs();
+        bool changed = false, opened = false;
+        vm.AccountsChanged += (_, _) => changed = true;
+        vm.WatchedAccountsRequested += (_, _) => opened = true;
+
+        await vm.ScanAgainCommand.ExecuteAsync(null);
+
+        Assert.True(changed);
+        Assert.False(opened);
+        var saved = Assert.IsType<SettingsLoad.Loaded>(new SettingsStore(h.SettingsFile).Load()).Settings;
+        Assert.Equal(@"D:\Games\World of Warcraft\_forever_", Assert.Single(saved.Accounts).InstallPath);
+        vm.Dispose();
+    }
+
+    [AvaloniaFact]
+    public async Task ScanAgainFindingNothingOpensWatchedAccounts()
+    {
+        var h = new MainHarness();
+        var vm = h.Create();
+        vm.Attach();
+        h.Status(MainHarness.First, AccountState.NotWatching);
+        Dispatcher.UIThread.RunJobs();
+        bool opened = false;
+        vm.WatchedAccountsRequested += (_, _) => opened = true;
+
+        await vm.ScanAgainCommand.ExecuteAsync(null);
+
+        Assert.True(opened);
+        vm.Dispose();
     }
 
     [AvaloniaFact]

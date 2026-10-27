@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using CommunitiesForever.Upload.App.ViewModels;
+using CommunitiesForever.Upload.App.Views;
 
 namespace CommunitiesForever.Upload.App;
 
@@ -11,7 +12,11 @@ internal sealed partial class MainWindow : Window
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
-        (DataContext as MainViewModel)?.Attach();
+        if (DataContext is MainViewModel vm)
+        {
+            vm.Ui = new WindowUi(this);
+            vm.Attach();
+        }
     }
 
     protected override void OnClosed(EventArgs e)

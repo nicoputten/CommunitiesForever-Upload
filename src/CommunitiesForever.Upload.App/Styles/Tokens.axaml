@@ -407,6 +407,9 @@
   <Thickness x:Key="AppInstallPad">14,10</Thickness>
   <x:Double x:Key="AppRadar">44</x:Double>
   <x:Double x:Key="AppSetupListH">250</x:Double>
+  <!-- Watched accounts and Connect windows (UP-07): the setup board's content column -->
+  <x:Double x:Key="AppDialogW">640</x:Double>
+  <x:Double x:Key="AppDialogH">520</x:Double>
   <x:Double x:Key="AppDimmed">0.6</x:Double>
   <sys:TimeSpan x:Key="AppDurSpin">0:0:1.2</sys:TimeSpan>
   <sys:TimeSpan x:Key="AppDurSweep">0:0:3</sys:TimeSpan>
@@ -415,6 +418,9 @@
   <Thickness x:Key="AppHeroPad">22</Thickness>
   <x:Double x:Key="AppHeroIcon">76</x:Double>
   <x:Double x:Key="AppShieldStroke">0.9</x:Double>
+  <x:Double x:Key="AppShieldBox">26</x:Double>
+  <x:Double x:Key="AppFileIconBox">84</x:Double>
+  <x:Double x:Key="AppFileIconStroke">3</x:Double>
   <x:Double x:Key="AppFsHero">24</x:Double>
   <x:Double x:Key="AppLsStatus">0.14</x:Double>
   <x:Double x:Key="AppFsStepNumber">18</x:Double>

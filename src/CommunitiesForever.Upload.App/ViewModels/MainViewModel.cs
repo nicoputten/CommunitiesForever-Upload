@@ -8,8 +8,11 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CommunitiesForever.Upload.App.ViewModels;
 
-/// <summary>A watched account in the "Watched" box (board <c>main-window</c>).</summary>
-public sealed record AccountRow(string FileLine, string Detail, string Badge, Tone BadgeTone, string Folder);
+/// <summary>
+/// A watched account in the "Watched" box: name, one status line and a badge; the path, save time and size are in
+/// <see cref="Details"/> (a tooltip). Less text than the board (docs/DESIGN-NOTES.md).
+/// </summary>
+public sealed record AccountRow(string Name, string Line, string Badge, Tone BadgeTone, string Details);
 
 /// <summary>A line in "Recent uploads": the site's summary line; click opens the session report.</summary>
 public sealed record RecentRow(string When, string Summary, Tone Tone, Uri? Report);
@@ -31,14 +34,16 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private readonly SiteOptions _options;
     private readonly IBrowser _browser;
     private readonly TimeProvider _time;
+    private readonly GameScanner _scanner;
     private SynchronizationContext? _ui;
     private ITimer? _ticker;
     private CancellationTokenSource? _identityLoad;
     private AppSettings _current = new();
     private WatchedAccount? _heroAccount;
 
-    public MainViewModel(IUploadLoop loop, UploadHistory history, SettingsStore settings, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time)
+    public MainViewModel(IUploadLoop loop, UploadHistory history, SettingsStore settings, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time, GameScanner scanner)
     {
+        _scanner = scanner;
         _loop = loop;
         _history = history;
         _settings = settings;
@@ -50,11 +55,17 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         Hero = Hero.For(null, null, time.GetUtcNow(), time.LocalTimeZone, Host, null);
     }
 
-    /// <summary>"Reconnect": the app opens setup at step 1.</summary>
+    /// <summary>"Reconnect": the app opens the Connect window.</summary>
     public event EventHandler? ReconnectRequested;
 
-    /// <summary>"Change…", "Scan again", "Choose folder…": the app opens setup at step 2.</summary>
-    public event EventHandler? FindGameRequested;
+    /// <summary>"Change…", or the game wasn't found again: the app opens the Watched accounts window.</summary>
+    public event EventHandler? WatchedAccountsRequested;
+
+    /// <summary>"Scan again" or "Choose folder…" found the game somewhere else; the settings are saved, the app restarts watching.</summary>
+    public event EventHandler? AccountsChanged;
+
+    /// <summary>The window's clipboard and folder picker, while it is open.</summary>
+    public IUiServices? Ui { get; set; }
 
     public string Host => _options.BaseUri.Host;
 
@@ -89,10 +100,16 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public void Attach()
     {
         _ui = SynchronizationContext.Current;
-        _current = _settings.Load() is SettingsLoad.Loaded { Settings: var settings } ? settings : new AppSettings();
-        StartsWithWindows = _current.StartWithWindows;
         _loop.StatusChanged += OnStatusChanged;
         _ticker = _time.CreateTimer(_ => Post(RefreshIfCounting), null, Tick, Tick);
+        Reload();
+    }
+
+    /// <summary>Reads the settings and who is connected again (after Watched accounts or Reconnect).</summary>
+    public void Reload()
+    {
+        _current = _settings.Load() is SettingsLoad.Loaded { Settings: var settings } ? settings : new AppSettings();
+        StartsWithWindows = _current.StartWithWindows;
         Refresh();
         _ = LoadIdentityAsync();
     }
@@ -106,6 +123,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _identityLoad?.Dispose();
         _identityLoad = null;
         _ui = null;
+        Ui = null;
     }
 
     /// <summary>Rebuilds everything from the loop's statuses and the history.</summary>
@@ -164,7 +182,70 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void Reconnect() => ReconnectRequested?.Invoke(this, EventArgs.Empty);
 
     [RelayCommand]
-    private void FindGame() => FindGameRequested?.Invoke(this, EventArgs.Empty);
+    private void ChangeAccounts() => WatchedAccountsRequested?.Invoke(this, EventArgs.Empty);
+
+    /// <summary>
+    /// "Scan again" (not watching): finds the accounts in their new place and saves that, without a window.
+    /// When an account is nowhere to be found, the Watched accounts window opens.
+    /// </summary>
+    [RelayCommand]
+    private async Task ScanAgainAsync()
+    {
+        var installs = await Task.Run(_scanner.Scan);
+        if (!Relocate(installs))
+        {
+            WatchedAccountsRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>"Choose folder…" (not watching): the user points at the game; the watched accounts move there.</summary>
+    [RelayCommand]
+    private async Task ChooseFolderAsync()
+    {
+        if (Ui is null || await Ui.PickFolderAsync("Choose the World of Warcraft folder") is not { } folder)
+        {
+            return;
+        }
+
+        var install = await Task.Run(() => _scanner.Inspect(folder));
+        if (install is null || !Relocate([install]))
+        {
+            WatchedAccountsRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    // Moves every watched account that isn't watched any more to an install that has it. False when one is nowhere.
+    private bool Relocate(IReadOnlyList<GameInstall> installs)
+    {
+        var lost = _loop.Statuses.Where(s => s.State == AccountState.NotWatching).Select(s => s.Account).ToHashSet();
+        bool changed = false, allFound = true;
+        var accounts = _current.Accounts.Select(account =>
+        {
+            if (!lost.Contains(account))
+            {
+                return account;
+            }
+
+            var home = installs.FirstOrDefault(i => i.Accounts.Any(a => string.Equals(a.Name, account.Account, StringComparison.OrdinalIgnoreCase)));
+            if (home is null)
+            {
+                allFound = false;
+                return account;
+            }
+
+            changed |= !string.Equals(home.ForeverPath, account.InstallPath, StringComparison.OrdinalIgnoreCase);
+            return account with { InstallPath = home.ForeverPath };
+        }).ToList();
+
+        if (changed)
+        {
+            _current = _current with { Accounts = accounts };
+            _settings.Save(_current);
+            AccountsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        return allFound;
+    }
 
     [RelayCommand]
     private void OpenSite() => _browser.Open(_options.BaseUri);
@@ -193,27 +274,13 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private AccountRow Row(AccountStatus status, DateTimeOffset localNow)
     {
         var account = status.Account;
-        string folder = Path.Combine(account.InstallPath, "WTF", "Account", account.Account, "SavedVariables");
-        var parts = new List<string>();
+        string line = status.LastUpload is { } last
+            ? $"Uploaded {Formats.Moment(TimeZoneInfo.ConvertTime(last.UploadedAt, _time.LocalTimeZone), localNow)}"
+            : "Not uploaded yet";
+        var details = new List<string> { Path.Combine(account.InstallPath, "WTF", "Account", account.Account, "SavedVariables", GameScanner.AddonFileName) };
         if (status.File is { } file)
         {
-            var saved = TimeZoneInfo.ConvertTime(file.WrittenAt, _time.LocalTimeZone);
-            parts.Add($"Saved by the game {(saved.Date == localNow.Date ? Formats.Clock(saved) : Formats.Moment(saved, localNow))}");
-        }
-
-        if (status.LastUpload is { } last)
-        {
-            var uploaded = TimeZoneInfo.ConvertTime(last.UploadedAt, _time.LocalTimeZone);
-            parts.Add($"uploaded {(uploaded.Date == localNow.Date ? Formats.Clock(uploaded) : Formats.Moment(uploaded, localNow))}");
-        }
-        else
-        {
-            parts.Add("not uploaded yet");
-        }
-
-        if (status.File is { } size)
-        {
-            parts.Add(Formats.Size(size.Size));
+            details.Add($"Saved by the game {Formats.Moment(TimeZoneInfo.ConvertTime(file.WrittenAt, _time.LocalTimeZone), localNow)} · {Formats.Size(file.Size)}");
         }
 
         var (badge, tone) = status.State switch
@@ -226,7 +293,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             AccountState.NotAllowed => ("Not allowed", Tone.Warn),
             _ => ("Waiting", Tone.Gold),
         };
-        return new AccountRow($"{account.Account} · {GameScanner.AddonFileName}", string.Join(" · ", parts), badge, tone, folder);
+        return new AccountRow(account.Account, line, badge, tone, string.Join(Environment.NewLine, details));
     }
 
     private async Task LoadIdentityAsync()

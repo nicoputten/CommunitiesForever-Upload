@@ -95,7 +95,7 @@ public sealed partial class FindGameStepViewModel(GameScanner scanner, TimeProvi
         var accounts = install.Accounts.Select(a => new AccountItem(
             a.Name,
             a.HasAddonFile,
-            a.SavedAt is { } saved ? $"{GameScanner.AddonFileName} · saved {SavedAt(TimeZoneInfo.ConvertTime(saved, time.LocalTimeZone), now)}" : "No addon file yet: log in once with the addon enabled",
+            a.SavedAt is { } saved ? $"Saved {SavedAt(TimeZoneInfo.ConvertTime(saved, time.LocalTimeZone), now)}" : "No addon file yet: log in once with the addon enabled",
             // Ready accounts are ticked; earlier choices win after "Scan again".
             chosen.Count > 0 ? chosen.Contains(new WatchedAccount(install.ForeverPath, a.Name)) : a.HasAddonFile,
             Update));

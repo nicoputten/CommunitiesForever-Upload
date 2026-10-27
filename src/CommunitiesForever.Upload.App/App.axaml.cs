@@ -39,7 +39,6 @@ internal sealed partial class App : Application
     private TrayIcon? _trayIcon;
     private Window? _mainWindow;
     private SetupViewModel? _setup;
-    private bool _setupReturnsToMain;
     private MainViewModel? _main;
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
@@ -79,6 +78,8 @@ internal sealed partial class App : Application
         services.AddTransient<GalleryWindow>();
         services.AddTransient<SetupViewModel>();
         services.AddTransient<MainViewModel>();
+        services.AddTransient<WatchedAccountsViewModel>();
+        services.AddTransient<ConnectWindowViewModel>();
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
     }
 
@@ -154,7 +155,7 @@ internal sealed partial class App : Application
             return CreateMain(services);
         }
 
-        return CreateSetup(services, settings, connectFirst: false, returnsToMain: false);
+        return CreateSetup(services, settings);
     }
 
     private MainWindow CreateMain(ServiceProvider services)
@@ -162,38 +163,85 @@ internal sealed partial class App : Application
         ForgetMain();
         _main = services.GetRequiredService<MainViewModel>();
         _main.ReconnectRequested += OnReconnectRequested;
-        _main.FindGameRequested += OnFindGameRequested;
+        _main.WatchedAccountsRequested += OnWatchedAccountsRequested;
+        _main.AccountsChanged += OnAccountsChanged;
         var window = services.GetRequiredService<MainWindow>();
         window.DataContext = _main;
         return window;
     }
 
-    private SetupWindow CreateSetup(ServiceProvider services, AppSettings? settings, bool connectFirst, bool returnsToMain)
+    // The wizard is for the first run only (docs/DESIGN-NOTES.md).
+    private SetupWindow CreateSetup(ServiceProvider services, AppSettings? settings)
     {
         _setup = services.GetRequiredService<SetupViewModel>();
         _setup.Existing = settings;
-        _setup.ConnectFirst = connectFirst;
-        _setupReturnsToMain = returnsToMain;
         _setup.Finished += OnSetupFinished;
         _setup.Cancelled += OnSetupCancelled;
         return new SetupWindow { DataContext = _setup };
     }
 
-    // "Reconnect" (setup at step 1) and "Change…" (setup at step 2) from the main window; setup returns to it.
-    private void OnReconnectRequested(object? sender, EventArgs e) => OpenSetupFromMain(connectFirst: true);
-
-    private void OnFindGameRequested(object? sender, EventArgs e) => OpenSetupFromMain(connectFirst: false);
-
-    private void OpenSetupFromMain(bool connectFirst)
+    // "Reconnect": the Connect window on top of the main window; once connected, watching restarts with the new token.
+    private async void OnReconnectRequested(object? sender, EventArgs e)
     {
-        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop || _services is null)
+        if (_services is null || _mainWindow is null)
         {
             return;
         }
 
-        var settings = (_services.GetRequiredService<SettingsStore>().Load() as SettingsLoad.Loaded)?.Settings;
-        ForgetMain();
-        SwitchTo(desktop, CreateSetup(_services, settings, connectFirst, returnsToMain: true));
+        using var vm = _services.GetRequiredService<ConnectWindowViewModel>();
+        var window = new ConnectWindow { DataContext = vm };
+        void Close(object? s, EventArgs a) => window.Close();
+        vm.Connected += Close;
+        vm.Cancelled += Close;
+        await window.ShowDialog(_mainWindow);
+        vm.Connected -= Close;
+        vm.Cancelled -= Close;
+        if (_services.GetRequiredService<ITokenStore>().Load() is not null)
+        {
+            RestartWatching();
+        }
+    }
+
+    // "Change…": the Watched accounts window on top of the main window.
+    private async void OnWatchedAccountsRequested(object? sender, EventArgs e)
+    {
+        if (_services is null || _mainWindow is null)
+        {
+            return;
+        }
+
+        var vm = _services.GetRequiredService<WatchedAccountsViewModel>();
+        var window = new WatchedAccountsWindow { DataContext = vm };
+        bool saved = false;
+        void Saved(object? s, EventArgs a)
+        {
+            saved = true;
+            window.Close();
+        }
+
+        void Cancelled(object? s, EventArgs a) => window.Close();
+        vm.Saved += Saved;
+        vm.Cancelled += Cancelled;
+        await window.ShowDialog(_mainWindow);
+        vm.Saved -= Saved;
+        vm.Cancelled -= Cancelled;
+        if (saved)
+        {
+            RestartWatching();
+        }
+    }
+
+    private void OnAccountsChanged(object? sender, EventArgs e) => RestartWatching();
+
+    // New accounts or a new token: restart the loop with the saved settings and refresh the main window.
+    private void RestartWatching()
+    {
+        if (_services?.GetRequiredService<SettingsStore>().Load() is SettingsLoad.Loaded { Settings: var settings })
+        {
+            StartLoop(_services, settings);
+        }
+
+        _main?.Reload();
     }
 
     private void SwitchTo(IClassicDesktopStyleApplicationLifetime desktop, Window next)
@@ -209,7 +257,8 @@ internal sealed partial class App : Application
         if (_main is { } main)
         {
             main.ReconnectRequested -= OnReconnectRequested;
-            main.FindGameRequested -= OnFindGameRequested;
+            main.WatchedAccountsRequested -= OnWatchedAccountsRequested;
+            main.AccountsChanged -= OnAccountsChanged;
             _main = null;
         }
     }
@@ -224,7 +273,6 @@ internal sealed partial class App : Application
         ForgetSetup();
         if (_services.GetRequiredService<SettingsStore>().Load() is SettingsLoad.Loaded { Settings: var settings })
         {
-            // Restarting picks up new accounts and a new token (after "Reconnect").
             StartLoop(_services, settings);
         }
 
@@ -237,21 +285,9 @@ internal sealed partial class App : Application
 
     private void OnSetupCancelled(object? sender, EventArgs e)
     {
+        // First run only: without a connection there is nothing to do.
         ForgetSetup();
-        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            return;
-        }
-
-        // From the main window: back to it. On first run there is nothing to go back to.
-        if (_setupReturnsToMain && _services is not null)
-        {
-            SwitchTo(desktop, CreateMain(_services));
-        }
-        else
-        {
-            desktop.Shutdown();
-        }
+        (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();
     }
 
     private void ForgetSetup()

@@ -1,5 +1,6 @@
 using CommunitiesForever.Upload.App.Tests.Setup;
 using CommunitiesForever.Upload.App.ViewModels;
+using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Core.Uploading;
@@ -37,6 +38,9 @@ internal sealed class MainHarness
     public MemoryTokens Tokens { get; } = new();
 
     public MemorySettingsFile SettingsFile { get; } = new();
+
+    /// <summary>What "Scan again" finds; empty unless a test adds installs.</summary>
+    public MemoryDisk Disk { get; } = new();
 
     public UploadHistory History { get; }
 
@@ -90,7 +94,13 @@ internal sealed class MainHarness
         Tokens,
         new SiteOptions(new Uri("https://wow.vestras.nl/"), "1.0.0"),
         new Browser(Opened),
-        Time);
+        Time,
+        new GameScanner(Disk, new Hints(Disk)));
+
+    private sealed class Hints(MemoryDisk disk) : IInstallHints
+    {
+        public IEnumerable<string> CandidateFolders() => disk.Roots;
+    }
 
     private sealed class Browser(List<Uri> opened) : IBrowser
     {

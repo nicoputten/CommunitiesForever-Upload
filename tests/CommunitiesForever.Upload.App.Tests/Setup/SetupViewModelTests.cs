@@ -41,12 +41,13 @@ public sealed class SetupViewModelTests
         await SetupHarness.Until(() => vm.Step == 2 && vm.Find.Found);
 
         Assert.Equal(SetupHarness.Token, _harness.Tokens.Token);
-        Assert.Equal("Connected as Nico#2201", vm.Step1Text);
+        Assert.Equal("Connected", vm.Step1Text);
+        Assert.Equal("Nico#2201", vm.ConnectedAs);
         Assert.Equal("Doombringers Uploader", vm.Title);
         Assert.Equal("Scan complete · 1 install · 2 accounts", vm.Find.Summary);
         var accounts = Assert.Single(vm.Find.Installs).Accounts;
         Assert.True(accounts[0].IsChecked);
-        Assert.Equal("CommunitiesForever.lua · saved today 21:12", accounts[0].Detail);
+        Assert.Equal("Saved today 21:12", accounts[0].Detail);
         Assert.False(accounts[1].IsChecked);
         Assert.Equal("Not found", accounts[1].Status);
         Assert.True(vm.Find.CanContinue);
