@@ -3,7 +3,7 @@
 Open stories only, in build order. Done stories move to `docs/STORIES-COMPLETED.md`.
 Each story: criteria are testable. "Manual" items are steps only Nico can do; they go in the PR.
 
-Build order: UP-09, UP-10, then UP-12 once the web's WEB-44 and the addon's CF-45 are released (UP-01 to UP-08 and UP-11 are done). All of it is v1 (decided with Nico).
+Build order: UP-10, then UP-12 once the web's WEB-44 and the addon's CF-45 are released (UP-01 to UP-09 and UP-11 are done). All of it is v1 (decided with Nico).
 The site side is built in the web repo: WEB-33 (uploader API, merged), WEB-34 (uploader page), WEB-35 (installer hosting and update feed).
 
 ## Every UI story
@@ -12,11 +12,6 @@ The site side is built in the web repo: WEB-33 (uploader API, merged), WEB-34 (u
 - Keyboard use, focus states, screen reader names (Avalonia automation properties), contrast as in the web DESIGN.md.
 - Window at the board's size (900 × 620) and resizable down to a sensible minimum.
 - The screen gets its design checks (UP-03): headless screenshot baselines and key style checks.
-
-## E3 Screens
-
-### UP-09 Settings
-- Board `settings`: Behaviour (upload automatically, start with Windows, close to tray, notifications, pause), Game folders (scan again, add folder, remove), Connection (connected as, token created, Test connection, Disconnect), About (version, Check for updates, Open log folder).
 
 ## E4 Release
 

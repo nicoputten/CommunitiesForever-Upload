@@ -105,7 +105,8 @@ internal sealed partial class App : Application
         services.AddTransient<GalleryWindow>();
         services.AddTransient<SetupViewModel>();
         services.AddTransient<MainViewModel>();
-        services.AddTransient<WatchedAccountsViewModel>();
+        // Not resolved as a transient: the container would keep every settings page it ever made (CLAUDE.md rule 11).
+        services.AddSingleton<Func<SettingsViewModel>>(sp => () => Configure(ActivatorUtilities.CreateInstance<SettingsViewModel>(sp)));
         services.AddTransient<ConnectWindowViewModel>();
         services.AddSingleton<TrayController>();
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
@@ -194,8 +195,8 @@ internal sealed partial class App : Application
         ForgetMain();
         _main = services.GetRequiredService<MainViewModel>();
         _main.ReconnectRequested += OnReconnectRequested;
-        _main.WatchedAccountsRequested += OnWatchedAccountsRequested;
         _main.AccountsChanged += OnAccountsChanged;
+        _main.SettingsChanged += OnSettingsChanged;
         var window = services.GetRequiredService<MainWindow>();
         window.DataContext = _main;
         window.HidesToTray = Settings(services)?.CloseHidesToTray ?? true;
@@ -232,39 +233,31 @@ internal sealed partial class App : Application
         {
             RestartWatching();
             _tray?.Reload();
+            _main?.Settings?.TestConnectionCommand.Execute(null);
         }
     }
 
-    // "Change…": the Watched accounts window on top of the main window.
-    private async void OnWatchedAccountsRequested(object? sender, EventArgs e)
+    private void OnAccountsChanged(object? sender, EventArgs e)
     {
-        if (_services is null || _mainWindow is null)
-        {
-            return;
-        }
+        RestartWatching();
+        _tray?.Reload();
+    }
 
-        var vm = _services.GetRequiredService<WatchedAccountsViewModel>();
-        var window = new WatchedAccountsWindow { DataContext = vm };
-        bool saved = false;
-        void Saved(object? s, EventArgs a)
+    // Settings saved (UP-09): autostart and the close button follow right away.
+    private void OnSettingsChanged(object? sender, AppSettings settings)
+    {
+        SyncAutostart();
+        if (_mainWindow is MainWindow window)
         {
-            saved = true;
-            window.Close();
-        }
-
-        void Cancelled(object? s, EventArgs a) => window.Close();
-        vm.Saved += Saved;
-        vm.Cancelled += Cancelled;
-        await window.ShowDialog(_mainWindow);
-        vm.Saved -= Saved;
-        vm.Cancelled -= Cancelled;
-        if (saved)
-        {
-            RestartWatching();
+            window.HidesToTray = settings.CloseHidesToTray;
         }
     }
 
-    private void OnAccountsChanged(object? sender, EventArgs e) => RestartWatching();
+    private static SettingsViewModel Configure(SettingsViewModel vm)
+    {
+        vm.LogFolder = AppPaths.LogDirectory;
+        return vm;
+    }
 
     // New accounts or a new token: restart the loop with the saved settings and refresh the main window.
     private void RestartWatching()
@@ -291,8 +284,8 @@ internal sealed partial class App : Application
         if (_main is { } main)
         {
             main.ReconnectRequested -= OnReconnectRequested;
-            main.WatchedAccountsRequested -= OnWatchedAccountsRequested;
             main.AccountsChanged -= OnAccountsChanged;
+            main.SettingsChanged -= OnSettingsChanged;
             _main = null;
         }
     }

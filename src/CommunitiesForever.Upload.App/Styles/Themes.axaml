@@ -140,6 +140,36 @@
       <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
 
+    <!-- neutral: settings board "Add folder…" -->
+    <Style Selector="^.neutral">
+      <Setter Property="BorderBrush" Value="{StaticResource LineNeutralBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextChipBrush}" />
+    </Style>
+
+    <!-- nav: settings board menu items; .on is the current section -->
+    <Style Selector="^.nav">
+      <Setter Property="Padding" Value="{StaticResource AppNavItemPad}" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="{StaticResource RNav}" />
+      <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+      <Setter Property="FontWeight" Value="{StaticResource FwRegular}" />
+      <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+    <Style Selector="^.nav.on">
+      <Setter Property="Background" Value="{StaticResource TintActiveBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+      <Setter Property="FontWeight" Value="{StaticResource FwSemibold}" />
+    </Style>
+    <Style Selector="^.nav.on /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BoxShadow" Value="{StaticResource AppNavActiveShadow}" />
+    </Style>
+    <Style Selector="^.nav-back">
+      <Setter Property="Margin" Value="{StaticResource AppNavBackMargin}" />
+    </Style>
+
     <Style Selector="^.window">
       <Setter Property="Width" Value="{StaticResource AppWindowButtonW}" />
       <Setter Property="Height" Value="{StaticResource AppTitleBarH}" />

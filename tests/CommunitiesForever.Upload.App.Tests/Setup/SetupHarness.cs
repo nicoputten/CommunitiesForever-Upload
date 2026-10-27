@@ -64,7 +64,7 @@ internal sealed class SetupHarness
         public void Open(Uri uri) => opened.Add(uri);
     }
 
-    private sealed class Device : IDeviceInfo
+    internal sealed class Device : IDeviceInfo
     {
         public string DeviceName => "DESKTOP-NICO";
     }

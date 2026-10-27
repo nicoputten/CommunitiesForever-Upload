@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="using:CommunitiesForever.Upload.App.Controls"
         xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+        xmlns:v="using:CommunitiesForever.Upload.App.Views"
         x:Class="CommunitiesForever.Upload.App.MainWindow"
         x:DataType="vm:MainViewModel"
         Title="{Binding Title, FallbackValue='CommunitiesForever Uploader'}"
@@ -14,20 +15,42 @@
   <!-- Board: design/boards/main-window; status states: design/boards/states (UP-07) -->
   <Border BorderBrush="{StaticResource AppLineWindowBrush}" BorderThickness="{StaticResource BorderThickness}">
     <DockPanel>
-      <c:TitleBar DockPanel.Dock="Top" />
+      <c:TitleBar Name="Bar" DockPanel.Dock="Top" />
 
-      <!-- Status bar -->
-      <Border Classes="statusbar" DockPanel.Dock="Bottom">
+      <!-- Status bar (not on the settings page, as on the settings board) -->
+      <Border Classes="statusbar" DockPanel.Dock="Bottom" IsVisible="{Binding !IsSettingsOpen}">
         <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
           <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
             <TextBlock Classes="meta fresh" Classes.warn="{Binding !IsConnected}" Text="●" />
             <TextBlock Classes="meta" Text="{Binding ConnectedText}" />
           </StackPanel>
-          <TextBlock Grid.Column="2" Classes="meta" Text="Starts with Windows" IsVisible="{Binding StartsWithWindows}" />
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{StaticResource S3_5}">
+            <TextBlock Classes="meta" VerticalAlignment="Center" Text="Starts with Windows" IsVisible="{Binding StartsWithWindows}" />
+            <Button Classes="link" Command="{Binding OpenSettingsCommand}" AutomationProperties.Name="Settings">
+              <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
+                <Viewbox Width="{StaticResource AppGearIcon}" Height="{StaticResource AppGearIcon}">
+                  <Canvas Width="{StaticResource AppGearIconBox}" Height="{StaticResource AppGearIconBox}">
+                    <Path Data="M10.5,8 A2.5,2.5 0 1 1 5.5,8 A2.5,2.5 0 1 1 10.5,8 Z M8,1 V3 M8,13 V15 M1,8 H3 M13,8 H15 M3,3 L4.4,4.4 M11.6,11.6 L13,13 M3,13 L4.4,11.6 M11.6,4.4 L13,3"
+                          Stroke="{StaticResource GoldBrush}" StrokeThickness="{StaticResource AppGearIconStroke}" />
+                  </Canvas>
+                </Viewbox>
+                <TextBlock Text="Settings" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
         </Grid>
       </Border>
 
-      <Grid Margin="{StaticResource S5Thickness}" ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+      <!-- Settings (UP-09) -->
+      <ContentControl Content="{Binding Settings}" IsVisible="{Binding IsSettingsOpen}">
+        <ContentControl.ContentTemplate>
+          <DataTemplate x:DataType="vm:SettingsViewModel">
+            <v:SettingsView />
+          </DataTemplate>
+        </ContentControl.ContentTemplate>
+      </ContentControl>
+
+      <Grid Margin="{StaticResource S5Thickness}" ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}" IsVisible="{Binding !IsSettingsOpen}">
         <StackPanel Spacing="{StaticResource S4}">
 
           <!-- Status header -->
