@@ -8,7 +8,7 @@ View them: `python -m http.server 4400 --directory design`, then open http://loc
 
 | Folder | Board | Screen |
 |---|---|---|
-| `setup` | `AppSetup.dc.html` | First-run setup: connect (browser pairing), find World of Warcraft, how it runs |
+| `setup` | `AppSetup.dc.html` | First-run setup: connect (in the browser, OAuth device flow), find World of Warcraft, how it runs |
 | `main-window` | `AppMain.dc.html` | Main window: status, watched accounts, explainer, recent uploads |
 | `states` | `AppStates.dc.html` | The loop and every status state with its actions |
 | `tray` | `AppTray.dc.html` | Tray icon per state, right-click menu, toast notifications |

@@ -2,7 +2,7 @@
 
 ## Core rules
 - The app is a courier: it finds the addon file, waits until the game has finished writing it, uploads the bytes and shows the site's answer. It never interprets the file (CLAUDE.md rule 1).
-- One upload token per installed app, upload-only, created by browser pairing or pasted by hand, revocable on the site.
+- One upload token per installed app, upload-only, created by connecting through the browser (OAuth 2.0 device authorization flow, RFC 8628) or pasted by hand, revocable on the site or by the app (RFC 7009).
 - It runs quietly: tray first, window on demand, notifications by preference.
 - Everything works offline: a file that couldn't be sent is kept and sent later.
 
@@ -29,7 +29,7 @@ Every package at an exact version. Anything not listed needs Nico's OK (CLAUDE.m
 - No generic Host: plain DI plus one class of our own that starts and stops the loop; settings stay in our versioned `settings.json`.
 - Retry and backoff are our own small state machine in Core, not Polly.
 - File watching: `FileSystemWatcher` as the trigger plus a 30 s poll as the safety net; both feed the same settle step.
-- Fake site: a fake `HttpMessageHandler` in unit tests, and `tools/FakeSite` (ASP.NET Core minimal API, no package) for trying pairing and uploads by hand, until WEB-33 is live.
+- Fake site: a fake `HttpMessageHandler` in unit tests, and `tools/FakeSite` (ASP.NET Core minimal API, no package) for trying connecting and uploads by hand, until WEB-33 is live.
 - Windows bits without packages: named mutex + named pipe for single instance, HKCU `Run` key for autostart, the WinRT notification API through the `net10.0-windows10.0.19041.0` target framework for toasts (UP-08 confirms).
 - Startup: ReadyToRun on publish; no Native AOT.
 - Core targets plain `net10.0`, so Windows APIs are not even available there; `ArchitectureTests` in Core.Tests reads Core's metadata and fails on Avalonia, Windows APIs, the other projects, direct file system, process, registry or socket use and P/Invoke. `HttpClient` is allowed in Core but always injected.
@@ -43,7 +43,7 @@ The app lives for weeks in the tray, so memory must stay flat:
 
 ## Layering
 ```
-src/CommunitiesForever.Upload.Core/     pure: state machine, settle timer, hashing, retry and queue, pairing flow,
+src/CommunitiesForever.Upload.Core/     pure: state machine, settle timer, hashing, retry and queue, connect flow,
                                         settings and history models with migrations, API contract types; no UI, no OS
 src/CommunitiesForever.Upload.Windows/  thin adapters: WoW folder discovery (registry, Battle.net config), file watcher,
                                         autostart, DPAPI token store, toasts, single-instance
@@ -80,7 +80,7 @@ Watching ─▶ game running (WoW process seen) ─▶ file changed ─▶ settl
 - `logs\`: rolling log files (no tokens, no other people's BattleTags).
 
 ## Site API
-Defined by the web repo in `docs/UPLOADER-API.md`: pairing (start, poll), token upload, "who am I", disconnect, update feed. The upload response carries the summary the app shows ("5 levels gained", "Ves 37 → 39") and the status (`ok`, `nothing_new`, `rejected` with a reason such as `newer_format`).
+Defined by the web repo in `docs/UPLOADER-API.md`: connecting with the OAuth 2.0 device authorization flow (RFC 8628: device code, then token polling), uploading with the Bearer token (RFC 6750 error responses), identity, disconnecting by token revocation (RFC 7009), update feed. The app follows that document for every endpoint, field and error code. The upload response carries the summary the app shows ("5 levels gained", "Ves 37 → 39") and the status (`ok`, `nothing_new`, `rejected` with a reason such as `newer_format`).
 
 ## Packaging and updates
 - Velopack builds a per-user installer and update packages on a `v*` tag on `main` (UP-10).

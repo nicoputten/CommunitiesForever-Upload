@@ -168,7 +168,7 @@ public sealed partial class TokenDriftTests
             .ToDictionary(e => e.Attribute(X + "Key")!.Value);
     }
 
-    private static string RepoRoot()
+    internal static string RepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "CommunitiesForever.Upload.slnx")))

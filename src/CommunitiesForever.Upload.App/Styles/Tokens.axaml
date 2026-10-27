@@ -366,7 +366,8 @@
   <Thickness x:Key="AppTitleBarPad">12,0,0,0</Thickness>
   <Thickness x:Key="AppTitleIconMargin">0,0,8,0</Thickness>
   <Thickness x:Key="AppBadgePad">6,2</Thickness>
-  <Thickness x:Key="AppFocusMargin">-2</Thickness>
+  <!-- focus ring outside the control: -(FocusWidth + FocusOffset) -->
+  <Thickness x:Key="AppFocusMargin">-4</Thickness>
   <!-- window background: main-window board, page glow top left over the night -->
   <RadialGradientBrush x:Key="AppWindowBackground" Center="20%,-10%" GradientOrigin="20%,-10%" RadiusX="78%" RadiusY="48%">
     <GradientStop Color="{StaticResource PageGlow}" Offset="0" />
