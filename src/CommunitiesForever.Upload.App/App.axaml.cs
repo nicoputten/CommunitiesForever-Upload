@@ -25,6 +25,8 @@ internal sealed partial class App : Application
             _services = ConfigureServices();
             desktop.MainWindow = _services.GetRequiredService<MainWindow>();
             _trayIcon = CreateTrayIcon(desktop);
+            // A tray icon only shows once it is registered on the Application.
+            TrayIcon.SetIcons(this, [_trayIcon]);
             desktop.Exit += OnExit;
         }
 
