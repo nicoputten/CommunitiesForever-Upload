@@ -61,6 +61,12 @@ The site side is built in the web repo: WEB-33 (uploader API), WEB-34 (uploader 
 - Board `main-window`: status header with the state dot and line ("All caught up", "Last upload today at 21:14 · World of Warcraft isn't running"), Upload now, Open site; watched accounts with save and upload times and size; the three-step explainer; recent uploads with summary lines; "Full history on the site →"; connected-as line.
 - The status states of board `states` shown in the header with their actions (Upload now, Skip this one, Try now, Reconnect, Scan again, Choose folder…).
 
+### UP-11 Keep dependencies fresh
+Built after UP-07 (small; like WEB-37 in the web repo).
+- Dependabot (`.github/dependabot.yml`) for NuGet and GitHub Actions, weekly; minor and patch updates grouped into one PR, majors in their own.
+- CI decides whether an update is safe (build, format, tests, design checks). A changed screenshot still needs Nico's OK (CLAUDE.md rule 7), so such an update waits for him.
+- Every exact pin that Dependabot must not move (for example xunit.v3 3.x for Avalonia.Headless.XUnit) is listed with its reason in `docs/ARCHITECTURE.md`, and ignored in `dependabot.yml` with the same reason.
+
 ### UP-08 Tray, notifications and autostart
 - Board `tray`: tray icon per state (watching, uploading, paused, needs attention) with tooltip line; left click opens the window; right-click menu (status, Upload now, Pause uploads → 1 hour / until tomorrow, Open site, Show uploader, Quit).
 - Windows toasts: "Uploaded · 5 levels gained" with "See what changed", "No connection: will try again", "Upload token no longer works" with Reconnect / Later; "Only problems" keeps the last two.
