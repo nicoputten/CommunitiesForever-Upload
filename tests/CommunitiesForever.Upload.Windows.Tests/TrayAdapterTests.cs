@@ -39,6 +39,28 @@ public sealed class TrayAdapterTests : IDisposable
     }
 
     [Fact]
+    public void StartMenuShortcutCarriesTheAppId()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "cfu-tests-" + Guid.NewGuid().ToString("N"));
+        string shortcut = Path.Combine(folder, "Uploader.lnk");
+        string exe = Path.Combine(AppContext.BaseDirectory, "testhost.exe");
+        try
+        {
+            StartMenuShortcut.Ensure(exe, shortcut);
+            StartMenuShortcut.Ensure(exe, shortcut);
+
+            var read = StartMenuShortcut.Read(shortcut);
+            Assert.NotNull(read);
+            Assert.Equal(exe, read.Value.Target, ignoreCase: true);
+            Assert.Equal(AppIdentity.AppId, read.Value.AppId);
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    [Fact]
     public void ToastXmlHasTheTextLogoAndLinkButtons()
     {
         var notification = new AppNotification(

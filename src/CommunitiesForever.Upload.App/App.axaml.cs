@@ -449,8 +449,10 @@ internal sealed partial class App : Application
         try
         {
             ShellRegistration.Register(Environment.ProcessPath ?? "", Path.Combine(AppContext.BaseDirectory, "app-icon.png"));
+            // Windows takes a notification's header (name, icon) from the Start menu shortcut.
+            StartMenuShortcut.Ensure(Environment.ProcessPath ?? "");
         }
-        catch (Exception e) when (e is UnauthorizedAccessException or System.Security.SecurityException or IOException)
+        catch (Exception e) when (e is UnauthorizedAccessException or System.Security.SecurityException or IOException or System.Runtime.InteropServices.COMException)
         {
             // Without it there are no notifications; the app itself works.
         }
