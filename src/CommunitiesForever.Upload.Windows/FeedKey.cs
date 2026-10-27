@@ -11,22 +11,15 @@ public static class FeedKey
 {
     public const string PublicKeyPem = """
         -----BEGIN PUBLIC KEY-----
-        PLACEHOLDER: Nico generates the key pair and pastes the public key here (README "Releasing").
+        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpeEWJ+Mo854B2iNl5PMQH5s7nBh/
+        eAUOHxyThVzLmV0TUXnf/pC4VsfeuUuCTfDGBEh5Fx89X1DaOGLhP3IGUQ==
         -----END PUBLIC KEY-----
         """;
 
     public static ECDsa Load()
     {
         var key = ECDsa.Create();
-        try
-        {
-            key.ImportFromPem(PublicKeyPem);
-        }
-        catch (ArgumentException)
-        {
-            // No key yet: nothing verifies, so no update is ever used.
-        }
-
+        key.ImportFromPem(PublicKeyPem);
         return key;
     }
 }
