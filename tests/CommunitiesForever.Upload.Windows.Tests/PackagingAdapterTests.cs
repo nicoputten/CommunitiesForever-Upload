@@ -31,6 +31,15 @@ public sealed class PackagingAdapterTests : IDisposable
     }
 
     [Fact]
+    public void TheShippedFeedKeyIsAP256PublicKey()
+    {
+        using var key = FeedKey.Load();
+
+        Assert.Equal(256, key.KeySize);
+        Assert.Throws<CryptographicException>(() => key.ExportParameters(includePrivateParameters: true));
+    }
+
+    [Fact]
     public void FeedRequestsCarryTheToken()
     {
         using var http = new HttpClient();
