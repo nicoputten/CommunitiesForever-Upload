@@ -174,17 +174,23 @@ public sealed class SetupViewModelTests
         Assert.Equal(expected, FindGameStepViewModel.SavedAt(DateTimeOffset.Parse(saved, System.Globalization.CultureInfo.InvariantCulture), new DateTimeOffset(2026, 10, 27, 21, 30, 0, TimeSpan.Zero)));
 
     [AvaloniaFact]
-    public void ClosedSetupWindowIsCollected()
+    public async Task ClosedSetupWindowIsCollected()
     {
         // Long-running app (CLAUDE.md rule 11): neither the window nor its view model may stay alive.
         var (window, vm) = OpenAndClose(_harness);
-        Dispatcher.UIThread.RunJobs();
-        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
-        Dispatcher.UIThread.RunJobs();
 
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
+        // Closing cancels connecting; that unwinds asynchronously (on slow machines it takes a moment), so collect
+        // until it has, for at most two seconds. A real leak stays alive the whole time.
+        for (int i = 0; i < 100 && (window.IsAlive || vm.IsAlive); i++)
+        {
+            Dispatcher.UIThread.RunJobs();
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+            Dispatcher.UIThread.RunJobs();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            await Task.Delay(20, TestContext.Current.CancellationToken);
+        }
 
         Assert.False(window.IsAlive);
         Assert.False(vm.IsAlive);
