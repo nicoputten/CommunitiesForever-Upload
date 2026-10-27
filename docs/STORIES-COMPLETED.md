@@ -80,4 +80,4 @@ Nico, 2026-10-27: "the ideal route", the Velopack way; with web WEB-35b (the sit
 - The first release has nothing to pull (404) and still works.
 - How many versions stay is decided here: the pulled feed is trimmed to the 2 newest earlier versions (3 with the new one); the site keeps exactly what the feed lists.
 - Manual: the next release after this one is the first to pull and make a delta; check its log ("Pulled the feed … and …-full.nupkg") and that an installed app updates.
-- Done (PR #PRNUM).
+- Done (PR #16; the site: web PR #55).
