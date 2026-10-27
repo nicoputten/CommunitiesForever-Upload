@@ -86,3 +86,4 @@ Defined by the web repo in `docs/UPLOADER-API.md`: pairing (start, poll), token 
 - Velopack builds a per-user installer and update packages on a `v*` tag on `main` (UP-10).
 - The installer and the update feed are hosted by the site (repos are private), at `/uploader/download` and the feed path in `UPLOADER-API.md`; the app reads the feed with its upload token.
 - Not code-signed (decided with Nico): Windows SmartScreen warns once on install.
+- Open point for UP-10: Windows 11 **Smart App Control** blocks unsigned apps outright (no "Run anyway"). Found on 2026-10-27 when it blocked the unsigned Avalonia analyzer and test programs on Nico's PC. Friends with it on can't install an unsigned app, so UP-10 decides between code signing (e.g. Azure Trusted Signing) and an install guide that explains turning it off.

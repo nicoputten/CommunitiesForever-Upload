@@ -1,5 +1,7 @@
 using System.Runtime.CompilerServices;
+using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CommunitiesForever.Upload.App.Tests;
@@ -26,6 +28,10 @@ public sealed class MainWindowTests
     {
         // Long-running app (CLAUDE.md rule 11): a closed window must not be kept alive.
         var window = OpenAndClose();
+        // Let Avalonia finish the queued close and render work, which still holds the window.
+        Dispatcher.UIThread.RunJobs();
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
 
         GC.Collect();
         GC.WaitForPendingFinalizers();
