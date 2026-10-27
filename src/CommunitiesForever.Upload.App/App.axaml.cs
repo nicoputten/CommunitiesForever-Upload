@@ -39,6 +39,7 @@ internal sealed partial class App : Application
     private TrayIcon? _trayIcon;
     private Window? _mainWindow;
     private SetupViewModel? _setup;
+    private MainViewModel? _main;
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -76,6 +77,9 @@ internal sealed partial class App : Application
         services.AddTransient<MainWindow>();
         services.AddTransient<GalleryWindow>();
         services.AddTransient<SetupViewModel>();
+        services.AddTransient<MainViewModel>();
+        services.AddTransient<WatchedAccountsViewModel>();
+        services.AddTransient<ConnectWindowViewModel>();
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
     }
 
@@ -148,14 +152,115 @@ internal sealed partial class App : Application
                 StartLoop(services, settings);
             }
 
-            return services.GetRequiredService<MainWindow>();
+            return CreateMain(services);
         }
 
+        return CreateSetup(services, settings);
+    }
+
+    private MainWindow CreateMain(ServiceProvider services)
+    {
+        ForgetMain();
+        _main = services.GetRequiredService<MainViewModel>();
+        _main.ReconnectRequested += OnReconnectRequested;
+        _main.WatchedAccountsRequested += OnWatchedAccountsRequested;
+        _main.AccountsChanged += OnAccountsChanged;
+        var window = services.GetRequiredService<MainWindow>();
+        window.DataContext = _main;
+        return window;
+    }
+
+    // The wizard is for the first run only (docs/DESIGN-NOTES.md).
+    private SetupWindow CreateSetup(ServiceProvider services, AppSettings? settings)
+    {
         _setup = services.GetRequiredService<SetupViewModel>();
         _setup.Existing = settings;
         _setup.Finished += OnSetupFinished;
         _setup.Cancelled += OnSetupCancelled;
         return new SetupWindow { DataContext = _setup };
+    }
+
+    // "Reconnect": the Connect window on top of the main window; once connected, watching restarts with the new token.
+    private async void OnReconnectRequested(object? sender, EventArgs e)
+    {
+        if (_services is null || _mainWindow is null)
+        {
+            return;
+        }
+
+        using var vm = _services.GetRequiredService<ConnectWindowViewModel>();
+        var window = new ConnectWindow { DataContext = vm };
+        void Close(object? s, EventArgs a) => window.Close();
+        vm.Connected += Close;
+        vm.Cancelled += Close;
+        await window.ShowDialog(_mainWindow);
+        vm.Connected -= Close;
+        vm.Cancelled -= Close;
+        if (_services.GetRequiredService<ITokenStore>().Load() is not null)
+        {
+            RestartWatching();
+        }
+    }
+
+    // "Change…": the Watched accounts window on top of the main window.
+    private async void OnWatchedAccountsRequested(object? sender, EventArgs e)
+    {
+        if (_services is null || _mainWindow is null)
+        {
+            return;
+        }
+
+        var vm = _services.GetRequiredService<WatchedAccountsViewModel>();
+        var window = new WatchedAccountsWindow { DataContext = vm };
+        bool saved = false;
+        void Saved(object? s, EventArgs a)
+        {
+            saved = true;
+            window.Close();
+        }
+
+        void Cancelled(object? s, EventArgs a) => window.Close();
+        vm.Saved += Saved;
+        vm.Cancelled += Cancelled;
+        await window.ShowDialog(_mainWindow);
+        vm.Saved -= Saved;
+        vm.Cancelled -= Cancelled;
+        if (saved)
+        {
+            RestartWatching();
+        }
+    }
+
+    private void OnAccountsChanged(object? sender, EventArgs e) => RestartWatching();
+
+    // New accounts or a new token: restart the loop with the saved settings and refresh the main window.
+    private void RestartWatching()
+    {
+        if (_services?.GetRequiredService<SettingsStore>().Load() is SettingsLoad.Loaded { Settings: var settings })
+        {
+            StartLoop(_services, settings);
+        }
+
+        _main?.Reload();
+    }
+
+    private void SwitchTo(IClassicDesktopStyleApplicationLifetime desktop, Window next)
+    {
+        var previous = _mainWindow;
+        SetMainWindow(desktop, next);
+        next.Show();
+        previous?.Close();
+    }
+
+    private void ForgetMain()
+    {
+        if (_main is { } main)
+        {
+            main.ReconnectRequested -= OnReconnectRequested;
+            main.WatchedAccountsRequested -= OnWatchedAccountsRequested;
+            main.AccountsChanged -= OnAccountsChanged;
+            _main = null;
+        }
     }
 
     private void OnSetupFinished(object? sender, EventArgs e)
@@ -165,17 +270,13 @@ internal sealed partial class App : Application
             return;
         }
 
-        var setupWindow = _mainWindow;
         ForgetSetup();
         if (_services.GetRequiredService<SettingsStore>().Load() is SettingsLoad.Loaded { Settings: var settings })
         {
             StartLoop(_services, settings);
         }
 
-        var main = _services.GetRequiredService<MainWindow>();
-        SetMainWindow(desktop, main);
-        main.Show();
-        setupWindow?.Close();
+        SwitchTo(desktop, CreateMain(_services));
     }
 
     // The watch-and-upload loop (UP-06); the container stops it on exit.
@@ -184,6 +285,7 @@ internal sealed partial class App : Application
 
     private void OnSetupCancelled(object? sender, EventArgs e)
     {
+        // First run only: without a connection there is nothing to do.
         ForgetSetup();
         (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();
     }
@@ -267,6 +369,7 @@ internal sealed partial class App : Application
         }
 
         ForgetSetup();
+        ForgetMain();
 
         _trayIcon?.Dispose();
         _trayIcon = null;

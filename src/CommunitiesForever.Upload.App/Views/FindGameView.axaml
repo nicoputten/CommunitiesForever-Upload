@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:CommunitiesForever.Upload.App.Controls"
+             xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+             x:Class="CommunitiesForever.Upload.App.Views.FindGameView"
+             x:DataType="vm:FindGameStepViewModel">
+  <!-- Finding WoW and choosing accounts (setup step 2 and the Watched accounts window): board setup, step 2 -->
+  <DockPanel>
+  <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="{StaticResource S2_5}" Margin="{StaticResource AppFooterPad}">
+    <Button Classes="small" Content="Scan again" Command="{Binding ScanCommand}" IsEnabled="{Binding !IsScanning}" />
+    <Button Classes="small ghost" Content="Choose folder…" Command="{Binding ChooseFolderCommand}" IsEnabled="{Binding !IsScanning}" />
+  </StackPanel>
+  <TextBlock DockPanel.Dock="Bottom" Classes="meta stale" TextWrapping="Wrap" Margin="{StaticResource AppFooterPad}"
+             Text="{Binding FolderProblem}" IsVisible="{Binding FolderProblem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+  <StackPanel Spacing="{StaticResource S3_5}">
+    <StackPanel Orientation="Horizontal" Spacing="{StaticResource S3_5}">
+      <c:Radar Scanning="{Binding IsScanning}" />
+      <StackPanel VerticalAlignment="Center">
+        <TextBlock Classes="setup-title small" Text="{Binding IsScanning, Converter={x:Static c:Choose.ScanTitle}}" IsVisible="{Binding !NothingFound}" />
+        <TextBlock Classes="setup-title small" Text="Where is World of Warcraft?" IsVisible="{Binding NothingFound}" />
+        <TextBlock Classes="meta fresh" Text="{Binding Summary}" IsVisible="{Binding Found}" />
+      </StackPanel>
+    </StackPanel>
+
+    <!-- Not on the board: nothing found (wording from the states board) -->
+    <TextBlock Classes="lead" IsVisible="{Binding NothingFound}"
+               Text="No World of Warcraft: Forever found on this PC. Scan again after installing it, or choose its folder yourself." />
+
+    <ScrollViewer IsVisible="{Binding Found}" MaxHeight="{StaticResource AppSetupListH}">
+      <ItemsControl ItemsSource="{Binding Installs}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:InstallItem">
+            <StackPanel Spacing="{StaticResource S2_5}">
+              <Border Classes="panel" Padding="{StaticResource AppInstallPad}">
+                <StackPanel>
+                  <TextBlock Classes="overline faint" Text="INSTALL" />
+                  <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding ForeverPath}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </Border>
+              <TextBlock Classes="overline faint" Text="ACCOUNTS TO WATCH" />
+              <ItemsControl ItemsSource="{Binding Accounts}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Spacing="{StaticResource S2}" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:AccountItem">
+                    <Border Classes="account" Classes.missing="{Binding !IsReady}">
+                      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S3}">
+                        <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Center"
+                                  AutomationProperties.Name="{Binding Name, StringFormat='Watch {0}'}" />
+                        <StackPanel Grid.Column="1">
+                          <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding Name}" />
+                          <TextBlock Classes="meta" Text="{Binding Detail}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Classes="meta small" Classes.fresh="{Binding IsReady}" VerticalAlignment="Center" Text="{Binding Status}" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </StackPanel>
+  </DockPanel>
+</UserControl>

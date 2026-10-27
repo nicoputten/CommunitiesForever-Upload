@@ -215,7 +215,7 @@ public sealed class UploadLoopTests
         await h.AdvanceUntil(() => h.Status(h.First).State == AccountState.Paused);
         Assert.Equal(0, h.Site.Count);
 
-        h.Loop.Resume();
+        h.Loop.EndPause();
         await h.AdvanceUntil(() => h.Site.Count == 1);
         Assert.Equal("v2", h.Site.Uploaded[0]);
     }

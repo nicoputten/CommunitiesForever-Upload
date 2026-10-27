@@ -48,6 +48,10 @@ public sealed partial class ConnectStepViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial string UserCode { get; set; } = "";
 
+    /// <summary>"Connected as Nico#2201", once connected.</summary>
+    [ObservableProperty]
+    public partial string ConnectedText { get; set; } = "";
+
     [ObservableProperty]
     public partial bool LinkCopied { get; set; }
 
@@ -159,6 +163,7 @@ public sealed partial class ConnectStepViewModel : ObservableObject, IDisposable
         switch (outcome)
         {
             case ConnectOutcome.Connected connected:
+                ConnectedText = $"Connected as {connected.Identity.BattleTag}";
                 State = ConnectState.Connected;
                 Connected?.Invoke(this, connected.Identity);
                 break;

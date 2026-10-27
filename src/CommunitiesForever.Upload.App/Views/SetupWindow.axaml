@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="using:CommunitiesForever.Upload.App.Controls"
         xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+        xmlns:v="using:CommunitiesForever.Upload.App.Views"
         x:Class="CommunitiesForever.Upload.App.Views.SetupWindow"
         x:DataType="vm:SetupViewModel"
         Title="{Binding Title}"
@@ -20,22 +21,26 @@
       <Border Classes="rail" DockPanel.Dock="Left">
         <StackPanel Spacing="{StaticResource S1_5}" AutomationProperties.Name="Setup steps">
           <Border Classes="step" Classes.on="{Binding IsStep1}" Classes.done="{Binding Step1Done}">
-            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2_5}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource S2_5}">
               <Border Classes="step-dot"><TextBlock Text="{Binding Step1Done, Converter={x:Static c:StepMark.One}}" /></Border>
-              <TextBlock Classes="step-label" Text="{Binding Step1Text}" />
-            </StackPanel>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Classes="step-label" Text="{Binding Step1Text}" />
+                <TextBlock Classes="meta" Text="{Binding ConnectedAs}" TextTrimming="CharacterEllipsis"
+                           IsVisible="{Binding ConnectedAs, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              </StackPanel>
+            </Grid>
           </Border>
           <Border Classes="step" Classes.on="{Binding IsStep2}" Classes.done="{Binding Step2Done}">
-            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2_5}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource S2_5}">
               <Border Classes="step-dot"><TextBlock Text="{Binding Step2Done, Converter={x:Static c:StepMark.Two}}" /></Border>
-              <TextBlock Classes="step-label" Text="{Binding Step2Text}" />
-            </StackPanel>
+              <TextBlock Grid.Column="1" Classes="step-label" Text="{Binding Step2Text}" />
+            </Grid>
           </Border>
           <Border Classes="step" Classes.on="{Binding IsStep3}">
-            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2_5}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource S2_5}">
               <Border Classes="step-dot"><TextBlock Text="3" /></Border>
-              <TextBlock Classes="step-label" Text="How it runs" />
-            </StackPanel>
+              <TextBlock Grid.Column="1" Classes="step-label" Text="How it runs" />
+            </Grid>
           </Border>
         </StackPanel>
       </Border>
@@ -52,57 +57,7 @@
                       Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).NextCommand}" />
             </StackPanel>
           </Border>
-          <StackPanel Spacing="{StaticResource S3_5}">
-            <TextBlock Classes="setup-title" Text="{Binding Heading}" />
-            <TextBlock Classes="lead">
-              <Run Text="The uploader sends your " /><Run Foreground="{StaticResource TextBrush}" Text="CommunitiesForever.lua" /><Run Text="{Binding ExplainerEnd}" />
-            </TextBlock>
-
-            <Border Classes="panel" Padding="{StaticResource AppCodeCardPad}">
-              <StackPanel Spacing="{StaticResource S2_5}" HorizontalAlignment="Center">
-                <!-- Getting a code -->
-                <StackPanel IsVisible="{Binding IsStarting}" Orientation="Horizontal" Spacing="{StaticResource S2}" HorizontalAlignment="Center">
-                  <c:Spinner />
-                  <TextBlock Classes="body-sm" Text="Getting a code from the site…" />
-                </StackPanel>
-                <!-- Waiting for the browser (board) -->
-                <StackPanel IsVisible="{Binding IsWaiting}" Spacing="{StaticResource S2_5}">
-                  <TextBlock Classes="meta" HorizontalAlignment="Center" Text="{Binding BrowserOpened}" />
-                  <Border Classes="code" HorizontalAlignment="Center">
-                    <TextBlock Classes="code" Text="{Binding UserCode}" AutomationProperties.Name="{Binding UserCode, StringFormat='Code {0}'}" />
-                  </Border>
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" HorizontalAlignment="Center" AutomationProperties.LiveSetting="Polite">
-                    <c:Spinner />
-                    <TextBlock Classes="body-sm" Text="Waiting for you to approve it there…" />
-                  </StackPanel>
-                  <Button Classes="link" HorizontalAlignment="Center" Command="{Binding CopyLinkCommand}"
-                          Content="{Binding LinkCopied, Converter={x:Static c:Choose.CopyLink}}" />
-                </StackPanel>
-                <!-- Connected (back from step 2) -->
-                <TextBlock IsVisible="{Binding IsConnected}" Classes="body-sm fresh" HorizontalAlignment="Center"
-                           Text="{Binding $parent[Window].((vm:SetupViewModel)DataContext).Step1Text}" />
-                <!-- Not on the board: expired, denied, unreachable (docs/DESIGN-NOTES.md) -->
-                <StackPanel IsVisible="{Binding HasProblem}" Spacing="{StaticResource S2_5}" AutomationProperties.LiveSetting="Assertive">
-                  <TextBlock Classes="body-sm stale" HorizontalAlignment="Center" Text="{Binding Problem}" />
-                  <Button Classes="small" HorizontalAlignment="Center" Content="Try again" Command="{Binding StartCommand}" />
-                </StackPanel>
-              </StackPanel>
-            </Border>
-
-            <StackPanel Spacing="{StaticResource S2}">
-              <Button Classes="link dim" HorizontalAlignment="Left" Content="Paste an upload token instead"
-                      Command="{Binding TogglePasteCommand}" />
-              <StackPanel IsVisible="{Binding IsPasteOpen}" Spacing="{StaticResource S1_5}">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S2}">
-                  <TextBox Classes="mono" Text="{Binding PasteText}" PlaceholderText="cfu_…"
-                           AutomationProperties.Name="Upload token" />
-                  <Button Grid.Column="1" Classes="small" Content="Use this token"
-                          Command="{Binding UsePastedTokenCommand}" IsEnabled="{Binding !IsPasting}" />
-                </Grid>
-                <TextBlock Classes="meta stale" Text="{Binding PasteError}" IsVisible="{Binding PasteError, Converter={x:Static ObjectConverters.IsNotNull}}" TextWrapping="Wrap" />
-              </StackPanel>
-            </StackPanel>
-          </StackPanel>
+          <v:ConnectView />
         </DockPanel>
         </Panel>
 
@@ -116,67 +71,7 @@
                       Command="{Binding $parent[Window].((vm:SetupViewModel)DataContext).NextCommand}" />
             </StackPanel>
           </Border>
-          <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="{StaticResource S2_5}" Margin="{StaticResource AppFooterPad}">
-            <Button Classes="small" Content="Scan again" Command="{Binding ScanCommand}" IsEnabled="{Binding !IsScanning}" />
-            <Button Classes="small ghost" Content="Choose folder…" Command="{Binding ChooseFolderCommand}" IsEnabled="{Binding !IsScanning}" />
-          </StackPanel>
-          <TextBlock DockPanel.Dock="Bottom" Classes="meta stale" TextWrapping="Wrap" Margin="{StaticResource AppFooterPad}"
-                     Text="{Binding FolderProblem}" IsVisible="{Binding FolderProblem, Converter={x:Static ObjectConverters.IsNotNull}}" />
-
-          <StackPanel Spacing="{StaticResource S3_5}">
-            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S3_5}">
-              <c:Radar Scanning="{Binding IsScanning}" />
-              <StackPanel VerticalAlignment="Center">
-                <TextBlock Classes="setup-title small" Text="{Binding IsScanning, Converter={x:Static c:Choose.ScanTitle}}" IsVisible="{Binding !NothingFound}" />
-                <TextBlock Classes="setup-title small" Text="Where is World of Warcraft?" IsVisible="{Binding NothingFound}" />
-                <TextBlock Classes="meta fresh" Text="{Binding Summary}" IsVisible="{Binding Found}" />
-              </StackPanel>
-            </StackPanel>
-
-            <!-- Not on the board: nothing found (wording from the states board) -->
-            <TextBlock Classes="lead" IsVisible="{Binding NothingFound}"
-                       Text="No World of Warcraft: Forever found on this PC. Scan again after installing it, or choose its folder yourself." />
-
-            <ScrollViewer IsVisible="{Binding Found}" MaxHeight="{StaticResource AppSetupListH}">
-              <ItemsControl ItemsSource="{Binding Installs}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate x:DataType="vm:InstallItem">
-                    <StackPanel Spacing="{StaticResource S2_5}">
-                      <Border Classes="panel" Padding="{StaticResource AppInstallPad}">
-                        <StackPanel>
-                          <TextBlock Classes="overline faint" Text="INSTALL" />
-                          <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding ForeverPath}" TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                      </Border>
-                      <TextBlock Classes="overline faint" Text="ACCOUNTS TO WATCH" />
-                      <ItemsControl ItemsSource="{Binding Accounts}">
-                        <ItemsControl.ItemsPanel>
-                          <ItemsPanelTemplate>
-                            <StackPanel Spacing="{StaticResource S2}" />
-                          </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate x:DataType="vm:AccountItem">
-                            <Border Classes="account" Classes.missing="{Binding !IsReady}">
-                              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S3}">
-                                <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Center"
-                                          AutomationProperties.Name="{Binding Name, StringFormat='Watch {0}'}" />
-                                <StackPanel Grid.Column="1">
-                                  <TextBlock Classes="mono" Foreground="{StaticResource TextBrush}" Text="{Binding Name}" />
-                                  <TextBlock Classes="meta" Text="{Binding Detail}" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                                <TextBlock Grid.Column="2" Classes="meta small" Classes.fresh="{Binding IsReady}" VerticalAlignment="Center" Text="{Binding Status}" />
-                              </Grid>
-                            </Border>
-                          </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
-                    </StackPanel>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-            </ScrollViewer>
-          </StackPanel>
+          <v:FindGameView />
         </DockPanel>
         </Panel>
 

@@ -127,6 +127,19 @@
       <Setter Property="Foreground" Value="{StaticResource TextDimBrush}" />
     </Style>
 
+    <!-- plain: a whole row that acts (recent uploads) -->
+    <Style Selector="^.plain">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="FontWeight" Value="{StaticResource FwRegular}" />
+      <Setter Property="FontSize" Value="{StaticResource FsBody}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
     <Style Selector="^.window">
       <Setter Property="Width" Value="{StaticResource AppWindowButtonW}" />
       <Setter Property="Height" Value="{StaticResource AppTitleBarH}" />

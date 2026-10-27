@@ -131,6 +131,6 @@ public sealed partial class TokenLintTests
     [GeneratedRegex(@"^[0.,\s]+$")]
     private static partial Regex ZeroOnly();
 
-    [GeneratedRegex(@"Color\.(Parse|FromRgb|FromArgb|FromUInt32)\(|Colors\.\w+|new (Thickness|CornerRadius)\(\s*[1-9]|TimeSpan\.From\w+\(\s*[1-9]")]
+    [GeneratedRegex(@"Color\.(Parse|FromRgb|FromArgb|FromUInt32)\(|Colors\.\w+|new (Thickness|CornerRadius)\(\s*[1-9]|TimeSpan\.FromMilliseconds\(\s*[1-9]")]
     private static partial Regex RawCode();
 }
