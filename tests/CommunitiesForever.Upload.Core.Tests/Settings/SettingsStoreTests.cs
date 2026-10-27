@@ -26,7 +26,7 @@ public sealed class SettingsStoreTests
         var loaded = new SettingsStore(_file).Load();
 
         Assert.Equal(settings, Assert.IsType<SettingsLoad.Loaded>(loaded).Settings);
-        Assert.Contains("\"version\": 1", _file.Text, StringComparison.Ordinal);
+        Assert.Contains("\"version\": 2", _file.Text, StringComparison.Ordinal);
         Assert.Contains("\"OnlyProblems\"", _file.Text, StringComparison.Ordinal);
     }
 
@@ -51,6 +51,8 @@ public sealed class SettingsStoreTests
         Assert.Equal(new WatchedAccount(@"C:\WoW\_forever_", "NICO"), Assert.Single(settings.Accounts));
         Assert.False(settings.StartWithWindows);
         Assert.Null(settings.SiteUri);
+        // Migrated to version 2 (UP-10): the new setting starts on.
+        Assert.True(settings.InstallUpdatesWhenWowClosed);
     }
 
     [Theory]

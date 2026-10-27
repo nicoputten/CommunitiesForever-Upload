@@ -41,7 +41,16 @@ public abstract record SettingsLoad
 public sealed class SettingsStore(ISettingsFile file)
 {
     // Migration steps: the step at key N turns a version N file into version N + 1. Version 1 is the first.
-    private static readonly Dictionary<int, Func<JsonObject, JsonObject>> Migrations = [];
+    private static readonly Dictionary<int, Func<JsonObject, JsonObject>> Migrations = new()
+    {
+        // 1 → 2 (UP-10): "install updates when WoW is closed", on by default.
+        [1] = json =>
+        {
+            json["version"] = 2;
+            json["installUpdatesWhenWowClosed"] = true;
+            return json;
+        },
+    };
 
     private bool _tooNew;
 
@@ -71,7 +80,7 @@ public sealed class SettingsStore(ISettingsFile file)
                 json = Migrations[version](json);
             }
 
-            var settings = json.Deserialize(SettingsJson.Default.SettingsV1Json);
+            var settings = json.Deserialize(SettingsJson.Default.SettingsFileJson);
             return settings is null ? Damaged() : new SettingsLoad.Loaded(settings.ToSettings());
         }
         catch (Exception e) when (e is JsonException or InvalidOperationException or FormatException or KeyNotFoundException)
@@ -89,7 +98,7 @@ public sealed class SettingsStore(ISettingsFile file)
             throw new InvalidOperationException("The settings file is from a newer version of the app and is not overwritten.");
         }
 
-        file.Write(JsonSerializer.Serialize(SettingsV1Json.From(settings), SettingsJson.Default.SettingsV1Json));
+        file.Write(JsonSerializer.Serialize(SettingsFileJson.From(settings), SettingsJson.Default.SettingsFileJson));
     }
 
     private SettingsLoad.Damaged Damaged()
@@ -101,23 +110,25 @@ public sealed class SettingsStore(ISettingsFile file)
 
 internal sealed record WatchedAccountJson(string InstallPath, string Account);
 
-internal sealed record SettingsV1Json(
+internal sealed record SettingsFileJson(
     int Version,
     WatchedAccountJson[]? Accounts,
     bool UploadAutomatically,
     bool StartWithWindows,
     bool CloseHidesToTray,
     NotificationLevel Notifications,
-    string? SiteUrl)
+    string? SiteUrl,
+    bool InstallUpdatesWhenWowClosed = true)
 {
-    public static SettingsV1Json From(AppSettings s) => new(
+    public static SettingsFileJson From(AppSettings s) => new(
         AppSettings.CurrentVersion,
         [.. s.Accounts.Select(a => new WatchedAccountJson(a.InstallPath, a.Account))],
         s.UploadAutomatically,
         s.StartWithWindows,
         s.CloseHidesToTray,
         s.Notifications,
-        s.SiteUri?.AbsoluteUri);
+        s.SiteUri?.AbsoluteUri,
+        s.InstallUpdatesWhenWowClosed);
 
     public AppSettings ToSettings() => new()
     {
@@ -126,6 +137,7 @@ internal sealed record SettingsV1Json(
         StartWithWindows = StartWithWindows,
         CloseHidesToTray = CloseHidesToTray,
         Notifications = Notifications,
+        InstallUpdatesWhenWowClosed = InstallUpdatesWhenWowClosed,
         SiteUri = SiteUrl is null ? null : new Uri(SiteUrl, UriKind.Absolute),
     };
 }
@@ -135,5 +147,5 @@ internal sealed record SettingsV1Json(
     UseStringEnumConverter = true,
     WriteIndented = true,
     RespectRequiredConstructorParameters = false)]
-[JsonSerializable(typeof(SettingsV1Json))]
+[JsonSerializable(typeof(SettingsFileJson))]
 internal sealed partial class SettingsJson : JsonSerializerContext;

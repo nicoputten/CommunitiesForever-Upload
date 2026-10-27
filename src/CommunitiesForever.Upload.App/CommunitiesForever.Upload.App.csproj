@@ -14,6 +14,8 @@
     <AvaloniaResource Include="Assets\**" />
     <!-- On disk for Windows: the notification sender's icon and the notifications' app logo (UP-08) -->
     <None Include="Assets\Icons\png\app-icon-96.png" Link="app-icon.png" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Settings › About & updates › Licences (UP-10) -->
+    <None Include="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommunitiesForever.Upload.Core\CommunitiesForever.Upload.Core.csproj" />
@@ -26,6 +28,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Velopack" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="CommunitiesForever.Upload.App.Tests" />

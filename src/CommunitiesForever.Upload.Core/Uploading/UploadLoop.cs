@@ -39,6 +39,7 @@ public sealed partial class UploadLoop : IUploadLoop, IAsyncDisposable, IDisposa
     private DateTimeOffset _startedAt;
     private DateTimeOffset? _pausedUntil;
     private volatile bool _notConnected;
+    private volatile bool _held;
 
     public UploadLoop(
         ISiteClient site,
@@ -109,6 +110,14 @@ public sealed partial class UploadLoop : IUploadLoop, IAsyncDisposable, IDisposa
     public void Pause(DateTimeOffset until)
     {
         _pausedUntil = until;
+        WakeAll();
+    }
+
+    public bool IsHeld => _held;
+
+    public void Hold(bool held)
+    {
+        _held = held;
         WakeAll();
     }
 
@@ -352,6 +361,12 @@ public sealed partial class UploadLoop : IUploadLoop, IAsyncDisposable, IDisposa
                 _skip = false;
                 _loop._history.Record(Account, new LedgerEntry(pending.Hash, LedgerOutcome.Skipped, null, Now));
                 Handled(pending.Stamp, notUploaded: false);
+                return;
+            }
+
+            if (_loop._held)
+            {
+                Set(AccountState.Paused);
                 return;
             }
 

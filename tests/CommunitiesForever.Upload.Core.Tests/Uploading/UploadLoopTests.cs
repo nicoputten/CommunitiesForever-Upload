@@ -221,6 +221,23 @@ public sealed class UploadLoopTests
     }
 
     [Fact]
+    public async Task HeldForARequiredUpdateEvenUploadNowWaits()
+    {
+        await using var h = new LoopHarness();
+        await h.StartAsync();
+        h.Loop.Hold(true);
+        h.Save(h.First, "v1");
+        await h.AdvanceUntil(() => h.Status(h.First).State == AccountState.Paused);
+        h.Loop.UploadNow();
+        h.Loop.EndPause();
+        await h.AdvanceUntil(() => h.Status(h.First).State == AccountState.Paused);
+        Assert.Equal(0, h.Site.Count);
+
+        h.Loop.Hold(false);
+        await h.AdvanceUntil(() => h.Site.Count == 1);
+    }
+
+    [Fact]
     public async Task PauseEndsByItself()
     {
         await using var h = new LoopHarness();

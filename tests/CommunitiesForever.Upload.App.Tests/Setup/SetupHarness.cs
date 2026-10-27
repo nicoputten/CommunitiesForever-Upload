@@ -99,6 +99,12 @@ internal sealed class FakeSite : ISiteClient
     public Task<SiteResult<SiteIdentity>> GetIdentityAsync(AccessToken token, CancellationToken cancellationToken = default) =>
         Task.FromResult(Identity);
 
+    /// <summary>Before the site has the endpoint: 404.</summary>
+    public SiteResult<UpdateStatus> UpdateStatus { get; set; } = new SiteFailure(SiteError.Unexpected, "not_found", 404);
+
+    public Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default) =>
+        Task.FromResult(UpdateStatus);
+
     public Task<SiteResult<UploadReceipt>> UploadAsync(AccessToken token, Stream content, DateTimeOffset? savedAt, CancellationToken cancellationToken = default) =>
         throw new NotSupportedException();
 

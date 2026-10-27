@@ -3,6 +3,7 @@ using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Notifications;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,6 +27,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IGameProcesses, GameProcesses>();
         services.AddSingleton<INotifier, WindowsNotifier>();
         services.AddSingleton<IAutostart>(_ => new RegistryAutostart(Environment.ProcessPath ?? ""));
+        services.AddSingleton<IAppUpdates, VelopackUpdates>();
+        services.AddSingleton<IUpdatesFile>(_ => new UpdatesFile(AppPaths.DataDirectory));
         return services;
     }
 }

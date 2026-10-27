@@ -4,13 +4,14 @@ using CommunitiesForever.Upload.App.Tests.Main;
 using CommunitiesForever.Upload.App.Tests.Setup;
 using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Updates;
 
 namespace CommunitiesForever.Upload.App.DesignChecks;
 
 /// <summary>Settings (board <c>settings</c>, 900 wide), tall so every section shows in one shot.</summary>
 public sealed class SettingsScreenshotTests
 {
-    private const double TallHeight = 1080;
+    private const double TallHeight = 1400;
 
     [AvaloniaFact]
     public Task Connected() => Shot("settings", _ => { });
@@ -21,7 +22,11 @@ public sealed class SettingsScreenshotTests
     [AvaloniaFact]
     public Task NotConnected() => Shot("settings-not-connected", _ => { }, connected: false);
 
-    private static async Task Shot(string name, Action<SettingsViewModel> arrange, bool connected = true)
+    /// <summary>Board settings-updates: a new version downloaded and waiting.</summary>
+    [AvaloniaFact]
+    public Task UpdateReady() => Shot("settings-updates", _ => { }, ready: true);
+
+    private static async Task Shot(string name, Action<SettingsViewModel> arrange, bool connected = true, bool ready = false)
     {
         // The board's two accounts: one watched, one found and switched off.
         var h = new MainHarness();
@@ -32,6 +37,16 @@ public sealed class SettingsScreenshotTests
         {
             h.Tokens.Token = null;
         }
+
+        h.Updates.Site.Status = ready
+            ? SiteResult.Ok(new UpdateStatus("1.1.0", null, null, new Uri("https://wow.vestras.nl/uploader/changes#1.1.0")))
+            : SiteResult.Ok(new UpdateStatus("1.0.3", new DateTimeOffset(2026, 10, 20, 12, 0, 0, TimeSpan.Zero), null, null));
+        if (ready)
+        {
+            h.Updates.Updates.Newer = new UpdateOffer("1.1.0", 6_600_000, "Fixes a missed upload after long sessions · shows planned runs");
+        }
+
+        await h.Updates.Checker.CheckNowAsync();
 
         var main = h.Create();
         var window = new MainWindow { DataContext = main, Height = TallHeight };

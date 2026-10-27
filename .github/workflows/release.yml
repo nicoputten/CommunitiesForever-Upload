@@ -1,0 +1,92 @@
+name: Release
+
+# Ships to every friend's PC: runs only for a v* tag on main, pushed on Nico's go-ahead (CLAUDE.md "Releases").
+# Never on pull_request or pull_request_target: the deploy secret must not reach code from a fork (UP-10).
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    # Protected environment: only main, Nico approves; holds the deploy secret and the feed signing key.
+    environment: release
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      PACK_ID: CommunitiesForever.Uploader
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tag on main, version from the tag
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || { echo "Tag is not on main"; exit 1; }
+          version="${GITHUB_REF_NAME#v}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Tag must be vX.Y.Z"; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build and test
+        run: |
+          dotnet restore
+          dotnet build --no-restore --configuration Release -p:Version="$VERSION"
+          dotnet test --no-build --configuration Release
+
+      # Self-contained: no .NET to install, no admin prompt (decided with Nico). No debug symbols in the package.
+      - name: Publish
+        run: |
+          dotnet publish src/CommunitiesForever.Upload.App -c Release -r win-x64 --self-contained true \
+            -p:Version="$VERSION" -p:DebugType=none -o publish
+          find publish -name '*.pdb' -delete
+
+      # The version's CHANGELOG section ("## vX.Y.Z (date)") becomes the release notes; Settings shows their first line.
+      - name: Release notes
+        run: |
+          awk -v tag="## $GITHUB_REF_NAME" 'index($0, tag) == 1 { on = 1; next } on && /^## / { exit } on' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          [ -s "$RUNNER_TEMP/notes.md" ] || { echo "CHANGELOG.md has no section for $GITHUB_REF_NAME"; exit 1; }
+
+      - name: Pack
+        run: |
+          dotnet tool install --global vpk --version 1.2.161
+          # No Velopack shortcuts: the app keeps its own Start menu shortcut, which carries the notification id (UP-08).
+          vpk pack --packId "$PACK_ID" --packVersion "$VERSION" --packDir publish \
+            --mainExe CommunitiesForever.Upload.App.exe --packTitle "CommunitiesForever Uploader" \
+            --icon src/CommunitiesForever.Upload.App/Assets/Icons/app.ico --shortcuts "" \
+            --releaseNotes "$RUNNER_TEMP/notes.md" --outputDir Releases
+
+      - name: Sign the feed
+        env:
+          FEED_SIGNING_KEY: ${{ secrets.UPLOADER_FEED_SIGNING_KEY }}
+        run: |
+          printf '%s' "$FEED_SIGNING_KEY" > "$RUNNER_TEMP/feed-key.pem"
+          openssl dgst -sha256 -sign "$RUNNER_TEMP/feed-key.pem" -out Releases/releases.win.json.sig Releases/releases.win.json
+          rm "$RUNNER_TEMP/feed-key.pem"
+
+      - name: Publish to the site
+        env:
+          DEPLOY_SECRET: ${{ secrets.UPLOADER_DEPLOY_SECRET }}
+          SITE: https://wow.vestras.nl
+        run: |
+          cd Releases
+          curl -fsS -H "Authorization: Bearer $DEPLOY_SECRET" \
+            -F "setup=@${PACK_ID}-win-Setup.exe" \
+            -F "full=@${PACK_ID}-${VERSION}-full.nupkg" \
+            -F "feed=@releases.win.json" \
+            -F "signature=@releases.win.json.sig" \
+            "$SITE/api/uploader/v1/releases"

@@ -460,6 +460,16 @@
   <Thickness x:Key="AppSettingsPad">28,20</Thickness>
   <x:Double x:Key="AppSectionGap">22</x:Double>
   <Thickness x:Key="AppSectionTitleMargin">0,0,0,4</Thickness>
+  <!-- settings-updates and update-states boards (UP-10) -->
+  <SolidColorBrush x:Key="AppUpdatePanelBrush" Color="#D90C121E" />
+  <SolidColorBrush x:Key="AppLineUpdateBrush" Color="#40D4AF6A" />
+  <SolidColorBrush x:Key="AppMuteTintBrush" Color="#1AAEB6C3" />
+  <x:Double x:Key="AppUpdateShield">28</x:Double>
+  <x:Double x:Key="AppUpdateArrows">34</x:Double>
+  <x:Double x:Key="AppUpdateArrowsBox">34</x:Double>
+  <x:Double x:Key="AppUpdateArrowsStroke">1.8</x:Double>
+  <Thickness x:Key="AppSplitBorder">0,1,0,0</Thickness>
+  <Thickness x:Key="AppSplitPad">0,10,0,0</Thickness>
   <!-- main-window board status bar: the Settings gear (14 px, 16 px box, 1.4 stroke) -->
   <x:Double x:Key="AppGearIcon">14</x:Double>
   <x:Double x:Key="AppGearIconBox">16</x:Double>

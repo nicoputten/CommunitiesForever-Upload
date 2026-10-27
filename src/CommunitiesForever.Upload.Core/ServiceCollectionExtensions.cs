@@ -2,6 +2,7 @@ using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Notifications;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,6 +25,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<NotificationPolicy>();
         services.AddSingleton<UploadLoop>();
         services.AddSingleton<IUploadLoop>(sp => sp.GetRequiredService<UploadLoop>());
+        services.AddSingleton<IUpdateMemoryFile, UpdateMemoryStore>();
+        services.AddSingleton<UpdateChecker>();
         return services;
     }
 }

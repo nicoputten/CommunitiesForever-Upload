@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:CommunitiesForever.Upload.App.Controls"
+             xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+             x:Class="CommunitiesForever.Upload.App.Views.UpdatePanelView"
+             x:DataType="vm:SettingsViewModel">
+  <!-- Board update-states, part 1: the updates panel in Settings › About & updates (UP-10) -->
+  <Border Classes="update" AutomationProperties.LiveSetting="Polite">
+    <StackPanel Spacing="{StaticResource S2_5}">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S3}">
+        <Viewbox Width="{StaticResource AppUpdateShield}" Height="{StaticResource AppUpdateShield}">
+          <Canvas Width="{StaticResource AppShieldBox}" Height="{StaticResource AppShieldBox}">
+            <Path Data="M13,3 L21,6.5 V13 C21,18.4 17.4,21.2 13,23 C8.6,21.2 5,18.4 5,13 V6.5 Z M13,7.5 V18.5 M8.8,12 H17.2"
+                  Fill="{StaticResource SurfaceRaisedBrush}" Stroke="{StaticResource GoldBrightBrush}"
+                  StrokeThickness="{StaticResource AppShieldStroke}" />
+          </Canvas>
+        </Viewbox>
+        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+          <TextBlock Classes="update-name" Text="{Binding AppName}" />
+          <TextBlock Classes="meta" Text="{Binding Updates.VersionLine, FallbackValue=''}" />
+        </StackPanel>
+        <Border Grid.Column="2" Classes="pill" IsVisible="{Binding Updates.HasPill, FallbackValue=False}"
+                Classes.fresh="{Binding Updates.PillTone, Converter={x:Static c:Tones.Fresh}, FallbackValue=False}"
+                Classes.gold="{Binding Updates.PillTone, Converter={x:Static c:Tones.Gold}, FallbackValue=False}"
+                Classes.warn="{Binding Updates.PillTone, Converter={x:Static c:Tones.Warn}, FallbackValue=False}"
+                Classes.dim="{Binding Updates.PillTone, Converter={x:Static c:Tones.Dim}, FallbackValue=False}">
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
+            <c:Spinner Width="{StaticResource FsMeta}" Height="{StaticResource FsMeta}" IsVisible="{Binding Updates.Spinning, FallbackValue=False}" />
+            <TextBlock Text="{Binding Updates.Pill, FallbackValue=''}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+      <ProgressBar Classes="update" Minimum="0" Maximum="1" Value="{Binding Updates.Progress, FallbackValue=0}"
+                   IsVisible="{Binding Updates.ShowBar, FallbackValue=False}" AutomationProperties.Name="Download" />
+      <Border Classes="split" IsVisible="{Binding Updates.HasLine, FallbackValue=False}">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S2_5}">
+          <TextBlock Classes="meta" Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding Updates.Line, FallbackValue=''}" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{StaticResource S2}" VerticalAlignment="Center">
+            <Button Classes="small primary" Content="Restart now" Command="{Binding RestartNowCommand}" IsVisible="{Binding Updates.ShowRestartNow, FallbackValue=False}" />
+            <Button Classes="small" Content="Cancel" Command="{Binding CancelRestartCommand}" IsVisible="{Binding Updates.ShowCancel, FallbackValue=False}" />
+            <Button Classes="small" Content="Try again" Command="{Binding CheckForUpdatesCommand}" IsVisible="{Binding Updates.ShowTryAgain, FallbackValue=False}" />
+            <Button Classes="small" Content="Open log" Command="{Binding OpenLogFolderCommand}" IsVisible="{Binding Updates.ShowOpenLog, FallbackValue=False}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+      <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}" IsVisible="{Binding Updates.HasWhatsNew, FallbackValue=False}">
+        <Button Classes="link" Content="{Binding Updates.WhatsNew, FallbackValue=''}" Command="{Binding OpenWhatsNewCommand}" />
+        <TextBlock Classes="meta" VerticalAlignment="Center" Text="·" IsVisible="{Binding Updates.Notes, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue=False}" />
+        <TextBlock Classes="meta" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding Updates.Notes, FallbackValue=''}" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

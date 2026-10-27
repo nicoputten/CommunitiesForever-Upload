@@ -52,6 +52,30 @@ The design tokens mirror the web's `tokens.css`. When the web changes them, refr
 powershell -File scripts/refresh-tokens.ps1
 ```
 
+## Installing (for friends)
+Download the installer from the site's uploader page ("Download for Windows") and run it. It installs for your Windows user only, without admin rights, and updates itself quietly (Settings › About & updates).
+
+The installer isn't code-signed, so Windows may stop it the first time:
+- **SmartScreen** ("Windows protected your PC"): click **More info**, then **Run anyway**.
+- **Smart App Control** (Windows 11, only on PCs set up fresh with it): it blocks unsigned apps without a "Run anyway". Check it in Windows Security › App & browser control › Smart App Control. To install the uploader, set it to **Off**. Windows can't turn it back on without resetting the PC, so decide that for yourself.
+
+## Releasing
+A tag `vX.Y.Z` on `main` runs `.github/workflows/release.yml`: build, test, a self-contained publish, `vpk pack`, the feed signed, and a publish to the site. Only on Nico's go-ahead per tag (CLAUDE.md "Releases"). The workflow runs in the protected `release` environment, which holds two secrets:
+- `UPLOADER_DEPLOY_SECRET`: the site's `UPLOADER_DEPLOY_SECRET` (WEB-35).
+- `UPLOADER_FEED_SIGNING_KEY`: the private half of the feed key (ECDSA P-256, PEM). The app has the public half in `src/CommunitiesForever.Upload.Windows/FeedKey.cs` and ignores a feed whose signature doesn't hold. Make the pair once, on your own PC:
+
+```bash
+openssl ecparam -name prime256v1 -genkey -noout -out feed-key.pem
+```
+
+```bash
+openssl ec -in feed-key.pem -pubout
+```
+
+Paste the second command's output into `FeedKey.cs`, the contents of `feed-key.pem` into the secret, then delete `feed-key.pem` (keep a copy somewhere safe: losing it means a new key and a manual reinstall for everyone).
+
+The release notes come from the version's section in `CHANGELOG.md` (`## vX.Y.Z (date)`); their first line shows in Settings as the update's summary.
+
 ## Projects
 | Project | What |
 |---|---|

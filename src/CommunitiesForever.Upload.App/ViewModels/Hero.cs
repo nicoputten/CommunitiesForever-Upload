@@ -25,6 +25,7 @@ public enum HeroActions
     FindGame = 32,
     Resume = 64,
     Report = 128,
+    RestartToUpdate = 256,
 }
 
 /// <summary>What the main window's status header shows: line, title, text, buttons (boards <c>main-window</c> and <c>states</c>).</summary>
@@ -51,8 +52,27 @@ public sealed record Hero(Tone Tone, string Status, string Title, string Line, H
 
     public bool ShowReport => Actions.HasFlag(HeroActions.Report) && Report is not null;
 
+    public bool ShowRestartToUpdate => Actions.HasFlag(HeroActions.RestartToUpdate);
+
+    /// <summary>The required-update banner shows the update arrows instead of the shield.</summary>
+    public bool IsUpdateNeeded => Actions.HasFlag(HeroActions.RestartToUpdate) || Status == UpdateNeededStatus;
+
+    public bool ShowsShield => !IsUpdateNeeded;
+
     /// <summary>The rings around the shield pulse only while all is well.</summary>
     public bool IsCalm => Tone is Tone.Fresh or Tone.Playing or Tone.Gold;
+
+    private const string UpdateNeededStatus = "● Uploads paused";
+
+    /// <summary>A required update (update-states board): uploads wait; "Restart and update" once it is downloaded.</summary>
+    public static Hero UpdateNeeded(string current, string? downloaded) => new(
+        Tone.Warn,
+        UpdateNeededStatus,
+        "Update needed to keep uploading",
+        downloaded is null
+            ? $"The site changed and {current} can't upload to it anymore. The new version is downloading. Nothing is lost: your saved data uploads right after."
+            : $"The site changed and {current} can't upload to it anymore. Version {UpdatePanel.ShortVersion(downloaded)} is downloaded. Nothing is lost: your saved data uploads right after.",
+        downloaded is null ? HeroActions.None : HeroActions.RestartToUpdate);
 
     /// <summary>The header for the most urgent account. <paramref name="name"/> prefixes the text when several accounts are watched.</summary>
     public static Hero For(AccountStatus? status, string? name, DateTimeOffset now, TimeZoneInfo zone, string host, DateTimeOffset? pausedUntil)

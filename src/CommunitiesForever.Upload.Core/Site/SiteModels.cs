@@ -38,6 +38,12 @@ public sealed record SiteIdentity(
     DateTimeOffset CreatedAt,
     DateTimeOffset? LastUploadAt);
 
+/// <summary>
+/// <c>GET updates/status</c> (UP-10): the newest uploader, when it came out, the oldest one the site still accepts
+/// (null: any) and its "What's new" page.
+/// </summary>
+public sealed record UpdateStatus(string Latest, DateTimeOffset? ReleasedAt, string? MinimumVersion, Uri? NotesUrl);
+
 public enum UploadStatus
 {
     Ok,

@@ -16,7 +16,7 @@ public sealed record WatchedAccount(string InstallPath, string Account);
 /// </summary>
 public sealed record AppSettings
 {
-    public const int CurrentVersion = 1;
+    public const int CurrentVersion = 2;
 
     public IReadOnlyList<WatchedAccount> Accounts { get; init; } = [];
 
@@ -28,6 +28,9 @@ public sealed record AppSettings
 
     public NotificationLevel Notifications { get; init; } = NotificationLevel.EveryUpload;
 
+    /// <summary>Version 2 (UP-10): restart quietly into a downloaded update when WoW is closed and nothing waits to upload.</summary>
+    public bool InstallUpdatesWhenWowClosed { get; init; } = true;
+
     /// <summary>Only set when the user points the app at another site than wow.vestras.nl.</summary>
     public Uri? SiteUri { get; init; }
 
@@ -38,7 +41,8 @@ public sealed record AppSettings
         && StartWithWindows == other.StartWithWindows
         && CloseHidesToTray == other.CloseHidesToTray
         && Notifications == other.Notifications
+        && InstallUpdatesWhenWowClosed == other.InstallUpdatesWhenWowClosed
         && SiteUri == other.SiteUri;
 
-    public override int GetHashCode() => HashCode.Combine(Accounts.Count, UploadAutomatically, StartWithWindows, CloseHidesToTray, Notifications, SiteUri);
+    public override int GetHashCode() => HashCode.Combine(Accounts.Count, UploadAutomatically, StartWithWindows, CloseHidesToTray, Notifications, InstallUpdatesWhenWowClosed, SiteUri);
 }

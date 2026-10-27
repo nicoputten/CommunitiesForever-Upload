@@ -3,6 +3,7 @@ using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Tests.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
 using Microsoft.Extensions.Time.Testing;
 
@@ -20,6 +21,12 @@ internal sealed class MainHarness
     public static readonly WatchedAccount Second = new(Forever, "123456789#2");
 
     public MainHarness(params WatchedAccount[] accounts)
+        : this(true, accounts)
+    {
+    }
+
+    /// <summary><paramref name="installed"/> false: a dev build, which never checks for updates.</summary>
+    public MainHarness(bool installed, params WatchedAccount[] accounts)
     {
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Accounts = accounts.Length > 0 ? accounts : [First];
@@ -27,7 +34,11 @@ internal sealed class MainHarness
         new SettingsStore(SettingsFile).Save(new AppSettings { Accounts = Accounts });
         History = new UploadHistory(new MemoryHistory());
         Loop.Statuses = [.. Accounts.Select(a => new AccountStatus(a, AccountState.Watching))];
+        Updates = new UpdateHarness(Loop, installed, Time);
     }
+
+    /// <summary>The update checker over fakes (installed as 1.0.3), on this harness's loop and clock.</summary>
+    public UpdateHarness Updates { get; }
 
     public FakeTimeProvider Time { get; } = new(new DateTimeOffset(2026, 10, 27, 21, 30, 0, TimeSpan.Zero));
 
@@ -98,7 +109,8 @@ internal sealed class MainHarness
         new Browser(Opened),
         Time,
         new GameScanner(Disk, new Hints(Disk)),
-        CreateSettings);
+        CreateSettings,
+        Updates.Checker);
 
     /// <summary>The settings page over the same fakes.</summary>
     public SettingsViewModel CreateSettings() => new(
@@ -110,7 +122,8 @@ internal sealed class MainHarness
         Tokens,
         Options,
         new Browser(Opened),
-        Time);
+        Time,
+        Updates.Checker);
 
     private sealed class Hints(MemoryDisk disk) : IInstallHints
     {
@@ -159,4 +172,8 @@ internal sealed class FakeLoop : IUploadLoop
         Calls.Add("EndPause");
         PausedUntil = null;
     }
+
+    public bool IsHeld { get; private set; }
+
+    public void Hold(bool held) => IsHeld = held;
 }

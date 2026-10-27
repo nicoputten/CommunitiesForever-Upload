@@ -54,6 +54,9 @@ public static class StartMenuShortcut
     }
 
     /// <summary>The shortcut's target and AppUserModelId, or null when it can't be read.</summary>
+    /// <summary>Deletes the shortcut (uninstall, UP-10).</summary>
+    public static void Remove(string? shortcutPath = null) => File.Delete(shortcutPath ?? DefaultPath);
+
     public static (string Target, string? AppId)? Read(string shortcutPath)
     {
         var link = (IShellLinkW)(object)new ShellLink();

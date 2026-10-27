@@ -18,7 +18,7 @@ public sealed record TrayModel(TrayIconKind Icon, string Tooltip, string StatusL
     /// <summary>Windows cuts tray tooltips longer than this.</summary>
     public const int TooltipMax = 127;
 
-    public static TrayModel For(IReadOnlyList<AccountStatus> statuses, string siteName, string host, DateTimeOffset now, TimeZoneInfo zone, DateTimeOffset? pausedUntil)
+    public static TrayModel For(IReadOnlyList<AccountStatus> statuses, string siteName, string host, DateTimeOffset now, TimeZoneInfo zone, DateTimeOffset? pausedUntil, bool updateNeeded = false)
     {
         ArgumentNullException.ThrowIfNull(statuses);
         var urgent = statuses.OrderByDescending(s => s.State).FirstOrDefault();
@@ -30,7 +30,8 @@ public sealed record TrayModel(TrayIconKind Icon, string Tooltip, string StatusL
             : $"last upload {When(TimeZoneInfo.ConvertTime(last.UploadedAt, zone), localNow)}";
         string until = pausedUntil is { } p ? Formats.Clock(TimeZoneInfo.ConvertTime(p, zone)) : "";
 
-        var (icon, tooltip, status) = state switch
+        // A required update holds every upload: the attention icon (the orange dot), update-states board.
+        var (icon, tooltip, status) = updateNeeded ? (TrayIconKind.Attention, "Update needed to keep uploading", "● Uploads paused · update needed") : state switch
         {
             AccountState.Uploading => (TrayIconKind.Uploading, "Uploading CommunitiesForever.lua…", "● Uploading"),
             AccountState.Paused => (TrayIconKind.Paused, $"Paused until {until}", $"● Paused until {until}"),

@@ -332,5 +332,8 @@ public sealed class ConnectFlowTests
             Revoked = token;
             return Task.FromResult(Revoke);
         }
+
+        public Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
     }
 }

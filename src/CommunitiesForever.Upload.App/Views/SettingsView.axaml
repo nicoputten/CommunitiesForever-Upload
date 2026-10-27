@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="using:CommunitiesForever.Upload.App.Controls"
              xmlns:vm="using:CommunitiesForever.Upload.App.ViewModels"
+             xmlns:v="using:CommunitiesForever.Upload.App.Views"
              x:Class="CommunitiesForever.Upload.App.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
   <!-- Board: design/boards/settings (UP-09). A page in the main window; everything saves right away. -->
@@ -12,7 +13,7 @@
         <Button Name="NavBehaviour" Classes="nav" Content="Behaviour" />
         <Button Name="NavGameFolders" Classes="nav" Content="Game folders" />
         <Button Name="NavConnection" Classes="nav" Content="Connection" />
-        <Button Name="NavAbout" Classes="nav" Content="About" />
+        <Button Name="NavAbout" Classes="nav" Content="About &amp; updates" />
       </StackPanel>
     </Border>
 
@@ -136,13 +137,37 @@
           </StackPanel>
         </StackPanel>
 
-        <!-- About ("Check for updates" comes with UP-10) -->
-        <StackPanel Name="SectionAbout">
-          <TextBlock Classes="section settings" Text="About" />
-          <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
-            <TextBlock Classes="meta" VerticalAlignment="Center" Text="{Binding AboutLine}" />
-            <TextBlock Classes="meta" VerticalAlignment="Center" Text="·" />
-            <Button Classes="link" Content="Open log folder" Command="{Binding OpenLogFolderCommand}" />
+        <!-- About & updates (UP-10): settings-updates board, states from update-states -->
+        <StackPanel Name="SectionAbout" Spacing="{StaticResource S3}">
+          <TextBlock Classes="section settings" Text="About &amp; updates" />
+          <v:UpdatePanelView />
+          <StackPanel IsVisible="{Binding !Updates.IsDevBuild, FallbackValue=True}">
+            <Border Classes="row">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                <StackPanel>
+                  <TextBlock Classes="label" Text="Install updates when WoW is closed" />
+                  <TextBlock Classes="meta" TextWrapping="Wrap" Text="Restarts the uploader quietly (about 2 seconds) when the game isn't running and nothing is waiting to upload. Off: only when you quit or Windows restarts." />
+                </StackPanel>
+                <ToggleSwitch Grid.Column="1" IsChecked="{Binding InstallUpdatesWhenWowClosed}" AutomationProperties.Name="Install updates when WoW is closed" />
+              </Grid>
+            </Border>
+            <Border Classes="row" BorderThickness="0">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+                <StackPanel>
+                  <TextBlock Classes="label" Text="Check for updates" />
+                  <TextBlock Classes="meta" Text="{Binding Updates.CheckLine, FallbackValue=''}" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="small" Content="Check now" Command="{Binding CheckForUpdatesCommand}" IsEnabled="{Binding Updates.CanCheck, FallbackValue=False}" />
+              </Grid>
+            </Border>
+          </StackPanel>
+          <StackPanel>
+            <TextBlock Classes="meta faint fine" TextWrapping="Wrap" Text="{Binding UpdatesNote}" />
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
+              <Button Classes="link fine" Content="Open log folder" Command="{Binding OpenLogFolderCommand}" />
+              <TextBlock Classes="meta faint fine" VerticalAlignment="Center" Text="·" />
+              <Button Classes="link fine" Content="Licences" Command="{Binding OpenLicencesCommand}" />
+            </StackPanel>
           </StackPanel>
         </StackPanel>
       </StackPanel>
