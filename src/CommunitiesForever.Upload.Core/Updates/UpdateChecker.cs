@@ -30,8 +30,8 @@ public enum UpdateState
     Failed,
 }
 
-/// <summary>A newer version in the (signature-checked) feed.</summary>
-public sealed record UpdateOffer(string Version, long Size);
+/// <summary>A newer version in the (signature-checked) feed; <paramref name="Notes"/> is its one-line summary.</summary>
+public sealed record UpdateOffer(string Version, long Size, string? Notes = null);
 
 /// <summary>The installer's update machinery (Velopack in the Windows layer).</summary>
 public interface IAppUpdates
@@ -76,9 +76,6 @@ public sealed partial class UpdateChecker : IDisposable
     public static readonly TimeSpan RetryAfter = TimeSpan.FromHours(1);
     public static readonly TimeSpan SafeMomentPoll = TimeSpan.FromMinutes(1);
 
-    /// <summary>A required update holds uploads with a pause that never ends by itself.</summary>
-    public static readonly DateTimeOffset HoldUntil = DateTimeOffset.MaxValue;
-
     private readonly IAppUpdates _updates;
     private readonly ISiteClient _site;
     private readonly ITokenStore _tokens;
@@ -122,6 +119,9 @@ public sealed partial class UpdateChecker : IDisposable
 
     /// <summary>The version on offer: downloading, ready or waiting.</summary>
     public string? NewVersion { get; private set; }
+
+    /// <summary>The new version's one-line summary ("Fixes a missed upload after long sessions · shows planned runs").</summary>
+    public string? NewNotes { get; private set; }
 
     public long DownloadedBytes { get; private set; }
 
@@ -199,6 +199,7 @@ public sealed partial class UpdateChecker : IDisposable
             }
 
             NewVersion = offer.Version;
+            NewNotes = offer.Notes;
             DownloadSize = offer.Size;
             DownloadedBytes = 0;
             Set(UpdateState.Downloading);
@@ -323,12 +324,9 @@ public sealed partial class UpdateChecker : IDisposable
             if (required)
             {
                 LogRequired(value.MinimumVersion!);
-                _loop.Pause(HoldUntil);
             }
-            else if (_loop.PausedUntil == HoldUntil)
-            {
-                _loop.EndPause();
-            }
+
+            _loop.Hold(required);
         }
     }
 

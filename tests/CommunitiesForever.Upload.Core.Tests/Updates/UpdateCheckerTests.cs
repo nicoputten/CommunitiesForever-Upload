@@ -204,7 +204,7 @@ public sealed class UpdateCheckerTests : IDisposable
         await Checker.CheckNowAsync();
 
         Assert.True(Checker.IsRequired);
-        Assert.Equal(UpdateChecker.HoldUntil, _h.Loop.PausedUntil);
+        Assert.True(_h.Loop.IsHeld);
         Assert.Equal(new Uri("https://wow.vestras.nl/uploader/changes#1.1.0"), Checker.NotesUrl);
         Assert.Equal(UpdateState.Ready, Checker.State);
     }
@@ -219,7 +219,7 @@ public sealed class UpdateCheckerTests : IDisposable
 
         Assert.Equal(released, Checker.ReleasedAt);
         Assert.False(Checker.IsRequired);
-        Assert.Null(_h.Loop.PausedUntil);
+        Assert.False(_h.Loop.IsHeld);
     }
 
     [Theory]

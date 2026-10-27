@@ -210,25 +210,25 @@
     <Setter Property="CornerRadius" Value="{StaticResource RPill}" />
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
-  <Style Selector="Border.pill > TextBlock">
+  <Style Selector="Border.pill TextBlock">
     <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
   </Style>
   <Style Selector="Border.pill.fresh">
     <Setter Property="Background" Value="{StaticResource AppFreshTintBrush}" />
   </Style>
-  <Style Selector="Border.pill.fresh > TextBlock">
+  <Style Selector="Border.pill.fresh TextBlock">
     <Setter Property="Foreground" Value="{StaticResource FreshTextBrush}" />
   </Style>
   <Style Selector="Border.pill.gold">
     <Setter Property="Background" Value="{StaticResource TintActiveBrush}" />
   </Style>
-  <Style Selector="Border.pill.gold > TextBlock">
+  <Style Selector="Border.pill.gold TextBlock">
     <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
   </Style>
   <Style Selector="Border.pill.warn">
     <Setter Property="Background" Value="{StaticResource StaleTintBrush}" />
   </Style>
-  <Style Selector="Border.pill.warn > TextBlock">
+  <Style Selector="Border.pill.warn TextBlock">
     <Setter Property="Foreground" Value="{StaticResource StaleTextBrush}" />
   </Style>
   <Style Selector="Border.explainer">
@@ -264,6 +264,31 @@
   <Style Selector="TextBlock.section.settings">
     <Setter Property="FontSize" Value="{StaticResource FsNameSm}" />
     <Setter Property="Margin" Value="{StaticResource AppSectionTitleMargin}" />
+  </Style>
+
+  <!-- Updates (UP-10): settings-updates and update-states boards -->
+  <Style Selector="Border.update">
+    <Setter Property="Padding" Value="{StaticResource S4Thickness}" />
+    <Setter Property="CornerRadius" Value="{StaticResource RCard}" />
+    <Setter Property="Background" Value="{StaticResource AppUpdatePanelBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppLineUpdateBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+  </Style>
+  <Style Selector="Border.split">
+    <Setter Property="Padding" Value="{StaticResource AppSplitPad}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineRowBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource AppSplitBorder}" />
+  </Style>
+  <Style Selector="TextBlock.update-name">
+    <Setter Property="FontFamily" Value="{StaticResource FontName}" />
+    <Setter Property="FontSize" Value="{StaticResource FsNameSm}" />
+    <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+  </Style>
+  <Style Selector="Border.pill.dim">
+    <Setter Property="Background" Value="{StaticResource AppMuteTintBrush}" />
+  </Style>
+  <Style Selector="Border.pill.dim TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
   </Style>
 
   <!-- Text box sizes (colours: Themes.axaml) -->
@@ -350,6 +375,17 @@
   </Style>
   <Style Selector="TextBlock.faint">
     <Setter Property="Foreground" Value="{StaticResource TextFaintBrush}" />
+  </Style>
+  <Style Selector="TextBlock.fine">
+    <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
+  </Style>
+  <!-- update-states board .bar: the download -->
+  <Style Selector="ProgressBar.update">
+    <Setter Property="Height" Value="{StaticResource AppBarH}" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="CornerRadius" Value="{StaticResource AppBarRadius}" />
+    <Setter Property="Background" Value="{StaticResource TrackBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldBrush}" />
   </Style>
   <Style Selector="TextBlock.code">
     <Setter Property="FontFamily" Value="{StaticResource FontMono}" />

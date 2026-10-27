@@ -1,0 +1,23 @@
+CommunitiesForever Uploader uses these open source components.
+Each is used under the licence named here; the full texts are at the links.
+
+Avalonia 12.1.4 (Avalonia, Avalonia.Desktop, Avalonia.Themes.Fluent)
+  MIT License - https://github.com/AvaloniaUI/Avalonia/blob/master/licence.md
+
+SkiaSharp and HarfBuzzSharp (through Avalonia)
+  MIT License - https://github.com/mono/SkiaSharp/blob/main/LICENSE.md
+
+CommunityToolkit.Mvvm 8.4.2
+  MIT License - https://github.com/CommunityToolkit/dotnet/blob/main/License.md
+
+Duende.IdentityModel 8.1.0
+  Apache License 2.0 - https://github.com/DuendeSoftware/foss/blob/main/LICENSE
+
+Velopack 1.2.161
+  MIT License - https://github.com/velopack/velopack/blob/develop/LICENSE
+
+.NET 10 runtime and Microsoft.Extensions (DependencyInjection, Logging), System.Security.Cryptography.ProtectedData
+  MIT License - https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
+
+Fonts: Marcellus, Marcellus SC and Inter
+  SIL Open Font License 1.1 - https://openfontlicense.org

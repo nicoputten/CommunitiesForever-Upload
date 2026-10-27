@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -50,12 +51,15 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     private readonly SiteOptions _options;
     private readonly IBrowser _browser;
     private readonly TimeProvider _time;
+    private readonly UpdateChecker _updates;
     private readonly List<GameInstall> _installs = [];
+    private SynchronizationContext? _ui;
     private AppSettings _settings = new();
     private bool _loading;
 
-    public SettingsViewModel(SettingsStore store, IUploadLoop loop, GameScanner scanner, ConnectFlow connect, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time)
+    public SettingsViewModel(SettingsStore store, IUploadLoop loop, GameScanner scanner, ConnectFlow connect, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time, UpdateChecker updates)
     {
+        _updates = updates;
         _store = store;
         _loop = loop;
         _scanner = scanner;
@@ -93,6 +97,12 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     /// <summary>The logs folder, for "Open log folder".</summary>
     public string LogFolder { get; set; } = "";
 
+    /// <summary>THIRD-PARTY-NOTICES.txt next to the app, for "Licences".</summary>
+    public string LicencesFile { get; set; } = "";
+
+    /// <summary>"Updates come from wow.vestras.nl with your upload token and are signed; …" (settings-updates board).</summary>
+    public string UpdatesNote => $"Updates come from {SiteHost} with your upload token and are signed; an unsigned file is thrown away. No pop-ups for updates.";
+
     public string SiteHost => _options.BaseUri.Host;
 
     public string AboutLine => $"{AppName} {Version}";
@@ -115,6 +125,13 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     /// <summary>0 not paused, 1 for 1 hour, 2 until tomorrow (06:00); the same pause as the tray menu.</summary>
     [ObservableProperty]
     public partial int Pause { get; set; }
+
+    [ObservableProperty]
+    public partial bool InstallUpdatesWhenWowClosed { get; set; }
+
+    /// <summary>Settings › About &amp; updates: the update state.</summary>
+    [ObservableProperty]
+    public partial UpdatePanel? Updates { get; set; }
 
     [ObservableProperty]
     public partial bool IsScanning { get; set; }
@@ -152,14 +169,23 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
         StartWithWindows = _settings.StartWithWindows;
         CloseHidesToTray = _settings.CloseHidesToTray;
         Notifications = (int)_settings.Notifications;
+        InstallUpdatesWhenWowClosed = _settings.InstallUpdatesWhenWowClosed;
         // The tray may have paused already: an hour or less left reads as "1 hour".
         Pause = _loop.PausedUntil is not { } until ? 0 : until - _time.GetUtcNow() <= TimeSpan.FromHours(1) ? 1 : 2;
         _loading = false;
+        _ui = SynchronizationContext.Current;
+        _updates.Changed += OnUpdatesChanged;
+        RefreshUpdates();
 
         await Task.WhenAll(ScanAsync(), TestConnectionAsync());
     }
 
-    public void Dispose() => Ui = null;
+    public void Dispose()
+    {
+        _updates.Changed -= OnUpdatesChanged;
+        _ui = null;
+        Ui = null;
+    }
 
     partial void OnUploadAutomaticallyChanged(bool value) => Save(_settings with { UploadAutomatically = value });
 
@@ -168,6 +194,12 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     partial void OnCloseHidesToTrayChanged(bool value) => Save(_settings with { CloseHidesToTray = value });
 
     partial void OnNotificationsChanged(int value) => Save(_settings with { Notifications = (NotificationLevel)value });
+
+    partial void OnInstallUpdatesWhenWowClosedChanged(bool value)
+    {
+        Save(_settings with { InstallUpdatesWhenWowClosed = value });
+        RefreshUpdates();
+    }
 
     partial void OnPauseChanged(int value)
     {
@@ -295,6 +327,33 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     private void Connect() => ConnectRequested?.Invoke(this, EventArgs.Empty);
 
     [RelayCommand]
+    private Task CheckForUpdatesAsync() => _updates.CheckNowAsync();
+
+    [RelayCommand]
+    private void RestartNow() => _updates.RestartNow();
+
+    [RelayCommand]
+    private void CancelRestart() => _updates.CancelRestart();
+
+    [RelayCommand]
+    private void OpenWhatsNew()
+    {
+        if (_updates.NotesUrl is { } notes)
+        {
+            _browser.Open(notes);
+        }
+    }
+
+    [RelayCommand]
+    private void OpenLicences()
+    {
+        if (File.Exists(LicencesFile))
+        {
+            _browser.Open(new Uri(LicencesFile));
+        }
+    }
+
+    [RelayCommand]
     private void OpenLogFolder()
     {
         if (LogFolder.Length > 0)
@@ -330,6 +389,18 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
             ? [.. _settings.Accounts.Append(row.Account).Distinct()]
             : [.. _settings.Accounts.Where(a => a != row.Account)],
     });
+
+    // The checker reports from its own thread.
+    private void OnUpdatesChanged(object? sender, EventArgs e)
+    {
+        if (_ui is { } ui)
+        {
+            ui.Post(_ => RefreshUpdates(), null);
+        }
+    }
+
+    private void RefreshUpdates() =>
+        Updates = UpdatePanel.For(_updates, _time.GetUtcNow(), _time.LocalTimeZone, SiteHost, InstallUpdatesWhenWowClosed);
 
     private void Save(AppSettings settings)
     {

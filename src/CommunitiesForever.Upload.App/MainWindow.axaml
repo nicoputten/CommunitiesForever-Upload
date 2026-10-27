@@ -25,6 +25,16 @@
             <TextBlock Classes="meta" Text="{Binding ConnectedText}" />
           </StackPanel>
           <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{StaticResource S3_5}">
+            <!-- Once after an update (update-states board) -->
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" IsVisible="{Binding HasUpdatedTo}">
+              <Border Classes="pill gold">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock VerticalAlignment="Center" Text="{Binding UpdatedTo}" />
+                  <Button Classes="link fine" Content="What's new" Command="{Binding OpenWhatsNewCommand}" />
+                </StackPanel>
+              </Border>
+              <Button Classes="link dim" Content="✕" Command="{Binding DismissUpdatedCommand}" AutomationProperties.Name="Close" ToolTip.Tip="Close" />
+            </StackPanel>
             <TextBlock Classes="meta" VerticalAlignment="Center" Text="Starts with Windows" IsVisible="{Binding StartsWithWindows}" />
             <Button Classes="link" Command="{Binding OpenSettingsCommand}" AutomationProperties.Name="Settings">
               <StackPanel Orientation="Horizontal" Spacing="{StaticResource S1_5}">
@@ -68,8 +78,15 @@
                     <ScaleTransform />
                   </Ellipse.RenderTransform>
                 </Ellipse>
+                <!-- Required update: the update arrows instead of the shield (update-states board) -->
+                <Viewbox Width="{StaticResource AppUpdateArrows}" Height="{StaticResource AppUpdateArrows}" IsVisible="{Binding Hero.IsUpdateNeeded}">
+                  <Canvas Width="{StaticResource AppUpdateArrowsBox}" Height="{StaticResource AppUpdateArrowsBox}">
+                    <Path Data="M27,17 A10,10 0 1 1 24,9.9 M27,6 V12 H21" Stroke="{StaticResource StaleTextBrush}"
+                          StrokeThickness="{StaticResource AppUpdateArrowsStroke}" StrokeLineCap="Round" StrokeJoin="Round" />
+                  </Canvas>
+                </Viewbox>
                 <!-- The board's 26 x 26 icon box, scaled: keeps the shield centred in the rings -->
-                <Viewbox>
+                <Viewbox IsVisible="{Binding Hero.ShowsShield}">
                   <Canvas Width="{StaticResource AppShieldBox}" Height="{StaticResource AppShieldBox}">
                     <Path Data="M13,3 L21,6.5 V13 C21,18.4 17.4,21.2 13,23 C8.6,21.2 5,18.4 5,13 V6.5 Z M13,7.5 V18.5 M8.8,12 H17.2"
                           Fill="{StaticResource SurfaceRaisedBrush}" Stroke="{StaticResource GoldBrightBrush}"
@@ -94,6 +111,7 @@
               </StackPanel>
 
               <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="{StaticResource S2}">
+                <Button Classes="primary" Content="Restart and update" Command="{Binding RestartToUpdateCommand}" IsVisible="{Binding Hero.ShowRestartToUpdate}" />
                 <Button Classes="primary" Content="Upload now" Command="{Binding UploadNowCommand}" IsVisible="{Binding Hero.ShowUploadNow}" />
                 <Button Classes="primary" Content="Try now" Command="{Binding TryNowCommand}" IsVisible="{Binding Hero.ShowTryNow}" />
                 <Button Classes="primary" Content="Reconnect" Command="{Binding ReconnectCommand}" IsVisible="{Binding Hero.ShowReconnect}" />

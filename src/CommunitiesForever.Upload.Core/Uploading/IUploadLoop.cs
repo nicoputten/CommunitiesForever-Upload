@@ -19,4 +19,9 @@ public interface IUploadLoop
     void Pause(DateTimeOffset until);
 
     void EndPause();
+
+    /// <summary>Uploads wait for a required update (UP-10); also "Upload now". Not a pause: Resume doesn't end it.</summary>
+    bool IsHeld { get; }
+
+    void Hold(bool held);
 }

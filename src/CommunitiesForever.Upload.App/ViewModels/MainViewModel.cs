@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -36,14 +37,16 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private readonly TimeProvider _time;
     private readonly GameScanner _scanner;
     private readonly Func<SettingsViewModel> _newSettings;
+    private readonly UpdateChecker _updates;
     private SynchronizationContext? _ui;
     private ITimer? _ticker;
     private CancellationTokenSource? _identityLoad;
     private AppSettings _current = new();
     private WatchedAccount? _heroAccount;
 
-    public MainViewModel(IUploadLoop loop, UploadHistory history, SettingsStore settings, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time, GameScanner scanner, Func<SettingsViewModel> newSettings)
+    public MainViewModel(IUploadLoop loop, UploadHistory history, SettingsStore settings, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time, GameScanner scanner, Func<SettingsViewModel> newSettings, UpdateChecker updates)
     {
+        _updates = updates;
         _scanner = scanner;
         _newSettings = newSettings;
         _loop = loop;
@@ -91,6 +94,13 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool HasRecent { get; set; }
 
+    /// <summary>"Updated to 1.1 · What's new", once in the footer after an update (update-states board).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUpdatedTo))]
+    public partial string? UpdatedTo { get; set; }
+
+    public bool HasUpdatedTo => UpdatedTo is not null;
+
     /// <summary>The settings page, while it is open (UP-09); the window shows it instead of the dashboard.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Title), nameof(IsSettingsOpen))]
@@ -115,6 +125,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     {
         _ui = SynchronizationContext.Current;
         _loop.StatusChanged += OnStatusChanged;
+        _updates.Changed += OnStatusChanged;
         _ticker = _time.CreateTimer(_ => Post(RefreshIfCounting), null, Tick, Tick);
         Reload();
     }
@@ -168,6 +179,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     {
         CloseSettings();
         _loop.StatusChanged -= OnStatusChanged;
+        _updates.Changed -= OnStatusChanged;
         _ticker?.Dispose();
         _ticker = null;
         _identityLoad?.Cancel();
@@ -185,7 +197,11 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _heroAccount = urgent?.Account;
         IsConnected = urgent?.State != AccountState.NotConnected;
         var now = _time.GetUtcNow();
-        Hero = Hero.For(urgent, statuses.Count > 1 ? urgent?.Account.Account : null, now, _time.LocalTimeZone, Host, _loop.PausedUntil);
+        // A required update is the one loud update case: it holds every upload (update-states board).
+        Hero = _updates.IsRequired
+            ? Hero.UpdateNeeded(_updates.CurrentVersion, _updates.State is UpdateState.Ready or UpdateState.WaitingForUpload ? _updates.NewVersion : null)
+            : Hero.For(urgent, statuses.Count > 1 ? urgent?.Account.Account : null, now, _time.LocalTimeZone, Host, _loop.PausedUntil);
+        UpdatedTo = _updates.UpdatedTo is { } to ? $"Updated to {UpdatePanel.ShortVersion(to)} · " : null;
 
         var localNow = TimeZoneInfo.ConvertTime(now, _time.LocalTimeZone);
         Accounts.Clear();
@@ -303,6 +319,23 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private void OpenSite() => _browser.Open(_options.BaseUri);
+
+    [RelayCommand]
+    private void RestartToUpdate() => _updates.RestartNow();
+
+    [RelayCommand]
+    private void OpenWhatsNew()
+    {
+        if (_updates.NotesUrl is { } notes)
+        {
+            _browser.Open(notes);
+        }
+
+        _updates.DismissUpdated();
+    }
+
+    [RelayCommand]
+    private void DismissUpdated() => _updates.DismissUpdated();
 
     [RelayCommand]
     private void OpenReport()

@@ -2,10 +2,12 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.Core;
 using CommunitiesForever.Upload.Core.Notifications;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
 
 namespace CommunitiesForever.Upload.App.Tray;
@@ -33,6 +35,8 @@ public sealed class TrayController : IDisposable
     private readonly List<WindowIcon> _frames = [];
     private readonly DispatcherTimer _animation;
     private readonly TrayIcon _trayIcon;
+    private readonly NativeMenuItem _restartToUpdate = new() { IsVisible = false };
+    private readonly NativeMenuItemSeparator _restartSeparator = new() { IsVisible = false };
     private readonly NativeMenuItem _siteLine = new() { IsEnabled = false };
     private readonly NativeMenuItem _statusLine = new() { IsEnabled = false };
     private readonly NativeMenuItem _uploadNow = new("Upload now");
@@ -43,6 +47,7 @@ public sealed class TrayController : IDisposable
     private readonly NativeMenuItem _openSite = new();
     private readonly NativeMenuItem _show = new("Show uploader");
     private readonly NativeMenuItem _quit = new("Quit");
+    private readonly UpdateChecker _updates;
     private int _frame;
     private string _siteName = App.DefaultName;
 
@@ -56,8 +61,10 @@ public sealed class TrayController : IDisposable
         SiteOptions options,
         IBrowser browser,
         IMotionPreference motion,
-        TimeProvider time)
+        TimeProvider time,
+        UpdateChecker updates)
     {
+        _updates = updates;
         _loop = loop;
         _policy = policy;
         _notifier = notifier;
@@ -82,6 +89,7 @@ public sealed class TrayController : IDisposable
         _animation.Tick += OnFrame;
 
         _pause.Menu = new NativeMenu { Items = { _pauseHour, _pauseTomorrow } };
+        _restartToUpdate.Click += OnRestartToUpdate;
         _uploadNow.Click += OnUploadNow;
         _pauseHour.Click += OnPauseHour;
         _pauseTomorrow.Click += OnPauseTomorrow;
@@ -97,6 +105,7 @@ public sealed class TrayController : IDisposable
             {
                 Items =
                 {
+                    _restartToUpdate, _restartSeparator,
                     _siteLine, _statusLine, new NativeMenuItemSeparator(),
                     _uploadNow, _pause, _resume, new NativeMenuItemSeparator(),
                     _openSite, _show, new NativeMenuItemSeparator(),
@@ -122,6 +131,7 @@ public sealed class TrayController : IDisposable
     public void Start()
     {
         _loop.StatusChanged += OnStatusChanged;
+        _updates.Changed += OnUpdatesChanged;
         Refresh();
         _ = LoadSiteNameAsync();
     }
@@ -136,6 +146,8 @@ public sealed class TrayController : IDisposable
     public void Dispose()
     {
         _loop.StatusChanged -= OnStatusChanged;
+        _updates.Changed -= OnUpdatesChanged;
+        _restartToUpdate.Click -= OnRestartToUpdate;
         _animation.Stop();
         _animation.Tick -= OnFrame;
         _trayIcon.Clicked -= OnShow;
@@ -161,9 +173,22 @@ public sealed class TrayController : IDisposable
         Notify();
     });
 
+    private void OnUpdatesChanged(object? sender, EventArgs e) => Dispatcher.UIThread.Post(Refresh);
+
+    private void OnRestartToUpdate(object? sender, EventArgs e) => _updates.RestartNow();
+
     private void Refresh()
     {
-        var model = TrayModel.For(_loop.Statuses, _siteName, _options.BaseUri.Host, _time.GetUtcNow(), _time.LocalTimeZone, _loop.PausedUntil);
+        bool updateNeeded = _updates.IsRequired;
+        var model = TrayModel.For(_loop.Statuses, _siteName, _options.BaseUri.Host, _time.GetUtcNow(), _time.LocalTimeZone, _loop.PausedUntil, updateNeeded);
+
+        // Normal updates leave the tray as it is; a required one leads the menu (update-states board).
+        bool canRestart = updateNeeded && _updates.State == UpdateState.Ready;
+        _restartToUpdate.Header = $"Restart to update to {UpdatePanel.ShortVersion(_updates.NewVersion)}";
+        _restartToUpdate.IsVisible = canRestart;
+        _restartSeparator.IsVisible = canRestart;
+        _uploadNow.Header = updateNeeded ? "Upload now · paused until updated" : "Upload now";
+        _uploadNow.IsEnabled = !updateNeeded;
         _trayIcon.ToolTipText = model.Tooltip;
         _siteLine.Header = _siteName;
         _statusLine.Header = model.StatusLine;

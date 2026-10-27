@@ -76,7 +76,9 @@ internal sealed partial class App : Application
             ApplyMotion();
             SyncAutostart();
             _tray.Start();
-            _services.GetRequiredService<UpdateChecker>().Start();
+            var updates = _services.GetRequiredService<UpdateChecker>();
+            updates.RestartRequested += OnUpdateRestart;
+            updates.Start();
             if (Instance is { } instance)
             {
                 instance.ArgumentsReceived += OnArgumentsReceived;
@@ -255,9 +257,13 @@ internal sealed partial class App : Application
         }
     }
 
+    // The checker handed the update to the installer, which starts the app again: quit (UP-10).
+    private void OnUpdateRestart(object? sender, bool quiet) => Dispatcher.UIThread.Post(Quit);
+
     private static SettingsViewModel Configure(SettingsViewModel vm)
     {
         vm.LogFolder = AppPaths.LogDirectory;
+        vm.LicencesFile = Path.Combine(AppContext.BaseDirectory, "THIRD-PARTY-NOTICES.txt");
         return vm;
     }
 
@@ -506,6 +512,12 @@ internal sealed partial class App : Application
             tray.QuitRequested -= OnQuitRequested;
             _tray = null; // disposed with the container
         }
+
+        if (_services is not null)
+        {
+            _services.GetRequiredService<UpdateChecker>().RestartRequested -= OnUpdateRestart;
+        }
+
         _services?.Dispose();
         _services = null;
     }

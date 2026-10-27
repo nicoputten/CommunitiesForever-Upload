@@ -55,13 +55,20 @@ jobs:
             -p:Version="$VERSION" -p:DebugType=none -o publish
           find publish -name '*.pdb' -delete
 
+      # The version's CHANGELOG section ("## vX.Y.Z (date)") becomes the release notes; Settings shows their first line.
+      - name: Release notes
+        run: |
+          awk -v tag="## $GITHUB_REF_NAME" 'index($0, tag) == 1 { on = 1; next } on && /^## / { exit } on' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          [ -s "$RUNNER_TEMP/notes.md" ] || { echo "CHANGELOG.md has no section for $GITHUB_REF_NAME"; exit 1; }
+
       - name: Pack
         run: |
           dotnet tool install --global vpk --version 1.2.161
           # No Velopack shortcuts: the app keeps its own Start menu shortcut, which carries the notification id (UP-08).
           vpk pack --packId "$PACK_ID" --packVersion "$VERSION" --packDir publish \
             --mainExe CommunitiesForever.Upload.App.exe --packTitle "CommunitiesForever Uploader" \
-            --icon src/CommunitiesForever.Upload.App/Assets/Icons/app.ico --shortcuts "" --outputDir Releases
+            --icon src/CommunitiesForever.Upload.App/Assets/Icons/app.ico --shortcuts "" \
+            --releaseNotes "$RUNNER_TEMP/notes.md" --outputDir Releases
 
       - name: Sign the feed
         env:

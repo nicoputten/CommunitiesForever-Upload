@@ -15,15 +15,16 @@ internal sealed class UpdateHarness
 {
     public static readonly WatchedAccount Account = new(@"C:\WoW\_forever_", "123456789#1");
 
-    public UpdateHarness(IUploadLoop? loop = null, bool installed = true)
+    public UpdateHarness(IUploadLoop? loop = null, bool installed = true, FakeTimeProvider? time = null)
     {
+        Time = time ?? new FakeTimeProvider(new DateTimeOffset(2026, 10, 27, 9, 12, 0, TimeSpan.Zero));
         Updates.IsInstalled = installed;
         Loop = loop ?? new UpdateLoop();
         Settings = new SettingsStore(SettingsFile);
         Checker = new UpdateChecker(Updates, Site, Tokens, Loop, Games, Settings, Memory, Time, NullLogger<UpdateChecker>.Instance);
     }
 
-    public FakeTimeProvider Time { get; } = new(new DateTimeOffset(2026, 10, 27, 9, 12, 0, TimeSpan.Zero));
+    public FakeTimeProvider Time { get; }
 
     public FakeUpdates Updates { get; } = new();
 
@@ -68,6 +69,9 @@ internal sealed class FakeUpdates : IAppUpdates
 
     public Exception? DownloadError { get; set; }
 
+    /// <summary>When set, the check waits for it (to see "Checking").</summary>
+    public TaskCompletionSource? CheckGate { get; set; }
+
     /// <summary>When set, the download waits for it (to see "Downloading").</summary>
     public TaskCompletionSource? DownloadGate { get; set; }
 
@@ -75,10 +79,15 @@ internal sealed class FakeUpdates : IAppUpdates
 
     public List<bool> Applied { get; } = [];
 
-    public Task<UpdateOffer?> CheckAsync(CancellationToken cancellationToken)
+    public async Task<UpdateOffer?> CheckAsync(CancellationToken cancellationToken)
     {
         Interlocked.Increment(ref _checks);
-        return CheckError is { } error ? Task.FromException<UpdateOffer?>(error) : Task.FromResult(Newer);
+        if (CheckGate is { } gate)
+        {
+            await gate.Task;
+        }
+
+        return CheckError is { } error ? throw error : Newer;
     }
 
     public async Task DownloadAsync(IProgress<long> progress, CancellationToken cancellationToken)
@@ -151,6 +160,10 @@ internal sealed class UpdateLoop : IUploadLoop
     public void Pause(DateTimeOffset until) => PausedUntil = until;
 
     public void EndPause() => PausedUntil = null;
+
+    public bool IsHeld { get; private set; }
+
+    public void Hold(bool held) => IsHeld = held;
 }
 
 internal sealed class UpdateGames : IGameProcesses

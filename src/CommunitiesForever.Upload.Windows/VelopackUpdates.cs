@@ -35,7 +35,7 @@ public sealed class VelopackUpdates : IAppUpdates
     public async Task<UpdateOffer?> CheckAsync(CancellationToken cancellationToken)
     {
         _offer = await _manager.CheckForUpdatesAsync().ConfigureAwait(false);
-        return _offer is { TargetFullRelease: var target } ? new UpdateOffer(target.Version.ToString(), target.Size) : null;
+        return _offer is { TargetFullRelease: var target } ? new UpdateOffer(target.Version.ToString(), target.Size, Summary(target.NotesMarkdown)) : null;
     }
 
     public async Task DownloadAsync(IProgress<long> progress, CancellationToken cancellationToken)
@@ -56,6 +56,10 @@ public sealed class VelopackUpdates : IAppUpdates
             throw new InvalidDataException("The download doesn't match the feed.", e);
         }
     }
+
+    // The release notes' first line (the release workflow takes them from CHANGELOG.md).
+    private static string? Summary(string? markdown) =>
+        markdown?.Split('\n').Select(l => l.Trim().TrimStart('-', '*', '#', ' ')).FirstOrDefault(l => l.Length > 0);
 
     public void ApplyAfterExit(bool restart)
     {
