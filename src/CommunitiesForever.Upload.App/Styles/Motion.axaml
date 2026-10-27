@@ -1,0 +1,35 @@
+<!--
+  Looping animations. App adds these styles only while Windows' "Animation effects" is on (App.ApplyMotion),
+  so with reduced motion, and in the design checks, everything stands still.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- setup board .spin: the waiting spinner -->
+  <Style Selector=":is(Control).spin">
+    <Style.Animations>
+      <Animation Duration="{StaticResource AppDurSpin}" IterationCount="Infinite">
+        <KeyFrame Cue="0%">
+          <Setter Property="RotateTransform.Angle" Value="0" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="RotateTransform.Angle" Value="360" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!-- setup board .sweep: the radar while scanning -->
+  <Style Selector=":is(Control).sweep">
+    <Style.Animations>
+      <Animation Duration="{StaticResource AppDurSweep}" IterationCount="Infinite">
+        <KeyFrame Cue="0%">
+          <Setter Property="RotateTransform.Angle" Value="0" />
+        </KeyFrame>
+        <KeyFrame Cue="100%">
+          <Setter Property="RotateTransform.Angle" Value="360" />
+        </KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+</Styles>

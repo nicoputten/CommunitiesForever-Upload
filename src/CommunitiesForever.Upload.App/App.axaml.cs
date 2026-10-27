@@ -4,9 +4,13 @@ using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Platform;
 using Avalonia.Styling;
+using CommunitiesForever.Upload.App.ViewModels;
+using CommunitiesForever.Upload.App.Views;
 using CommunitiesForever.Upload.Core;
+using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Windows;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,9 +27,16 @@ internal sealed partial class App : Application
         Setters = { new Setter(Animatable.TransitionsProperty, null) },
     };
 
+    // Looping animations (Styles/Motion.axaml), added only while animations are on.
+    private readonly StyleInclude _motion = new(new Uri("avares://CommunitiesForever.Upload.App/"))
+    {
+        Source = new Uri("/Styles/Motion.axaml", UriKind.Relative),
+    };
+
     private ServiceProvider? _services;
     private TrayIcon? _trayIcon;
     private Window? _mainWindow;
+    private SetupViewModel? _setup;
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -33,16 +44,15 @@ internal sealed partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            _services = ConfigureServices(desktop.Args ?? []);
-            _mainWindow = CreateMainWindow(desktop.Args ?? [], _services);
-            desktop.MainWindow = _mainWindow;
+            string[] args = desktop.Args ?? [];
+            _services = ConfigureServices(args);
             _trayIcon = CreateTrayIcon(desktop);
             // A tray icon only shows once it is registered on the Application.
             TrayIcon.SetIcons(this, [_trayIcon]);
-
-            ApplyMotion();
-            _mainWindow.Activated += OnMainWindowActivated;
             desktop.Exit += OnExit;
+
+            SetMainWindow(desktop, FirstWindow(args, _services));
+            ApplyMotion();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -59,20 +69,27 @@ internal sealed partial class App : Application
         services.AddSingleton(_ => SiteHttp.Create(version));
         services.AddTransient<MainWindow>();
         services.AddTransient<GalleryWindow>();
+        services.AddTransient<SetupViewModel>();
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
     }
 
-    /// <summary>Follows Windows' "Animation effects": switches every transition off while it is off.</summary>
+    /// <summary>Follows Windows' "Animation effects": off removes every transition and looping animation.</summary>
     internal void ApplyMotion(bool animationsEnabled)
     {
-        bool applied = Styles.Contains(_noMotion);
-        if (!animationsEnabled && !applied)
+        Toggle(_noMotion, !animationsEnabled);
+        Toggle(_motion, animationsEnabled);
+    }
+
+    private void Toggle(IStyle style, bool on)
+    {
+        bool applied = Styles.Contains(style);
+        if (on && !applied)
         {
-            Styles.Add(_noMotion);
+            Styles.Add(style);
         }
-        else if (animationsEnabled && applied)
+        else if (!on && applied)
         {
-            Styles.Remove(_noMotion);
+            Styles.Remove(style);
         }
     }
 
@@ -104,10 +121,75 @@ internal sealed partial class App : Application
         return informational?.Split('+')[0] ?? "0.0.0";
     }
 
-    private static Window CreateMainWindow(string[] args, ServiceProvider services) =>
-        DevSwitchesAllowed && args.Contains("--gallery")
-            ? services.GetRequiredService<GalleryWindow>()
-            : services.GetRequiredService<MainWindow>();
+    /// <summary>
+    /// Setup without a token or without a watched account (UP-05), else the main window.
+    /// A settings file from a newer version is left alone: the main window, nothing is overwritten.
+    /// </summary>
+    private Window FirstWindow(string[] args, ServiceProvider services)
+    {
+        if (DevSwitchesAllowed && args.Contains("--gallery"))
+        {
+            return services.GetRequiredService<GalleryWindow>();
+        }
+
+        var load = services.GetRequiredService<SettingsStore>().Load();
+        var settings = (load as SettingsLoad.Loaded)?.Settings;
+        bool connected = services.GetRequiredService<ITokenStore>().Load() is not null;
+        if (load is SettingsLoad.FromNewerVersion || (connected && settings is { Accounts.Count: > 0 }))
+        {
+            return services.GetRequiredService<MainWindow>();
+        }
+
+        _setup = services.GetRequiredService<SetupViewModel>();
+        _setup.Existing = settings;
+        _setup.Finished += OnSetupFinished;
+        _setup.Cancelled += OnSetupCancelled;
+        return new SetupWindow { DataContext = _setup };
+    }
+
+    private void OnSetupFinished(object? sender, EventArgs e)
+    {
+        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop || _services is null)
+        {
+            return;
+        }
+
+        var setupWindow = _mainWindow;
+        ForgetSetup();
+        var main = _services.GetRequiredService<MainWindow>();
+        SetMainWindow(desktop, main);
+        main.Show();
+        setupWindow?.Close();
+    }
+
+    private void OnSetupCancelled(object? sender, EventArgs e)
+    {
+        ForgetSetup();
+        (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();
+    }
+
+    private void ForgetSetup()
+    {
+        if (_setup is { } setup)
+        {
+            setup.Finished -= OnSetupFinished;
+            setup.Cancelled -= OnSetupCancelled;
+            _setup = null;
+        }
+    }
+
+    // The window the app lives in; moves the activation handler along (CLAUDE.md rule 11).
+    private void SetMainWindow(IClassicDesktopStyleApplicationLifetime desktop, Window window)
+    {
+        if (_mainWindow is not null)
+        {
+            _mainWindow.Activated -= OnMainWindowActivated;
+        }
+
+        _mainWindow = window;
+        _mainWindow.Activated += OnMainWindowActivated;
+        desktop.MainWindow = window;
+    }
 
     private void ApplyMotion()
     {
@@ -163,6 +245,8 @@ internal sealed partial class App : Application
             _mainWindow.Activated -= OnMainWindowActivated;
             _mainWindow = null;
         }
+
+        ForgetSetup();
 
         _trayIcon?.Dispose();
         _trayIcon = null;

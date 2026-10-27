@@ -74,7 +74,8 @@ Watching ─▶ game running (WoW process seen) ─▶ file changed ─▶ settl
 - Several accounts are watched independently.
 
 ## Storage (per Windows user)
-- `%LocalAppData%\CommunitiesForever.Upload\settings.json`: versioned settings (watched folders, behaviour, notifications, site URL), migration step per version (CLAUDE.md rule 10).
+- `%LocalAppData%\CommunitiesForever.Upload\settings.json`: versioned settings, migration step per version (CLAUDE.md rule 10). Version 1 (UP-05): `version`, `accounts` (`installPath` = the `_forever_` folder, `account`), `uploadAutomatically`, `startWithWindows`, `closeHidesToTray`, `notifications` (`EveryUpload`, `OnlyProblems`, `Off`), `siteUrl` (null for wow.vestras.nl). Written via a temporary file; a damaged file is kept as `settings.json.bad` and setup runs again; a file from a newer version is never overwritten. `SettingsStoreTests` keeps the released v1 text loading.
+- Finding WoW (UP-05): `GameScanner` in Core over `IFileSystem` (folders and file times only, no way to read contents) and `IInstallHints` (Windows: Blizzard registry keys, Battle.net.config `DefaultInstallPath`, the usual folders on every fixed drive).
 - `history.json`: the last 50 uploads per account with the site's summary line and report link.
 - The token: DPAPI-protected file next to it, never in settings.
 - `logs\`: rolling log files (no tokens, no other people's BattleTags).

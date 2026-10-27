@@ -97,6 +97,36 @@
       <Setter Property="Background" Value="{StaticResource StaleTintBrush}" />
     </Style>
 
+    <!-- ghost: setup board footer (Cancel, Back) -->
+    <Style Selector="^.ghost">
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+    </Style>
+    <Style Selector="^.ghost:pointerover">
+      <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
+    </Style>
+
+    <!-- link: a text link that acts (setup board "Copy the link") -->
+    <Style Selector="^.link">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="FontSize" Value="{StaticResource FsMeta}" />
+      <Setter Property="FontWeight" Value="{StaticResource FwRegular}" />
+      <Setter Property="Foreground" Value="{StaticResource GoldBrush}" />
+    </Style>
+    <Style Selector="^.link:pointerover">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource GoldBrightBrush}" />
+    </Style>
+    <Style Selector="^.link:pressed">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="^.link.dim">
+      <Setter Property="Foreground" Value="{StaticResource TextDimBrush}" />
+    </Style>
+
     <Style Selector="^.window">
       <Setter Property="Width" Value="{StaticResource AppWindowButtonW}" />
       <Setter Property="Height" Value="{StaticResource AppTitleBarH}" />
@@ -165,6 +195,39 @@
     </Style>
   </ControlTheme>
 
+  <!-- Check box: setup board .cb, 18px, gold when checked -->
+  <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{StaticResource AppLineDimBrush}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="Box"
+                Width="{StaticResource AppCheck}" Height="{StaticResource AppCheck}"
+                CornerRadius="{StaticResource AppCheckRadius}"
+                BorderThickness="{StaticResource AppLineThinThickness}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                Background="{TemplateBinding Background}">
+          <Path Name="Mark" Data="M2,6 L5,9 L10,3"
+                Width="{StaticResource AppCheckMark}" Height="{StaticResource AppCheckMark}"
+                Stretch="Uniform"
+                Stroke="{StaticResource OnGoldBrush}" StrokeThickness="{StaticResource BorderStrong}"
+                IsVisible="False" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{StaticResource GoldBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+    </Style>
+    <Style Selector="^:checked /template/ Path#Mark">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:pointerover">
+      <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+    </Style>
+  </ControlTheme>
+
   <!-- Segmented control: settings board .seg; a ListBox with Theme="{StaticResource Segmented}" -->
   <ControlTheme x:Key="SegmentedItem" TargetType="ListBoxItem">
     <Setter Property="Padding" Value="{StaticResource AppSegmentPad}" />
@@ -214,4 +277,18 @@
       </ControlTemplate>
     </Setter>
   </ControlTheme>
+  <!-- Text box: Fluent's template, our colours (Fluent reads these keys) -->
+  <StaticResource x:Key="TextControlBackground" ResourceKey="ControlBgBrush" />
+  <StaticResource x:Key="TextControlBackgroundPointerOver" ResourceKey="ControlBgBrush" />
+  <StaticResource x:Key="TextControlBackgroundFocused" ResourceKey="ControlBgBrush" />
+  <StaticResource x:Key="TextControlBorderBrush" ResourceKey="LineControlBrush" />
+  <StaticResource x:Key="TextControlBorderBrushPointerOver" ResourceKey="LineChipOnBrush" />
+  <StaticResource x:Key="TextControlBorderBrushFocused" ResourceKey="GoldBrush" />
+  <StaticResource x:Key="TextControlForeground" ResourceKey="TextBrush" />
+  <StaticResource x:Key="TextControlForegroundPointerOver" ResourceKey="TextBrush" />
+  <StaticResource x:Key="TextControlForegroundFocused" ResourceKey="TextStrongBrush" />
+  <StaticResource x:Key="TextControlPlaceholderForeground" ResourceKey="TextFaintBrush" />
+  <StaticResource x:Key="TextControlPlaceholderForegroundPointerOver" ResourceKey="TextFaintBrush" />
+  <StaticResource x:Key="TextControlPlaceholderForegroundFocused" ResourceKey="TextFaintBrush" />
+  <StaticResource x:Key="TextControlSelectionHighlightColor" ResourceKey="TintSelectedBrush" />
 </ResourceDictionary>

@@ -33,6 +33,7 @@ public sealed class ConnectFlowTests
         var waiting = Assert.IsType<ConnectProgress.WaitingForBrowser>(progress[1]);
         Assert.Equal("KXRT-7QMN", waiting.UserCode);
         Assert.Equal(Start.AddMinutes(10), waiting.ExpiresAt);
+        Assert.Equal(new Uri("https://wow.vestras.nl/uploader?code=KXRT-7QMN"), waiting.Page);
         // Three polls, five seconds apart.
         Assert.Equal([5, 10, 15], _site.PollTimes.Select(t => (t - Start).TotalSeconds));
     }
