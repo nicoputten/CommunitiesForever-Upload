@@ -4,8 +4,10 @@ using Microsoft.Win32;
 namespace CommunitiesForever.Upload.Windows;
 
 /// <summary>Start with Windows: a value in the user's Run key that starts the app hidden in the tray (<c>--tray</c>).</summary>
-public sealed class RegistryAutostart(string exePath, string runKey = @"Software\Microsoft\Windows\CurrentVersion\Run") : IAutostart
+public sealed class RegistryAutostart(string exePath, string runKey = RegistryAutostart.RunKey) : IAutostart
 {
+    public const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
+
     public const string TrayArgument = "--tray";
 
     private string Command => $"\"{exePath}\" {TrayArgument}";

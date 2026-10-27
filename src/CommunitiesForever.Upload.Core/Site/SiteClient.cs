@@ -97,6 +97,28 @@ public sealed class SiteClient(HttpClient http, SiteOptions options) : ISiteClie
             me.LastUploadAt is { } last ? DateTimeOffset.FromUnixTimeSeconds(last) : null));
     }
 
+    public async Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, Endpoint("updates/status"));
+        var result = await SendAsync(request, token, SiteJson.Default.UpdateStatusJson, cancellationToken).ConfigureAwait(false);
+        if (!result.IsOk)
+        {
+            return result.Failure!;
+        }
+
+        var status = result.Value!;
+        if (string.IsNullOrEmpty(status.Latest))
+        {
+            return new SiteFailure(SiteError.Unexpected, "invalid_response", 200);
+        }
+
+        return SiteResult.Ok(new UpdateStatus(
+            status.Latest,
+            status.ReleasedAt is { } released ? DateTimeOffset.FromUnixTimeSeconds(released) : null,
+            status.MinimumVersion,
+            Uri.TryCreate(status.NotesUrl, UriKind.Absolute, out var notes) && notes.Host == options.BaseUri.Host ? notes : null));
+    }
+
     public async Task<SiteResult<UploadReceipt>> UploadAsync(AccessToken token, Stream content, DateTimeOffset? savedAt, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(content);
@@ -248,6 +270,8 @@ internal sealed record ErrorJson(string? Error, string? ErrorDescription);
 
 internal sealed record MeJson(string? BattleTag, string? SiteName, string? DeviceName, string? AppVersion, long CreatedAt, long? LastUploadAt);
 
+internal sealed record UpdateStatusJson(string? Latest, long? ReleasedAt, string? MinimumVersion, string? NotesUrl);
+
 internal sealed record CountsJson(int Characters, int Friends);
 
 internal sealed record UploadJson(
@@ -264,6 +288,7 @@ internal sealed record UploadJson(
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(MeJson))]
 [JsonSerializable(typeof(UploadJson))]
+[JsonSerializable(typeof(UpdateStatusJson))]
 internal sealed partial class SiteJson : JsonSerializerContext;
 
 // OAuth errors use snake_case keys (RFC 6749 §5.2).

@@ -14,6 +14,7 @@ using CommunitiesForever.Upload.Core;
 using CommunitiesForever.Upload.Core.Notifications;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
 using CommunitiesForever.Upload.Windows;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,6 +76,7 @@ internal sealed partial class App : Application
             ApplyMotion();
             SyncAutostart();
             _tray.Start();
+            _services.GetRequiredService<UpdateChecker>().Start();
             if (Instance is { } instance)
             {
                 instance.ArgumentsReceived += OnArgumentsReceived;
@@ -378,6 +380,8 @@ internal sealed partial class App : Application
     private void Quit()
     {
         _quitting = true;
+        // A downloaded update goes in once the app has quit (UP-10).
+        _services?.GetRequiredService<UpdateChecker>().ApplyIfReady();
         (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();
     }
 

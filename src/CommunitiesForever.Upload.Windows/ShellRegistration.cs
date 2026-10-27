@@ -29,6 +29,13 @@ public static partial class ShellRegistration
         _ = SetCurrentProcessExplicitAppUserModelID(AppIdentity.AppId);
     }
 
+    /// <summary>Removes the sender and the link scheme again (uninstall, UP-10).</summary>
+    public static void Unregister(string classesRoot = @"Software\Classes")
+    {
+        Registry.CurrentUser.DeleteSubKeyTree($@"{classesRoot}\AppUserModelId\{AppIdentity.AppId}", throwOnMissingSubKey: false);
+        Registry.CurrentUser.DeleteSubKeyTree($@"{classesRoot}\{AppIdentity.Scheme}", throwOnMissingSubKey: false);
+    }
+
     [LibraryImport("shell32.dll", StringMarshalling = StringMarshalling.Utf16)]
     private static partial int SetCurrentProcessExplicitAppUserModelID(string appId);
 }

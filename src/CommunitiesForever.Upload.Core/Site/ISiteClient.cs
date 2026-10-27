@@ -16,6 +16,9 @@ public interface ISiteClient
 
     /// <summary>RFC 7009 revocation; succeeds for unknown or already revoked tokens too.</summary>
     Task<SiteResult<bool>> RevokeAsync(AccessToken token, CancellationToken cancellationToken = default);
+
+    /// <summary>The newest version, the minimum the site still accepts and its "What's new" page (UP-10).</summary>
+    Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Where the site is and what the app sends about itself.</summary>
