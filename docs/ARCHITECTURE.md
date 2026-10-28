@@ -56,6 +56,7 @@ The app lives for weeks in the tray, so memory must stay flat:
 - Every subscribed event handler is unsubscribed (or a weak event is used); no static events.
 - One shared `HttpClient`; no caches or collections without a maximum (history 50 per account, a bounded queue, rolling logs).
 - Tests: every view, view model and loop component that can be created more than once is checked to be collected after close or stop (`WeakReference` + GC); the loop gets a soak test in UP-06.
+- Small in the tray (UP-14): Avalonia renders in software (`Program`), because the GPU path (ANGLE on Direct3D) held most of the memory, also with the window hidden; and `TrayMemory` runs one compacting collection a few seconds after the window hides to the tray, giving back the heap the window grew. Hiding keeps the window (reopening stays instant); disposing it saved only a few MB more.
 
 ## Layering
 ```

@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IUpdateMemoryFile, UpdateMemoryStore>();
         services.AddSingleton<UpdateChecker>();
         services.AddSingleton<RunsSync>();
+        services.AddSingleton<TrayMemory>();
         return services;
     }
 }

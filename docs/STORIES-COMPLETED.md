@@ -95,3 +95,12 @@ Planned runs (decided with Nico, 2026-10-27; the flow: board `runs-flow`): the s
 - Manual: plan a run on the site, wait for the fetch or upload, `/reload` in game, the Dungeons tab (addon CF-46) shows it.
 - Decided with Nico (2026-10-28): one Runs.lua per install; fetch at game start, every 5 min while it runs and after each upload; the whole answer converted generically, with busy realistic tests far below the caps (caps a safety net only); written only when the bytes change, atomically; the missing-folder messages; the Runs block texts; nothing stored.
 - Done (PR #23): `Core/Runs` (`RunsSync`, `RunsLua`, `IRunsFiles`), `ISiteClient.GetRunsAsync`, Windows `RunsFiles`, the main window's Runs block (`RunsBlock`, design check `main-runs`; the other main-window baselines change with the block).
+
+### UP-14 Less memory in the tray
+Nico (2026-10-28): the uploader used about 75–100 MB, also while it only sits in the tray, where no window is needed. Measured on a Release build like the shipped one (private working set as Task Manager shows it, and private bytes): window open 98 MB / 228 MB; hidden to the tray 95 MB / 204 MB, nothing given back; started with Windows, never opened, 28 MB / 78 MB. What held it: Avalonia's GPU path (ANGLE on Direct3D, about 50 MB even never shown, more once the window was drawn), and about 40 MB the GC had committed while the window was open and never decommitted. The window's own objects were a few MB. Decided with Nico (2026-10-28):
+- Render in software (`Win32RenderingMode.Software`): the window looks the same and needs no GPU.
+- A few seconds after the window hides to the tray, one compacting, decommitting collection (`TrayMemory`, in Core, tested with a fake clock); showing the window before then cancels it.
+- Keep hiding the window (reopening stays instant). Not done, measured: disposing the window on hide (a few MB more), other GC modes (non-concurrent, ConserveMemory: nothing more), restarting into `--tray` or a separate tray process (would reach about 22 MB in software; single instance, updates and upload state across restarts not worth it).
+- Result (Release): window open 52 MB / 57 MB; in the tray 30 MB / 34 MB.
+- Manual: the window looks as before at 100 % and 150 % scaling, animations stay smooth, and Task Manager shows about 30 MB after hiding to the tray.
+- Done (PR #NN).

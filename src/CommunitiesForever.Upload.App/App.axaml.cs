@@ -375,6 +375,7 @@ internal sealed partial class App : Application
         {
             e.Cancel = true;
             window.Hide();
+            _services?.GetRequiredService<TrayMemory>().Hidden();
         }
     }
 
@@ -445,6 +446,7 @@ internal sealed partial class App : Application
         }
 
         desktop.MainWindow = window;
+        _services?.GetRequiredService<TrayMemory>().Shown();
         window.Show();
         window.WindowState = WindowState.Normal;
         window.Activate();
