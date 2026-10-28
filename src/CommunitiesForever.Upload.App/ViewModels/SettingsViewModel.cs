@@ -105,8 +105,6 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
 
     public string SiteHost => _options.BaseUri.Host;
 
-    public string AboutLine => $"{AppName} {Version}";
-
     public ObservableCollection<GameFolderRow> Folders { get; } = [];
 
     [ObservableProperty]
