@@ -4,6 +4,7 @@ using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Runs;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Tests;
 using CommunitiesForever.Upload.Core.Tests.Runs;
 using CommunitiesForever.Upload.Core.Tests.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
@@ -56,11 +57,7 @@ internal sealed class MainHarness
     {
         Updates.Games.Running = true;
         Runs.Start(new AppSettings { Accounts = Accounts });
-        for (int i = 0; i < 200 && Runs.Status.FetchedAt is null; i++)
-        {
-            Time.Advance(TimeSpan.Zero);
-            Thread.Sleep(5);
-        }
+        Wait.UntilBlocking(() => Runs.Status.FetchedAt is not null, () => Time.Advance(TimeSpan.Zero));
 
         Time.Advance(TimeSpan.FromSeconds(10));
     }
