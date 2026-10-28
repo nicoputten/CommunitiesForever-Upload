@@ -103,4 +103,4 @@ Nico (2026-10-28): the uploader used about 75–100 MB, also while it only sits 
 - Keep hiding the window (reopening stays instant). Not done, measured: disposing the window on hide (a few MB more), other GC modes (non-concurrent, ConserveMemory: nothing more), restarting into `--tray` or a separate tray process (would reach about 22 MB in software; single instance, updates and upload state across restarts not worth it).
 - Result (Release): window open 52 MB / 57 MB; in the tray 30 MB / 34 MB.
 - Manual: the window looks as before at 100 % and 150 % scaling, animations stay smooth, and Task Manager shows about 30 MB after hiding to the tray.
-- Done (PR #NN).
+- Done (PR #24).
