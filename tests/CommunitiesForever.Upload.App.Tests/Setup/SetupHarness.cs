@@ -105,6 +105,8 @@ internal sealed class FakeSite : ISiteClient
     public Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default) =>
         Task.FromResult(UpdateStatus);
 
+    public Task<SiteResult<RunsFeed>> GetRunsAsync(AccessToken token, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
     public Task<SiteResult<UploadReceipt>> UploadAsync(AccessToken token, Stream content, DateTimeOffset? savedAt, CancellationToken cancellationToken = default) =>
         throw new NotSupportedException();
 

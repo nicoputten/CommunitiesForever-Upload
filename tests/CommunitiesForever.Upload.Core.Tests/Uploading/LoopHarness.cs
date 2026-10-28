@@ -278,6 +278,8 @@ internal sealed class FakeUploads : ISiteClient
     public Task<SiteResult<bool>> RevokeAsync(AccessToken token, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
     public Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+    public Task<SiteResult<RunsFeed>> GetRunsAsync(AccessToken token, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 }
 
 internal sealed class MemoryTokens : ITokenStore

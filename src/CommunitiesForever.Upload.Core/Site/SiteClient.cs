@@ -158,6 +158,21 @@ public sealed class SiteClient(HttpClient http, SiteOptions options) : ISiteClie
             Uri.TryCreate(upload.ReportUrl, UriKind.Absolute, out var report) ? report : null));
     }
 
+    public async Task<SiteResult<RunsFeed>> GetRunsAsync(AccessToken token, CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, Endpoint("runs"));
+        var result = await SendAsync(request, token, SiteJson.Default.JsonDocument, cancellationToken).ConfigureAwait(false);
+        if (!result.IsOk)
+        {
+            return result.Failure!;
+        }
+
+        using var document = result.Value!;
+        return document.RootElement.ValueKind == JsonValueKind.Object
+            ? SiteResult.Ok(new RunsFeed(document.RootElement.Clone()))
+            : new SiteFailure(SiteError.Unexpected, "invalid_response", 200);
+    }
+
     public async Task<SiteResult<bool>> RevokeAsync(AccessToken token, CancellationToken cancellationToken = default)
     {
         var response = await http.RevokeTokenAsync(
@@ -289,6 +304,7 @@ internal sealed record UploadJson(
 [JsonSerializable(typeof(MeJson))]
 [JsonSerializable(typeof(UploadJson))]
 [JsonSerializable(typeof(UpdateStatusJson))]
+[JsonSerializable(typeof(JsonDocument))]
 internal sealed partial class SiteJson : JsonSerializerContext;
 
 // OAuth errors use snake_case keys (RFC 6749 §5.2).

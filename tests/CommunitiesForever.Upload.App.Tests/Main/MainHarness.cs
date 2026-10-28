@@ -1,10 +1,13 @@
 using CommunitiesForever.Upload.App.Tests.Setup;
 using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.Core.Game;
+using CommunitiesForever.Upload.Core.Runs;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Tests.Runs;
 using CommunitiesForever.Upload.Core.Tests.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 
 namespace CommunitiesForever.Upload.App.Tests.Main;
@@ -35,6 +38,31 @@ internal sealed class MainHarness
         History = new UploadHistory(new MemoryHistory());
         Loop.Statuses = [.. Accounts.Select(a => new AccountStatus(a, AccountState.Watching))];
         Updates = new UpdateHarness(Loop, installed, Time);
+        Runs = new RunsSync(RunsSite, Tokens, Loop, Updates.Games, RunsFiles, Time, NullLogger<RunsSync>.Instance);
+    }
+
+    /// <summary>The runs to the game (UP-12) over fakes; not started unless a test sends runs.</summary>
+    public RunsSync Runs { get; }
+
+    public RunsSite RunsSite { get; } = new();
+
+    public FakeRunsFiles RunsFiles { get; } = new();
+
+    /// <summary>
+    /// The main-window-runs board: WoW running, three runs fetched and written, "/reload to see them". The fakes answer
+    /// at once; this waits for the first fetch, then lets the 10 s check publish.
+    /// </summary>
+    public void RunsSent()
+    {
+        Updates.Games.Running = true;
+        Runs.Start(new AppSettings { Accounts = Accounts });
+        for (int i = 0; i < 200 && Runs.Status.FetchedAt is null; i++)
+        {
+            Time.Advance(TimeSpan.Zero);
+            Thread.Sleep(5);
+        }
+
+        Time.Advance(TimeSpan.FromSeconds(10));
     }
 
     /// <summary>The update checker over fakes (installed as 1.0.3), on this harness's loop and clock.</summary>
@@ -110,7 +138,8 @@ internal sealed class MainHarness
         Time,
         new GameScanner(Disk, new Hints(Disk)),
         CreateSettings,
-        Updates.Checker);
+        Updates.Checker,
+        Runs);
 
     /// <summary>The settings page over the same fakes.</summary>
     public SettingsViewModel CreateSettings() => new(
