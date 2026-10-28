@@ -451,6 +451,13 @@
     <GradientStop Color="{StaticResource AppStaleSoft}" Offset="0" />
     <GradientStop Color="{StaticResource AppSurfaceHero}" Offset="0.6" />
   </LinearGradientBrush>
+  <!-- main-window-runs board (UP-12) -->
+  <SolidColorBrush x:Key="AppRunsBrush" Color="#FF7FB2E5" />
+  <SolidColorBrush x:Key="AppLineRunsBrush" Color="#597FB2E5" />
+  <SolidColorBrush x:Key="AppReloadBadgeBrush" Color="#FF3A2A10" />
+  <Thickness x:Key="AppReloadBadgePad">9,4</Thickness>
+  <x:Double x:Key="AppRunsIconBox">28</x:Double>
+  <x:Double x:Key="AppRunsIconStroke">1.6</x:Double>
   <!-- settings board (UP-09) -->
   <x:Double x:Key="AppNavW">190</x:Double>
   <Thickness x:Key="AppNavPad">12,18</Thickness>

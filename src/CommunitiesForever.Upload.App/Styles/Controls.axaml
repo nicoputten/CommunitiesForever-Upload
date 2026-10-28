@@ -284,6 +284,34 @@
     <Setter Property="FontSize" Value="{StaticResource FsNameSm}" />
     <Setter Property="Foreground" Value="{StaticResource TextStrongBrush}" />
   </Style>
+  <!-- Runs block (UP-12, board main-window-runs) -->
+  <Style Selector="Border.panel.runs">
+    <Setter Property="BorderBrush" Value="{StaticResource AppLineRunsBrush}" />
+  </Style>
+  <Style Selector="Path.runs-icon">
+    <Setter Property="Stroke" Value="{StaticResource AppRunsBrush}" />
+    <Setter Property="StrokeThickness" Value="{StaticResource AppRunsIconStroke}" />
+  </Style>
+  <Style Selector="TextBlock.body-strong">
+    <Setter Property="FontSize" Value="{StaticResource FsBodySm}" />
+    <Setter Property="FontWeight" Value="{StaticResource FwMedium}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.mono.small">
+    <Setter Property="FontSize" Value="{StaticResource FsMetaSm}" />
+    <Setter Property="Foreground" Value="{StaticResource TextFaintBrush}" />
+  </Style>
+  <Style Selector="Border.pill.reload">
+    <Setter Property="Padding" Value="{StaticResource AppReloadBadgePad}" />
+    <Setter Property="Background" Value="{StaticResource AppReloadBadgeBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource BorderThickness}" />
+  </Style>
+  <Style Selector="Border.pill.reload TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
+    <Setter Property="FontWeight" Value="{StaticResource FwSemibold}" />
+    <Setter Property="Foreground" Value="{StaticResource GoldPaleBrush}" />
+  </Style>
   <Style Selector="Border.pill.dim">
     <Setter Property="Background" Value="{StaticResource AppMuteTintBrush}" />
   </Style>

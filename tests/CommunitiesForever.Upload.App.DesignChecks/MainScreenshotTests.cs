@@ -90,6 +90,15 @@ public sealed class MainScreenshotTests
         MainHarness.First,
         MainHarness.Second);
 
+    // UP-12, board main-window-runs: three runs sent while WoW runs.
+    [AvaloniaFact]
+    public Task RunsSent() => Shot("main-runs", h =>
+    {
+        h.BoardHistory(MainHarness.First);
+        h.Status(MainHarness.First, AccountState.Playing);
+        h.RunsSent();
+    });
+
     private static async Task Shot(string name, Action<MainHarness> arrange, params WatchedAccount[] accounts)
     {
         var h = new MainHarness(accounts);

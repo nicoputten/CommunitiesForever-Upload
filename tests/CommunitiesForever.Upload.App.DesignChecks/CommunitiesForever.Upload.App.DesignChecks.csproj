@@ -15,6 +15,7 @@
     <Compile Include="..\CommunitiesForever.Upload.App.Tests\Setup\SetupHarness.cs" Link="Setup\SetupHarness.cs" />
     <Compile Include="..\CommunitiesForever.Upload.App.Tests\Main\MainHarness.cs" Link="Main\MainHarness.cs" />
     <Compile Include="..\CommunitiesForever.Upload.Core.Tests\Updates\UpdateHarness.cs" Link="Updates\UpdateHarness.cs" />
+    <Compile Include="..\CommunitiesForever.Upload.Core.Tests\Runs\RunsFakes.cs" Link="Runs\RunsFakes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\CommunitiesForever.Upload.App\CommunitiesForever.Upload.App.csproj" />
