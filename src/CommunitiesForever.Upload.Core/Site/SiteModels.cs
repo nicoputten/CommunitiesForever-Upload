@@ -44,6 +44,20 @@ public sealed record SiteIdentity(
 /// </summary>
 public sealed record UpdateStatus(string Latest, DateTimeOffset? ReleasedAt, string? MinimumVersion, Uri? NotesUrl);
 
+/// <summary>
+/// <c>GET runs</c> (UP-12): the site's answer as it came, turned into Runs.lua as data only. <see cref="RunCount"/> is
+/// what the main window shows; the app reads nothing else from it.
+/// </summary>
+public sealed record RunsFeed(System.Text.Json.JsonElement Root)
+{
+    public int RunCount =>
+        Root.ValueKind == System.Text.Json.JsonValueKind.Object
+        && Root.TryGetProperty("runs", out var runs)
+        && runs.ValueKind == System.Text.Json.JsonValueKind.Array
+            ? runs.GetArrayLength()
+            : 0;
+}
+
 public enum UploadStatus
 {
     Ok,

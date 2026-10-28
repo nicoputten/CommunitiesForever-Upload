@@ -335,5 +335,8 @@ public sealed class ConnectFlowTests
 
         public Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
+
+        public Task<SiteResult<RunsFeed>> GetRunsAsync(AccessToken token, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
     }
 }
