@@ -104,3 +104,13 @@ Nico (2026-10-28): the uploader used about 75–100 MB, also while it only sits 
 - Result (Release): window open 52 MB / 57 MB; in the tray 30 MB / 34 MB.
 - Manual: the window looks as before at 100 % and 150 % scaling, animations stay smooth, and Task Manager shows about 30 MB after hiding to the tray.
 - Done (PR #24).
+
+### UP-15 Clean-up before the Doomsday release
+Agreed with Nico (2026-10-29): the whole ecosystem (addon, web, bot, uploader) gets a clean-up before the Doomsday release. One or more PRs, branches `feature/up-15-<slug>`.
+- Dependencies: the open Dependabot PRs (actions/checkout 7, actions/setup-dotnet 6, actions/upload-artifact 7) handled, and other outdated NuGet packages and GitHub Actions brought up to date. A major bump (Avalonia, Velopack, .NET) only when build and tests pass, and a risky one only after Nico's OK. A Dependabot PR that needs changes is redone on our own branch and the original closed with a pointer.
+- Technical debt: a list of refactors, each with effort and risk, goes to Nico first; only what he picks is built. UP-14's memory behaviour stays (software rendering, the compacting GC after hiding).
+- Docs: finished stories in `docs/STORIES-COMPLETED.md`; `README.md` and `docs/ARCHITECTURE.md` describe the app as it is; `CHANGELOG.md` `## Unreleased` reads well as release notes.
+- Leftovers: dead code and leftovers removed, flaky tests fixed.
+- `dotnet build`, `dotnet test` and `dotnet format --verify-no-changes` pass; screenshot baselines unchanged (or a change approved by Nico).
+- Decided with Nico (2026-10-29): Dependabot #18 to #20 merged as they were; xunit.v3 stays on 3.x (Avalonia.Headless.XUnit 12.1.4 still needs 3.2.2); refactors 1 (one shared test wait helper) and 3 (drop `docs/KICKOFF.md`) built, 2 (window handling out of `App.axaml.cs`) skipped for now.
+- Done (PRs #27, #28, #29).

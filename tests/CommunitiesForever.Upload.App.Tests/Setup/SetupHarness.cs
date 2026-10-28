@@ -1,8 +1,10 @@
+using System.Runtime.CompilerServices;
 using Avalonia.Threading;
 using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Tests;
 using Microsoft.Extensions.Time.Testing;
 
 namespace CommunitiesForever.Upload.App.Tests.Setup;
@@ -46,18 +48,9 @@ internal sealed class SetupHarness
         new SiteOptions(new Uri("https://wow.vestras.nl/"), "1.0.0"),
         Time);
 
-    /// <summary>Runs the UI jobs (and background scans) until <paramref name="done"/>, at most a few seconds.</summary>
-    public static async Task Until(Func<bool> done)
-    {
-        for (int i = 0; i < 300 && !done(); i++)
-        {
-            Dispatcher.UIThread.RunJobs();
-            await Task.Delay(10);
-        }
-
-        Dispatcher.UIThread.RunJobs();
-        Assert.True(done(), "Timed out waiting for the setup to get there");
-    }
+    /// <summary>Runs the UI jobs (and background scans) until <paramref name="done"/>, at most <see cref="Wait.Max"/>.</summary>
+    public static Task Until(Func<bool> done, [CallerArgumentExpression(nameof(done))] string condition = "") =>
+        Wait.Until(done, () => Dispatcher.UIThread.RunJobs(), condition);
 
     private sealed class Browser(List<Uri> opened) : IBrowser
     {

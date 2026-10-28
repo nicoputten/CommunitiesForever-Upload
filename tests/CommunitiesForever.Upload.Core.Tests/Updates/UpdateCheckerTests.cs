@@ -18,14 +18,14 @@ public sealed class UpdateCheckerTests : IDisposable
     public async Task ChecksAtStartAndThenDaily()
     {
         Checker.Start();
-        await UpdateHarness.Until(() => Checker.State == UpdateState.UpToDate);
+        await Wait.Until(() => Checker.State == UpdateState.UpToDate);
         Assert.Equal(_h.Time.GetUtcNow(), Checker.LastCheck);
         Assert.Equal(_h.Time.GetUtcNow(), _h.Memory.Saved.LastCheck);
 
         _h.Time.Advance(TimeSpan.FromHours(23));
         Assert.Equal(1, _h.Updates.Checks);
         _h.Time.Advance(TimeSpan.FromHours(1));
-        await UpdateHarness.Until(() => _h.Updates.Checks == 2);
+        await Wait.Until(() => _h.Updates.Checks == 2);
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public sealed class UpdateCheckerTests : IDisposable
         _h.Updates.DownloadGate = new TaskCompletionSource();
 
         var check = Checker.CheckNowAsync();
-        await UpdateHarness.Until(() => Checker.State == UpdateState.Downloading);
+        await Wait.Until(() => Checker.State == UpdateState.Downloading);
         Assert.Equal("1.1.0", Checker.NewVersion);
         Assert.Equal(4_092_000, Checker.DownloadedBytes);
         Assert.Equal(6_600_000, Checker.DownloadSize);
@@ -128,7 +128,7 @@ public sealed class UpdateCheckerTests : IDisposable
         var restarts = new List<bool>();
         Checker.RestartRequested += (_, quiet) => restarts.Add(quiet);
         Checker.Start();
-        await UpdateHarness.Until(() => Checker.State == UpdateState.Ready);
+        await Wait.Until(() => Checker.State == UpdateState.Ready);
         loop.Set(AccountState.Uploading);
 
         Checker.RestartNow();
@@ -152,7 +152,7 @@ public sealed class UpdateCheckerTests : IDisposable
         _h.Updates.CheckError = null;
         _h.Time.Advance(UpdateChecker.RetryAfter);
 
-        await UpdateHarness.Until(() => Checker.State == UpdateState.UpToDate);
+        await Wait.Until(() => Checker.State == UpdateState.UpToDate);
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public sealed class UpdateCheckerTests : IDisposable
 
         Checker.Start();
         Assert.Equal("1.1.0", Checker.UpdatedTo);
-        await UpdateHarness.Until(() => Checker.State == UpdateState.UpToDate);
+        await Wait.Until(() => Checker.State == UpdateState.UpToDate);
 
         Checker.DismissUpdated();
 

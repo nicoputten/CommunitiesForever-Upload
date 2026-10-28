@@ -32,7 +32,7 @@ public sealed class RunsSyncTests : IDisposable
     private async Task Tick(TimeSpan by)
     {
         _time.Advance(by);
-        await UpdateHarness.Until(() => !_sync.IsFetching);
+        await Wait.Until(() => !_sync.IsFetching);
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public sealed class RunsSyncTests : IDisposable
 
         _games.Running = true;
         await Tick(UploadLoop.GameCheckInterval);
-        await UpdateHarness.Until(() => _site.Calls == 1);
+        await Wait.Until(() => _site.Calls == 1);
         Assert.Equal(1, _files.Writes); // two accounts, one install: one file
         Assert.Equal(3, _sync.Status.RunCount);
         Assert.True(_sync.Status.GameRunning);
@@ -54,7 +54,7 @@ public sealed class RunsSyncTests : IDisposable
         await Tick(TimeSpan.FromMinutes(4));
         Assert.Equal(1, _site.Calls);
         await Tick(TimeSpan.FromMinutes(1));
-        await UpdateHarness.Until(() => _site.Calls == 2);
+        await Wait.Until(() => _site.Calls == 2);
         Assert.Equal(1, _files.Writes); // nothing changed: not written again
 
         _games.Running = false;
@@ -71,7 +71,7 @@ public sealed class RunsSyncTests : IDisposable
         await Tick(TimeSpan.FromSeconds(10));
         _loop.Statuses = [new AccountStatus(Settings.Accounts[0], AccountState.Watching, LastUpload: Upload(_time.GetUtcNow()))];
         _loop.Raise();
-        await UpdateHarness.Until(() => _site.Calls == 1);
+        await Wait.Until(() => _site.Calls == 1);
         Assert.Equal(1, _files.Writes);
         Assert.Equal(RunsHint.None, _sync.Status.Hint); // WoW closed: read at the next login
     }
@@ -81,15 +81,15 @@ public sealed class RunsSyncTests : IDisposable
     {
         _games.Running = true;
         _sync.Start(Settings);
-        await UpdateHarness.Until(() => _site.Calls == 1);
+        await Wait.Until(() => _site.Calls == 1);
         _site.Feed = """{ "v": 1, "updatedAt": 2, "runs": [] }""";
         await Tick(RunsSync.Interval);
-        await UpdateHarness.Until(() => _files.Writes == 2);
+        await Wait.Until(() => _files.Writes == 2);
         Assert.Equal(0, _sync.Status.RunCount);
 
         _files.Content = "CF_RUNS = nil\n"u8.ToArray(); // the addon update shipped its empty file
         await Tick(RunsSync.Interval);
-        await UpdateHarness.Until(() => _files.Writes == 3);
+        await Wait.Until(() => _files.Writes == 3);
     }
 
     [Theory]
@@ -101,7 +101,7 @@ public sealed class RunsSyncTests : IDisposable
         _files.Folder = folder;
         _games.Running = true;
         _sync.Start(Settings);
-        await UpdateHarness.Until(() => _site.Calls == 1);
+        await Wait.Until(() => _site.Calls == 1);
         await Tick(TimeSpan.FromSeconds(10));
         Assert.Equal(writes, _files.Writes);
         Assert.Equal(hint, _sync.Status.Hint);
@@ -112,16 +112,16 @@ public sealed class RunsSyncTests : IDisposable
     {
         _games.Running = true;
         _sync.Start(Settings);
-        await UpdateHarness.Until(() => _site.Calls == 1);
+        await Wait.Until(() => _site.Calls == 1);
         _site.Fail = true;
         await Tick(RunsSync.Interval);
-        await UpdateHarness.Until(() => _sync.Status.Failed);
+        await Wait.Until(() => _sync.Status.Failed);
         Assert.Equal(3, _sync.Status.RunCount);
         Assert.Equal(1, _files.Writes);
 
         _site.Fail = false;
         await Tick(RunsSync.Interval);
-        await UpdateHarness.Until(() => !_sync.Status.Failed);
+        await Wait.Until(() => !_sync.Status.Failed);
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public sealed class RunsSyncTests : IDisposable
         var site = new RunsSite();
         var sync = new RunsSync(site, new UpdateTokens(), loop, games, new FakeRunsFiles(), time, NullLogger<RunsSync>.Instance);
         sync.Start(Settings);
-        await UpdateHarness.Until(() => site.Calls == 1 && !sync.IsFetching);
+        await Wait.Until(() => site.Calls == 1 && !sync.IsFetching);
         sync.Dispose();
         return new WeakReference(sync);
     }
