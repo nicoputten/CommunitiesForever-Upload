@@ -81,3 +81,26 @@ Nico, 2026-10-27: "the ideal route", the Velopack way; with web WEB-35b (the sit
 - How many versions stay is decided here: the pulled feed is trimmed to the 2 newest earlier versions (3 with the new one); the site keeps exactly what the feed lists.
 - Manual: the next release after this one is the first to pull and make a delta; check its log ("Pulled the feed … and …-full.nupkg") and that an installed app updates.
 - Done (PR #16; the site: web PR #55).
+
+### UP-12 Runs to the game
+Planned runs (decided with Nico, 2026-10-27; the flow: board `runs-flow`): the site owns them, and the game learns about them from a file this app writes, loaded by the addon at login or `/reload`. Needs the web's WEB-44 (`GET /api/uploader/v1/runs`) and the addon's CF-45 (ships the empty file, so it exists when the game starts; a file added later loads only after a game restart).
+- Fetch the upcoming runs every 5 minutes while World of Warcraft runs, and right after each upload; not while the game is closed (one fetch at game start).
+- Write them to `Interface\AddOns\CommunitiesForever\Data\Runs.lua` of each game folder found (setup, UP-05), as Lua data only: one table `CF_RUNS = { updatedAt = <UTC>, runs = { ... } }` generated from the site's JSON with every string escaped and length-capped, never code or text from the site as code (CLAUDE.md rule 1's exception). Atomic: write a temp file next to it, then replace, so a `/reload` never reads half a file. Write only when the content changed.
+- Not a SavedVariables file (the game would overwrite it on logout), and never the addon's saved file.
+- Runs v2 (web WEB-47, addon CF-49, decided with Nico 2026-10-28): copy each answer's optional `role`, `fit` (text, at most 24 characters) and `reserve` (true only) into the file as well; the addon shows the fit and lists reserves without a slot. Older addons ignore `fit` and `reserve` and show a reserve as Maybe (the site sends it as `answer = "maybe"`).
+- When the addon folder or the file is missing (addon not installed, or an addon update replaced the folder): write it again when the folder exists; when the addon has no `Data` folder yet (a version before CF-45), write nothing and show "Update the addon to see runs in game".
+- Main window: the board `main-window-runs` "Runs" block: "3 upcoming runs sent to the game · 17:34", "Checks every 5 min while WoW runs, and after each upload · next 17:39", "/reload to see them" while the game runs, "Open runs on the site". The board's other lines that are already deviations (`docs/DESIGN-NOTES.md`) stay as built.
+- The recent-uploads summary shows the site's "N run answers" like its other counts.
+- Tests: the Lua writer (escaping, caps, a site string that tries to close the table or inject code), the atomic replace, the schedule (game running, after upload, game closed), the missing-folder cases, no memory growth over a soak run (rule 11).
+- Manual: plan a run on the site, wait for the fetch or upload, `/reload` in game, the Dungeons tab (addon CF-46) shows it.
+- Decided with Nico (2026-10-28): one Runs.lua per install; fetch at game start, every 5 min while it runs and after each upload; the whole answer converted generically, with busy realistic tests far below the caps (caps a safety net only); written only when the bytes change, atomically; the missing-folder messages; the Runs block texts; nothing stored.
+- Done (PR #23): `Core/Runs` (`RunsSync`, `RunsLua`, `IRunsFiles`), `ISiteClient.GetRunsAsync`, Windows `RunsFiles`, the main window's Runs block (`RunsBlock`, design check `main-runs`; the other main-window baselines change with the block).
+
+### UP-14 Less memory in the tray
+Nico (2026-10-28): the uploader used about 75–100 MB, also while it only sits in the tray, where no window is needed. Measured on a Release build like the shipped one (private working set as Task Manager shows it, and private bytes): window open 98 MB / 228 MB; hidden to the tray 95 MB / 204 MB, nothing given back; started with Windows, never opened, 28 MB / 78 MB. What held it: Avalonia's GPU path (ANGLE on Direct3D, about 50 MB even never shown, more once the window was drawn), and about 40 MB the GC had committed while the window was open and never decommitted. The window's own objects were a few MB. Decided with Nico (2026-10-28):
+- Render in software (`Win32RenderingMode.Software`): the window looks the same and needs no GPU.
+- A few seconds after the window hides to the tray, one compacting, decommitting collection (`TrayMemory`, in Core, tested with a fake clock); showing the window before then cancels it.
+- Keep hiding the window (reopening stays instant). Not done, measured: disposing the window on hide (a few MB more), other GC modes (non-concurrent, ConserveMemory: nothing more), restarting into `--tray` or a separate tray process (would reach about 22 MB in software; single instance, updates and upload state across restarts not worth it).
+- Result (Release): window open 52 MB / 57 MB; in the tray 30 MB / 34 MB.
+- Manual: the window looks as before at 100 % and 150 % scaling, animations stay smooth, and Task Manager shows about 30 MB after hiding to the tray.
+- Done (PR #24).

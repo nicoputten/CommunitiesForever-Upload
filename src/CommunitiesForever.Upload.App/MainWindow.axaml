@@ -165,6 +165,34 @@
             </StackPanel>
           </Border>
 
+          <!-- Runs (UP-12, board main-window-runs) -->
+          <Border Classes="panel runs" IsVisible="{Binding ShowRuns}" AutomationProperties.Name="Runs">
+            <StackPanel Spacing="{StaticResource S2_5}">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="section" Text="Runs" />
+                <Button Grid.Column="1" Classes="link" Content="Open runs on the site" Command="{Binding OpenRunsCommand}" />
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S3}">
+                <Viewbox Width="{StaticResource AppFileIcon}" Height="{StaticResource AppFileIcon}">
+                  <Canvas Width="{StaticResource AppRunsIconBox}" Height="{StaticResource AppRunsIconBox}">
+                    <Path Classes="runs-icon" Data="M7,6 H21 A3,3 0 0 1 24,9 V21 A3,3 0 0 1 21,24 H7 A3,3 0 0 1 4,21 V9 A3,3 0 0 1 7,6 Z M4,11 H24 M9,3 V8 M19,3 V8" />
+                  </Canvas>
+                </Viewbox>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                  <TextBlock Classes="body-strong" Text="{Binding Runs.Title}" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Classes="meta" Text="{Binding Runs.Line}" TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Grid.Column="2" Classes="pill"
+                        Classes.reload="{Binding Runs.BadgeKind, Converter={x:Static c:RunsBadges.Reload}}"
+                        Classes.warn="{Binding Runs.BadgeKind, Converter={x:Static c:RunsBadges.Warn}}"
+                        IsVisible="{Binding Runs.HasBadge}">
+                  <TextBlock Text="{Binding Runs.Badge}" />
+                </Border>
+              </Grid>
+              <TextBlock Classes="mono small" Text="{Binding Runs.Path}" IsVisible="{Binding Runs.HasPath}" ToolTip.Tip="{Binding Runs.FullPath}" />
+            </StackPanel>
+          </Border>
+
           <!-- How it works: only until the first upload (docs/DESIGN-NOTES.md) -->
           <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource S2_5}" IsVisible="{Binding !HasRecent}">
             <Border Classes="panel explainer">

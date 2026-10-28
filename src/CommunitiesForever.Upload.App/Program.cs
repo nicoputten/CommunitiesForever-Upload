@@ -27,9 +27,12 @@ internal static class Program
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
-    // Also used by the designer previewer.
+    // Also used by the designer previewer. Rendered in software (UP-14): the GPU path (ANGLE on Direct3D) held about
+    // 120 MB more private memory in the tray than the software renderer (measured 2026-10-28), and this small window
+    // with a few short animations needs no GPU.
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            .With(new Win32PlatformOptions { RenderingMode = [Win32RenderingMode.Software] })
             .LogToTrace();
 }

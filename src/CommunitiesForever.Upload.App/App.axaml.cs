@@ -12,6 +12,7 @@ using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.App.Views;
 using CommunitiesForever.Upload.Core;
 using CommunitiesForever.Upload.Core.Notifications;
+using CommunitiesForever.Upload.Core.Runs;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Core.Updates;
@@ -316,9 +317,12 @@ internal sealed partial class App : Application
         SwitchTo(desktop, CreateMain(_services));
     }
 
-    // The watch-and-upload loop (UP-06); the container stops it on exit.
-    private static void StartLoop(ServiceProvider services, AppSettings settings) =>
+    // The watch-and-upload loop (UP-06) and the runs to the game (UP-12); the container stops them on exit.
+    private static void StartLoop(ServiceProvider services, AppSettings settings)
+    {
         _ = services.GetRequiredService<UploadLoop>().StartAsync(settings);
+        services.GetRequiredService<RunsSync>().Start(settings);
+    }
 
     private void OnSetupCancelled(object? sender, EventArgs e)
     {
@@ -371,6 +375,7 @@ internal sealed partial class App : Application
         {
             e.Cancel = true;
             window.Hide();
+            _services?.GetRequiredService<TrayMemory>().Hidden();
         }
     }
 
@@ -441,6 +446,7 @@ internal sealed partial class App : Application
         }
 
         desktop.MainWindow = window;
+        _services?.GetRequiredService<TrayMemory>().Shown();
         window.Show();
         window.WindowState = WindowState.Normal;
         window.Activate();

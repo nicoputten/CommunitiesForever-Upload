@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunitiesForever.Upload.Core.Game;
+using CommunitiesForever.Upload.Core.Runs;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
 using CommunitiesForever.Upload.Core.Updates;
@@ -38,15 +39,17 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private readonly GameScanner _scanner;
     private readonly Func<SettingsViewModel> _newSettings;
     private readonly UpdateChecker _updates;
+    private readonly RunsSync _runs;
     private SynchronizationContext? _ui;
     private ITimer? _ticker;
     private CancellationTokenSource? _identityLoad;
     private AppSettings _current = new();
     private WatchedAccount? _heroAccount;
 
-    public MainViewModel(IUploadLoop loop, UploadHistory history, SettingsStore settings, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time, GameScanner scanner, Func<SettingsViewModel> newSettings, UpdateChecker updates)
+    public MainViewModel(IUploadLoop loop, UploadHistory history, SettingsStore settings, ISiteClient site, ITokenStore tokens, SiteOptions options, IBrowser browser, TimeProvider time, GameScanner scanner, Func<SettingsViewModel> newSettings, UpdateChecker updates, RunsSync runs)
     {
         _updates = updates;
+        _runs = runs;
         _scanner = scanner;
         _newSettings = newSettings;
         _loop = loop;
@@ -58,6 +61,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _browser = browser;
         _time = time;
         Hero = Hero.For(null, null, time.GetUtcNow(), time.LocalTimeZone, Host, null);
+        Runs = RunsBlock.For(runs.Status, time.LocalTimeZone);
     }
 
     /// <summary>"Reconnect": the app opens the Connect window.</summary>
@@ -94,6 +98,13 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool HasRecent { get; set; }
 
+    /// <summary>The Runs block (UP-12); shown while connected with an account watched.</summary>
+    [ObservableProperty]
+    public partial RunsBlock Runs { get; set; }
+
+    [ObservableProperty]
+    public partial bool ShowRuns { get; set; }
+
     /// <summary>"Updated to 1.1 · What's new", once in the footer after an update (update-states board).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUpdatedTo))]
@@ -126,6 +137,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _ui = SynchronizationContext.Current;
         _loop.StatusChanged += OnStatusChanged;
         _updates.Changed += OnStatusChanged;
+        _runs.Changed += OnStatusChanged;
         _ticker = _time.CreateTimer(_ => Post(RefreshIfCounting), null, Tick, Tick);
         Reload();
     }
@@ -180,6 +192,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         CloseSettings();
         _loop.StatusChanged -= OnStatusChanged;
         _updates.Changed -= OnStatusChanged;
+        _runs.Changed -= OnStatusChanged;
         _ticker?.Dispose();
         _ticker = null;
         _identityLoad?.Cancel();
@@ -225,6 +238,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
 
         HasRecent = Recent.Count > 0;
+        Runs = RunsBlock.For(_runs.Status, _time.LocalTimeZone);
+        ShowRuns = IsConnected && _current.Accounts.Count > 0;
     }
 
     [RelayCommand]
@@ -319,6 +334,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private void OpenSite() => _browser.Open(_options.BaseUri);
+
+    [RelayCommand]
+    private void OpenRuns() => _browser.Open(new Uri(_options.BaseUri, "runs"));
 
     [RelayCommand]
     private void RestartToUpdate() => _updates.RestartNow();

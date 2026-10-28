@@ -22,6 +22,14 @@ public static class Choose
 }
 
 /// <summary>A <see cref="Tone"/> as style classes (fresh, gold, playing, dim, warn).</summary>
+/// <summary>The Runs block's badge classes (UP-12).</summary>
+public static class RunsBadges
+{
+    public static readonly IValueConverter Reload = new FuncValueConverter<RunsBadgeKind, bool>(k => k == RunsBadgeKind.Reload);
+
+    public static readonly IValueConverter Warn = new FuncValueConverter<RunsBadgeKind, bool>(k => k == RunsBadgeKind.Warn);
+}
+
 public static class Tones
 {
     public static readonly IValueConverter Fresh = new FuncValueConverter<Tone, bool>(t => t == Tone.Fresh);

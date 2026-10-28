@@ -56,6 +56,7 @@ The app lives for weeks in the tray, so memory must stay flat:
 - Every subscribed event handler is unsubscribed (or a weak event is used); no static events.
 - One shared `HttpClient`; no caches or collections without a maximum (history 50 per account, a bounded queue, rolling logs).
 - Tests: every view, view model and loop component that can be created more than once is checked to be collected after close or stop (`WeakReference` + GC); the loop gets a soak test in UP-06.
+- Small in the tray (UP-14): Avalonia renders in software (`Program`), because the GPU path (ANGLE on Direct3D) held most of the memory, also with the window hidden; and `TrayMemory` runs one compacting collection a few seconds after the window hides to the tray, giving back the heap the window grew. Hiding keeps the window (reopening stays instant); disposing it saved only a few MB more.
 
 ## Layering
 ```
@@ -90,6 +91,12 @@ Watching ─▶ game running (WoW process seen) ─▶ file changed ─▶ settl
 - Implementation: `UploadLoop` in Core with one worker per account (`AccountState`, ordered by urgency: the overall status is the highest), uploads one at a time; `UploadHistory` for the ledger and history. Windows: `FileWatcherFactory` (FileSystemWatcher; the loop also checks every 30 s), `AddonFileReader`, `GameProcesses` (`Wow.exe` inside the install's `_forever_`, checked every 10 s, only to show "Playing").
 - Pause: no uploads until the pause ends; changes are noted and the newest file goes up after.
 - Several accounts are watched independently.
+
+## Runs to the game (UP-12, board `runs-flow`)
+- `RunsSync` in Core fetches `GET runs` when WoW is seen starting (the 10 s game check), every 5 min while it runs, and right after each upload that reached the site (a newer last upload on any account), also with WoW closed. Nothing else while WoW is closed; a failed fetch waits for the next tick. One fetch at a time; the timer and cancellation are owned and stopped (rule 11).
+- `RunsLua` turns the whole answer into `CF_RUNS = { ... }` as data only (Nico, 2026-10-28): keys as `["key"]`, strings quoted with `\\`, `\"` and control characters as `\ddd`, invariant numbers, booleans, `null` left out (`nil` in lists). New site fields reach the addon without an uploader update; the addon's validator (CF-45) drops what it doesn't know. Safety caps only (depth 12, strings 500 characters, 4 MB per file): the site's own maximum (50 runs, 40 answers each, 200 received ids) is about a fifth of the size cap and nothing is cut (`RunsLuaTests`, which also read the file back with a strict Lua data reader).
+- `IRunsFiles` (Windows: `RunsFiles`) writes `<_forever_>\Interface\AddOns\CommunitiesForever\Data\Runs.lua` once per install (accounts in one install share it), only when the bytes differ from the file on disk (so the first fetch after an addon update, which ships the empty file, writes again), via `Runs.lua.tmp` and a move. No addon folder: "Install the addon"; no `Data` folder (an addon before CF-45): "Update the addon", nothing written; `Data` without Runs.lua: written, "Restart WoW to see them" (the game loads only files that existed at its start). Never the addon's saved file (rule 1).
+- Nothing is stored: the last fetch lives in memory (`RunsStatus`), so settings and history don't change.
 
 ## Storage (per Windows user)
 - `%LocalAppData%\CommunitiesForever.Upload\settings.json`: versioned settings, migration step per version (CLAUDE.md rule 10). Version 1 (UP-05): `version`, `accounts` (`installPath` = the `_forever_` folder, `account`), `uploadAutomatically`, `startWithWindows`, `closeHidesToTray`, `notifications` (`EveryUpload`, `OnlyProblems`, `Off`), `siteUrl` (null for wow.vestras.nl). Version 2 (UP-10) adds `installUpdatesWhenWowClosed` (the 1 → 2 step sets it on). Written via a temporary file; a damaged file is kept as `settings.json.bad` and setup runs again; a file from a newer version is never overwritten. `SettingsStoreTests` keeps the released v1 text loading.

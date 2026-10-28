@@ -22,5 +22,6 @@
   <ItemGroup>
     <!-- Shared with Core.Tests: the update checker over fakes (UP-10) -->
     <Compile Include="..\CommunitiesForever.Upload.Core.Tests\Updates\UpdateHarness.cs" Link="Updates\UpdateHarness.cs" />
+    <Compile Include="..\CommunitiesForever.Upload.Core.Tests\Runs\RunsFakes.cs" Link="Runs\RunsFakes.cs" />
   </ItemGroup>
 </Project>

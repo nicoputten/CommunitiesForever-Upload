@@ -113,6 +113,8 @@ internal sealed class StatusSite : ISiteClient
 
     public Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default) => Task.FromResult(Status);
 
+    public Task<SiteResult<RunsFeed>> GetRunsAsync(AccessToken token, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
     public Task<SiteResult<DeviceAuthorization>> RequestDeviceCodeAsync(string deviceName, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
     public Task<SiteResult<TokenPoll>> PollTokenAsync(DeviceCode deviceCode, CancellationToken cancellationToken = default) => throw new NotSupportedException();
@@ -148,6 +150,10 @@ internal sealed class UpdateLoop : IUploadLoop
         Statuses = [new(UpdateHarness.Account, state)];
         StatusChanged?.Invoke(this, EventArgs.Empty);
     }
+
+    public void Raise() => StatusChanged?.Invoke(this, EventArgs.Empty);
+
+    public int Subscribers => StatusChanged?.GetInvocationList().Length ?? 0;
 
     public void UploadNow(WatchedAccount? account = null)
     {

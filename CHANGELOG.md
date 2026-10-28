@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.0 (2026-10-28)
+- Uses far less memory, most of all in the tray: the window is drawn without the graphics card, and the app gives memory back a few seconds after you hide it to the tray.
+- Planned runs reach the game: while World of Warcraft runs (every 5 minutes) and after each upload, the uploader gets the upcoming runs from the site and writes them into the addon, so the Dungeons tab shows them after a /reload. The main window has a Runs block saying how many were sent, when it checks next, and when the game needs a /reload, a restart or a newer addon.
+
 ## v0.1.0 (2026-10-27)
 - Updates download only what changed since your version, when you're at most two versions behind; otherwise the whole app as before.
 - Installs from the site and keeps itself up to date: it checks once a day, downloads quietly and installs when you quit, when Windows restarts or when World of Warcraft is closed (a setting). Never during an upload, no pop-ups. Settings › About & updates shows what it's doing; after an update the window says so once, with a link to what's new.

@@ -19,6 +19,9 @@ public interface ISiteClient
 
     /// <summary>The newest version, the minimum the site still accepts and its "What's new" page (UP-10).</summary>
     Task<SiteResult<UpdateStatus>> GetUpdateStatusAsync(AccessToken token, CancellationToken cancellationToken = default);
+
+    /// <summary>The upcoming runs the app writes into the game as Runs.lua (UP-12, web WEB-44).</summary>
+    Task<SiteResult<RunsFeed>> GetRunsAsync(AccessToken token, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Where the site is and what the app sends about itself.</summary>
