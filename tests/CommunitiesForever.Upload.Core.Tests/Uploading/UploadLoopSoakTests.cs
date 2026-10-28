@@ -4,8 +4,10 @@ namespace CommunitiesForever.Upload.Core.Tests.Uploading;
 
 /// <summary>
 /// The app runs for weeks (CLAUDE.md rule 11): 10,000 saves over three accounts must leave the ledger, the history,
-/// the watchers and memory where they were.
+/// the watchers and memory where they were. Runs alone: the memory check reads the whole process's heap, so another
+/// test class loading its statics (the contract examples, JSON metadata) in the meantime would count as growth.
 /// </summary>
+[Collection(nameof(UploadLoopSoakTests))]
 public sealed class UploadLoopSoakTests
 {
     private const int Saves = 10_000;
@@ -62,3 +64,6 @@ public sealed class UploadLoopSoakTests
         return GC.GetTotalMemory(forceFullCollection: true);
     }
 }
+
+[CollectionDefinition(nameof(UploadLoopSoakTests), DisableParallelization = true)]
+public sealed class UploadLoopSoakRunsAlone;

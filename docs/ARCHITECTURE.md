@@ -12,7 +12,7 @@
 | Runtime | .NET 10 (LTS), C# | Nico's choice |
 | UI | Avalonia 12 (MVVM with CommunityToolkit.Mvvm), compiled bindings | styleable to the shared tokens, headless rendering for screenshot tests |
 | Tray icon | Avalonia `TrayIcon` | built in |
-| Notifications | Windows toast notifications (UP-08 picks the package, ask first) | |
+| Notifications | Windows toast notifications through the WinRT API of the `net10.0-windows10.0.19041.0` target | no package (UP-08) |
 | HTTP | one shared `HttpClient` (`SiteHttp.Create`, 15 min connection lifetime, 100 s timeout), `SiteClient` in Core | CLAUDE.md rule 11 |
 | OAuth (connecting, revoking) | Duende.IdentityModel 8.1.0 (Apache-2.0): device authorization, device token, revocation | named by UPLOADER-API.md "Standards" |
 | Dependency injection | Microsoft.Extensions.DependencyInjection, container built only in App | interfaces everywhere, Core and Windows each offer one `AddCore()` / `AddWindowsAdapters()` |
@@ -24,7 +24,7 @@
 | Tests | xUnit v3, Avalonia.Headless for UI and screenshots, hand-written fakes, plain `Assert` | no mocking or assertion library |
 | CI | GitHub Actions on `windows-latest` | |
 
-Every package at an exact version. Anything not listed needs Nico's OK (CLAUDE.md rule 9). UP-01 checks the current versions.
+Every package at an exact version. Anything not listed needs Nico's OK (CLAUDE.md rule 9).
 
 ### Dependencies (UP-11)
 - Dependabot (`.github/dependabot.yml`) checks NuGet and GitHub Actions every Monday and opens PRs into `develop`: minor and patch updates grouped into one PR a week, majors on their own. Avalonia's four packages always move together (majors included); the .NET extensions and DPAPI form one group.
@@ -40,7 +40,7 @@ Every package at an exact version. Anything not listed needs Nico's OK (CLAUDE.m
 - Retry and backoff are our own small state machine in Core, not Polly.
 - File watching: `FileSystemWatcher` as the trigger plus a 30 s poll as the safety net; both feed the same settle step.
 - Fake site: a fake `HttpMessageHandler` in unit tests whose answers are the `<!-- example -->` blocks of `docs/contract/UPLOADER-API.md` (a copy of the web's contract, refreshed by `scripts/refresh-api-contract.ps1`). By hand: the web dev server, started with `--site http://localhost:3000` (Debug builds). No `tools/FakeSite` (dropped in UP-04: the real API exists).
-- Windows bits without packages: named mutex + named pipe for single instance, HKCU `Run` key for autostart, the WinRT notification API through the `net10.0-windows10.0.19041.0` target framework for toasts (UP-08 confirms).
+- Windows bits without packages: named mutex + named pipe for single instance, HKCU `Run` key for autostart, the WinRT notification API through the `net10.0-windows10.0.19041.0` target framework for toasts.
 - Startup: ReadyToRun on publish; no Native AOT.
 - Core targets plain `net10.0`, so Windows APIs are not even available there; `ArchitectureTests` in Core.Tests reads Core's metadata and fails on Avalonia, Windows APIs, the other projects, direct file system, process, registry or socket use and P/Invoke. `HttpClient` is allowed in Core but always injected.
 
@@ -48,14 +48,14 @@ Every package at an exact version. Anything not listed needs Nico's OK (CLAUDE.m
 - The app lives in the tray (`ShutdownMode.OnExplicitShutdown`): it ends by the tray's Quit, or by closing the window when "Close hides to the tray" is off. `TrayController` (App) shows the icon per state, the tooltip and the menu, and turns status changes into notifications through `NotificationPolicy` (Core: an upload with something new, each problem once when it starts; the notification setting filters).
 - Notifications are Windows toasts for this unpackaged app, without a package: `ShellRegistration` registers, at every start and for the current user only, the sender (`HKCU\Software\Classes\AppUserModelId\CommunitiesForever.Uploader`, name and icon) and the app link scheme `communitiesforever-uploader://` (`open`, `reconnect`). Every toast click is a link (protocol activation), so no COM server is needed. Windows takes the notification's header (name and shield) from a Start menu shortcut carrying the AppUserModelId, not from the registry: `StartMenuShortcut` keeps "CommunitiesForever Uploader.lnk" right at every start (found when Nico tried it; without it the header shows the raw id).
 - One instance per Windows user (`SingleInstance`: named mutex and pipe). A later start (Start menu, a notification's link) hands its arguments to the running app and quits.
-- Start with Windows: `RegistryAutostart` keeps `HKCU\…\Run\CommunitiesForever Uploader = "<exe>" --tray` in step with the setting; `--tray` starts hidden. Debug builds leave the Run key alone. UP-10 points the Run entry and the registrations at Velopack's stable launcher and removes them on uninstall.
+- Start with Windows: `RegistryAutostart` keeps `HKCU\…\Run\CommunitiesForever Uploader = "<exe>" --tray` in step with the setting; `--tray` starts hidden. Debug builds leave the Run key alone. The Run entry and the registrations point at Velopack's stable launcher and are removed on uninstall (UP-10).
 
 ## Long running (CLAUDE.md rule 11)
 The app lives for weeks in the tray, so memory must stay flat:
 - Whoever creates something with a lifetime disposes it: timers, watchers, `CancellationTokenSource`s, DI scopes, the tray icon. App disposes the service provider on exit.
 - Every subscribed event handler is unsubscribed (or a weak event is used); no static events.
 - One shared `HttpClient`; no caches or collections without a maximum (history 50 per account, a bounded queue, rolling logs).
-- Tests: every view, view model and loop component that can be created more than once is checked to be collected after close or stop (`WeakReference` + GC); the loop gets a soak test in UP-06.
+- Tests: every view, view model and loop component that can be created more than once is checked to be collected after close or stop (`WeakReference` + GC); the loop has a soak test (`UploadLoopSoakTests`, 10,000 saves).
 - Small in the tray (UP-14): Avalonia renders in software (`Program`), because the GPU path (ANGLE on Direct3D) held most of the memory, also with the window hidden; and `TrayMemory` runs one compacting collection a few seconds after the window hides to the tray, giving back the heap the window grew. Hiding keeps the window (reopening stays instant); disposing it saved only a few MB more.
 
 ## Layering
@@ -63,7 +63,7 @@ The app lives for weeks in the tray, so memory must stay flat:
 src/CommunitiesForever.Upload.Core/     pure: state machine, settle timer, hashing, retry and queue, connect flow,
                                         settings and history models with migrations, API contract types; no UI, no OS
 src/CommunitiesForever.Upload.Windows/  thin adapters: WoW folder discovery (registry, Battle.net config), file watcher,
-                                        autostart, DPAPI token store, toasts, single-instance
+                                        autostart, DPAPI token store, toasts, single-instance, Runs.lua writer, Velopack
 src/CommunitiesForever.Upload.App/      Avalonia app: views, view models, tray, styles (Tokens.axaml)
 tests/                                  Core unit tests, Windows adapter tests, UI tests and screenshot checks
 design/                                 Claude Design boards (reference only, never built)

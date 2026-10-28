@@ -82,8 +82,8 @@ The release notes come from the version's section in `CHANGELOG.md` (`## vX.Y.Z 
 | `src/CommunitiesForever.Upload.Core` | All logic, UI-free and OS-free (`net10.0`) |
 | `src/CommunitiesForever.Upload.Windows` | Thin Windows adapters behind Core's interfaces |
 | `src/CommunitiesForever.Upload.App` | Avalonia app, composition root (DI) |
-| `tests/…Core.Tests` | Core unit tests (site client against the contract's examples, connect flow) and the architecture test |
-| `tests/…Windows.Tests` | Windows adapter tests (DPAPI token store) |
+| `tests/…Core.Tests` | Core unit tests (site client against the contract's examples, connect flow, loop and its soak test, runs, updates) and the architecture test |
+| `tests/…Windows.Tests` | Windows adapter tests (DPAPI token store, loop, tray and packaging adapters) |
 | `tests/…App.Tests` | Headless UI tests, token drift, token lint, contrast |
 | `tests/…App.DesignChecks` | Screenshot design checks against `Baselines/` |
 
