@@ -104,6 +104,7 @@ Watching ─▶ game running (WoW process seen) ─▶ file changed ─▶ settl
 - `updates.json` (version 1, UP-10): the version handed to the installer, "Updated to …" until it is closed, the last check. An unreadable or newer file starts afresh.
 - `history.json` (version 1, UP-06): per account (`installPath`, `account`) the `ledger` (last 300: `hash`, `outcome`, `rejection`, `at`) and the `history` (last 50 uploads: the site's id, time, status, rejection, schema version, summary line, highlights, report link). Same migration rules as the settings; an unreadable file starts afresh (at worst one file goes up again). `UploadHistoryTests` keeps the released v1 text loading.
 - The token: DPAPI-protected file next to it, never in settings.
+- Retail test mode (`--retail`, `GameFolderOptions`, docs/RETAIL-TEST-MODE.md): the scanner looks for `_retail_` instead of `_forever_`, and `settings.json` and `history.json` live in `retail-test\` beside the normal ones; token, logs and `updates.json` are shared. Autostart is left to the normal mode.
 - `logs\`: `uploader.log` rolled at 1 MB, at most 7 files (`RollingFileLoggerProvider`). No tokens, no highlights or other people's names (tested).
 
 ## Site API

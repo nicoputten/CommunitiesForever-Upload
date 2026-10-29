@@ -7,4 +7,7 @@ public static class AppPaths
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CommunitiesForever.Upload");
 
     public static string LogDirectory { get; } = Path.Combine(DataDirectory, "logs");
+
+    /// <summary>Settings and history of retail test mode (<c>--retail</c>), apart from the normal ones.</summary>
+    public static string RetailTestDirectory { get; } = Path.Combine(DataDirectory, "retail-test");
 }

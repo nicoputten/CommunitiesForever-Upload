@@ -99,7 +99,13 @@ public sealed partial class SetupViewModel : ObservableObject, IDisposable
     public string Step2Text => Step > 2 ? WatchedText(Find.Chosen.Count) : "Find your game";
 
     /// <summary>"CommunitiesForever Uploader" until the site's name is known (docs/DESIGN-NOTES.md).</summary>
-    public string Title => Identity is { SiteName.Length: > 0 } me ? $"{me.SiteName} Uploader" : App.DefaultName;
+    public string Title => (Identity is { SiteName.Length: > 0 } me ? $"{me.SiteName} Uploader" : App.DefaultName)
+        + (RetailTestMode ? $" · {MainViewModel.RetailTestText}" : "");
+
+    /// <summary>Started with --retail: the title says so.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title))]
+    public partial bool RetailTestMode { get; set; }
 
     /// <summary>Settings from an earlier run (setup reopened because no account is watched), or null.</summary>
     public AppSettings? Existing { get; set; }

@@ -23,7 +23,7 @@ public sealed record GameAccount(string Name, string AddonFilePath, DateTimeOffs
     public bool HasAddonFile => SavedAt is not null;
 }
 
-/// <summary>A WoW: Forever install: its <c>_forever_</c> folder and accounts.</summary>
+/// <summary>A WoW: Forever install: its <c>_forever_</c> folder (<c>_retail_</c> in retail test mode) and accounts.</summary>
 public sealed record GameInstall(string ForeverPath, IReadOnlyList<GameAccount> Accounts)
 {
     public bool Equals(GameInstall? other) =>
@@ -34,12 +34,15 @@ public sealed record GameInstall(string ForeverPath, IReadOnlyList<GameAccount> 
 
 /// <summary>
 /// Finds WoW: Forever and its accounts (UP-05). It only checks folders and the addon file's save time; it never opens
-/// the file (CLAUDE.md rule 1).
+/// the file (CLAUDE.md rule 1). Looks for <c>_retail_</c> instead in retail test mode (<see cref="GameFolderOptions"/>).
 /// </summary>
-public sealed class GameScanner(IFileSystem files, IInstallHints hints)
+public sealed class GameScanner(IFileSystem files, IInstallHints hints, GameFolderOptions? folder = null)
 {
+
     public const string ForeverFolder = "_forever_";
     public const string AddonFileName = "CommunitiesForever.lua";
+
+    private readonly string _versionFolder = (folder ?? GameFolderOptions.Forever).VersionFolder;
 
     /// <summary>Every install found through the hints, each once.</summary>
     public IReadOnlyList<GameInstall> Scan()
@@ -78,7 +81,7 @@ public sealed class GameScanner(IFileSystem files, IInstallHints hints)
         // Inside _forever_: walk up to it.
         for (string? dir = folder; dir is not null; dir = Path.GetDirectoryName(dir))
         {
-            if (string.Equals(Path.GetFileName(dir), ForeverFolder, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Path.GetFileName(dir), _versionFolder, StringComparison.OrdinalIgnoreCase))
             {
                 return files.DirectoryExists(dir) ? dir : null;
             }
@@ -87,7 +90,7 @@ public sealed class GameScanner(IFileSystem files, IInstallHints hints)
         // The WoW folder, or a sibling of _forever_ (the registry points at _retail_).
         foreach (string? root in new[] { folder, Path.GetDirectoryName(folder) })
         {
-            if (root is not null && Path.Combine(root, ForeverFolder) is var candidate && files.DirectoryExists(candidate))
+            if (root is not null && Path.Combine(root, _versionFolder) is var candidate && files.DirectoryExists(candidate))
             {
                 return candidate;
             }
