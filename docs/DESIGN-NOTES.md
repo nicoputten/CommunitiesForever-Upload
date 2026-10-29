@@ -26,6 +26,7 @@ Approved departures from the boards (CLAUDE.md rule 7). Only Nico approves one; 
 |---|---|---|---|
 | 2026-10-27 | Setup scan shows the file and its save time, no "10 characters" | No parsing in the app | Nico |
 | 2026-10-27 | Newer-format state without "Told Nico automatically" | Left out | Nico |
+| 2026-10-29 | Runs block: "3 runs saved for the game" and "Type /reload to load them" instead of "3 upcoming runs sent to the game" and "/reload to see them"; the Runs.lua path is a tooltip on the title, not its own line | "/reload to see them" read as if the runs hadn't arrived; the path is no use to players | Nico |
 | 2026-10-27 | Setup before connecting: title "CommunitiesForever Uploader" and heading "Connect to wow.vestras.nl" instead of "Doombringers" | The site's name is only known after connecting | Nico |
 | 2026-10-27 | Setup step 1 states not on the board: getting a code, code expired, denied on the site, site unreachable (one stale line and "Try again" in the code card), connected (after Back); paste errors inline under the field | The board shows only "waiting" | Nico |
 | 2026-10-27 | Setup step 2 "nothing found": "Where is World of Warcraft?" with a short explanation, Scan again and Choose folder…; "Looking for your game…" while scanning | Not on the setup board; wording from the states board | Nico |
