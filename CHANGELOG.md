@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.1 (2026-10-29)
+- The Runs block in the main window says "3 runs saved for the game" and how to load them ("Type /reload to load them"), instead of "/reload to see them". The file path moved into a tooltip.
+
 ## v0.3.0 (2026-10-29)
 - Retail test mode for testing the addon before Forever launches: started with `--retail`, the uploader watches and writes the retail client's folder instead of Forever's, with its own settings, and says "Retail test mode" in the window. Without the flag nothing changes.
 

@@ -50,7 +50,7 @@ internal sealed class MainHarness
     public FakeRunsFiles RunsFiles { get; } = new();
 
     /// <summary>
-    /// The main-window-runs board: WoW running, three runs fetched and written, "/reload to see them". The fakes answer
+    /// The main-window-runs board: WoW running, three runs fetched and written, "Type /reload to load them". The fakes answer
     /// at once; this waits for the first fetch, then lets the 10 s check publish.
     /// </summary>
     public void RunsSent()
