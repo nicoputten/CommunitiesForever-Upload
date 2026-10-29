@@ -25,6 +25,10 @@
             <TextBlock Classes="meta" Text="{Binding ConnectedText}" />
           </StackPanel>
           <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{StaticResource S3_5}">
+            <!-- Retail test mode (docs/RETAIL-TEST-MODE.md) -->
+            <Border Classes="pill gold" VerticalAlignment="Center" IsVisible="{Binding RetailTestMode}">
+              <TextBlock VerticalAlignment="Center" Text="{x:Static vm:MainViewModel.RetailTestText}" />
+            </Border>
             <!-- Once after an update (update-states board) -->
             <StackPanel Orientation="Horizontal" Spacing="{StaticResource S2}" IsVisible="{Binding HasUpdatedTo}">
               <Border Classes="pill gold">

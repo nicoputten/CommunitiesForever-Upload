@@ -12,17 +12,21 @@ namespace CommunitiesForever.Upload.Windows;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>Registers the Windows adapters for Core's interfaces.</summary>
-    public static IServiceCollection AddWindowsAdapters(this IServiceCollection services)
+    /// <summary>
+    /// Registers the Windows adapters for Core's interfaces. Settings and history live in <paramref name="stateDirectory"/>
+    /// (default: the data folder; retail test mode keeps its own, see <see cref="AppPaths.RetailTestDirectory"/>).
+    /// </summary>
+    public static IServiceCollection AddWindowsAdapters(this IServiceCollection services, string? stateDirectory = null)
     {
+        string state = stateDirectory ?? AppPaths.DataDirectory;
         services.AddSingleton<IMotionPreference, WindowsMotionPreference>();
         services.AddSingleton<ITokenStore>(_ => new DpapiTokenStore(AppPaths.DataDirectory));
         services.AddSingleton<IBrowser, WindowsBrowser>();
         services.AddSingleton<IDeviceInfo, WindowsDeviceInfo>();
         services.AddSingleton<IFileSystem, PhysicalFileSystem>();
         services.AddSingleton<IInstallHints, WindowsInstallHints>();
-        services.AddSingleton<ISettingsFile>(_ => new SettingsFile(AppPaths.DataDirectory));
-        services.AddSingleton<IHistoryFile>(_ => new HistoryFile(AppPaths.DataDirectory));
+        services.AddSingleton<ISettingsFile>(_ => new SettingsFile(state));
+        services.AddSingleton<IHistoryFile>(_ => new HistoryFile(state));
         services.AddSingleton<IAddonFileReader, AddonFileReader>();
         services.AddSingleton<IFileWatcherFactory, FileWatcherFactory>();
         services.AddSingleton<IGameProcesses, GameProcesses>();

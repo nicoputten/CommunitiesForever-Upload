@@ -119,7 +119,14 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
 
     public bool IsSettingsOpen => Settings is not null;
 
-    public string Title => Settings is null ? Name : $"{Name} · Settings";
+    public string Title => (Settings is null ? Name : $"{Name} · Settings") + (RetailTestMode ? $" · {RetailTestText}" : "");
+
+    /// <summary>Started with --retail: the window says so in its title and status bar.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title))]
+    public partial bool RetailTestMode { get; set; }
+
+    public const string RetailTestText = "Retail test mode";
 
     private string Name => Identity is { SiteName.Length: > 0 } me ? $"{me.SiteName} Uploader" : App.DefaultName;
 
