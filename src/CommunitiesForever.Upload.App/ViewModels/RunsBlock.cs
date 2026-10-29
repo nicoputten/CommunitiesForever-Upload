@@ -11,16 +11,12 @@ public enum RunsBadgeKind
 }
 
 /// <summary>
-/// The main window's Runs block (UP-12, board <c>main-window-runs</c>): what was sent to the game and when it checks
-/// again, a badge when the game or the addon needs something, and the file's path (in full as a tooltip).
+/// The main window's Runs block (UP-12, board <c>main-window-runs</c>): what was saved for the game and when it checks
+/// again, and a badge when the game or the addon needs something. The file's path is a tooltip only (docs/DESIGN-NOTES.md).
 /// </summary>
-public sealed record RunsBlock(string Title, string Line, string? Badge, RunsBadgeKind BadgeKind, string? Path, string? FullPath)
+public sealed record RunsBlock(string Title, string Line, string? Badge, RunsBadgeKind BadgeKind, string? FullPath)
 {
-    public const string ShortPath = @"…\Interface\AddOns\CommunitiesForever\Data\Runs.lua";
-
     public bool HasBadge => Badge is not null;
-
-    public bool HasPath => Path is not null;
 
     public static RunsBlock For(RunsStatus status, TimeZoneInfo zone)
     {
@@ -31,8 +27,8 @@ public sealed record RunsBlock(string Title, string Line, string? Badge, RunsBad
             : status.RunCount switch
             {
                 0 or null => $"No upcoming runs · {Clock(fetched)}",
-                1 => $"1 upcoming run sent to the game · {Clock(fetched)}",
-                var n => $"{n} upcoming runs sent to the game · {Clock(fetched)}",
+                1 => $"1 run saved for the game · {Clock(fetched)}",
+                var n => $"{n} runs saved for the game · {Clock(fetched)}",
             };
 
         string line = (status.Failed, status.NextAt) switch
@@ -46,8 +42,9 @@ public sealed record RunsBlock(string Title, string Line, string? Badge, RunsBad
 
         (string? badge, var kind) = status.Hint switch
         {
-            RunsHint.Reload => ("/reload to see them", RunsBadgeKind.Reload),
-            RunsHint.RestartWow => ("Restart WoW to see them", RunsBadgeKind.Reload),
+            // The game reads the file only when it loads: say what loads them, not that they are missing.
+            RunsHint.Reload => ("Type /reload to load them", RunsBadgeKind.Reload),
+            RunsHint.RestartWow => ("Restart WoW to load them", RunsBadgeKind.Reload),
             RunsHint.UpdateAddon => ("Update the addon", RunsBadgeKind.Warn),
             RunsHint.InstallAddon => ("Addon not installed", RunsBadgeKind.Warn),
             _ => ((string?)null, RunsBadgeKind.None),
@@ -60,6 +57,6 @@ public sealed record RunsBlock(string Title, string Line, string? Badge, RunsBad
             _ => line,
         };
 
-        return new RunsBlock(title, line, badge, kind, status.FilePath is null ? null : ShortPath, status.FilePath);
+        return new RunsBlock(title, line, badge, kind, status.FilePath);
     }
 }
