@@ -44,15 +44,6 @@ internal sealed class UpdateHarness
 
     public UpdateChecker Checker { get; }
 
-    public static async Task Until(Func<bool> condition)
-    {
-        for (int i = 0; i < 300 && !condition(); i++)
-        {
-            await Task.Delay(10);
-        }
-
-        Assert.True(condition());
-    }
 }
 
 internal sealed class FakeUpdates : IAppUpdates

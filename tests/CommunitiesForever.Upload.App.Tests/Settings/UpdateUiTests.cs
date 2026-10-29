@@ -5,6 +5,7 @@ using CommunitiesForever.Upload.App.Tray;
 using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.Core.Settings;
 using CommunitiesForever.Upload.Core.Site;
+using CommunitiesForever.Upload.Core.Tests;
 using CommunitiesForever.Upload.Core.Updates;
 using CommunitiesForever.Upload.Core.Uploading;
 
@@ -37,7 +38,7 @@ public sealed class UpdateUiTests
         updates.Updates.Newer = new UpdateOffer("1.1.0", 6_600_000, "Fixes a missed upload after long sessions · shows planned runs");
         updates.Updates.DownloadGate = new TaskCompletionSource();
         var check = updates.Checker.CheckNowAsync();
-        await UpdateHarnessUntil(() => updates.Checker.State == UpdateState.Downloading);
+        await Wait.Until(() => updates.Checker.State == UpdateState.Downloading);
         Assert.Equal(("Downloading 1.1", "62% · 4.1 of 6.6 MB · uploads keep working"), (Panel().Pill, Panel().Line));
         Assert.Equal(0.62, Panel().Progress!.Value, 2);
         updates.Updates.DownloadGate.SetResult();
@@ -141,15 +142,5 @@ public sealed class UpdateUiTests
 
         Assert.Equal(TrayIconKind.Attention, model.Icon);
         Assert.Equal("Update needed to keep uploading", model.Tooltip);
-    }
-
-    private static async Task UpdateHarnessUntil(Func<bool> condition)
-    {
-        for (int i = 0; i < 300 && !condition(); i++)
-        {
-            await Task.Delay(10);
-        }
-
-        Assert.True(condition());
     }
 }

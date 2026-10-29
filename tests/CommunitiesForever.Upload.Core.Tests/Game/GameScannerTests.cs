@@ -7,6 +7,7 @@ public sealed class GameScannerTests
     private const string Wow = @"C:\Program Files (x86)\World of Warcraft";
     private const string Forever = Wow + @"\_forever_";
     private const string Accounts = Forever + @"\WTF\Account";
+    private const string Retail = Wow + @"\_retail_";
 
     private static readonly DateTimeOffset Saved = new(2026, 10, 27, 21, 12, 0, TimeSpan.Zero);
 
@@ -83,7 +84,52 @@ public sealed class GameScannerTests
         Assert.Equal([Forever, @"D:\Games\World of Warcraft\_forever_"], installs.Select(i => i.ForeverPath));
     }
 
+    [Fact]
+    public void ForeverIsTheDefault()
+    {
+        Assert.False(GameFolderOptions.Forever.IsRetailTest);
+        Assert.Equal("_forever_", GameFolderOptions.Forever.VersionFolder);
+    }
+
+    [Theory]
+    [InlineData(Wow)]
+    [InlineData(Forever)]
+    [InlineData(Retail)]
+    [InlineData(Retail + @"\WTF\Account\ACCOUNT\SavedVariables")]
+    public void RetailTestModeLeadsToRetail(string chosen)
+    {
+        _disk.AddAccount(Accounts, "ACCOUNT", Saved);
+        _disk.AddAccount(Retail + @"\WTF\Account", "ACCOUNT", Saved);
+
+        var install = RetailScanner().Inspect(chosen);
+
+        Assert.Equal(Retail, install?.ForeverPath);
+        Assert.Equal(Retail + @"\WTF\Account\ACCOUNT\SavedVariables\CommunitiesForever.lua", Assert.Single(install!.Accounts).AddonFilePath);
+    }
+
+    [Fact]
+    public void RetailTestModeScansOnlyRetail()
+    {
+        _disk.AddAccount(Accounts, "ACCOUNT", Saved);
+        _disk.AddAccount(Retail + @"\WTF\Account", "ACCOUNT", Saved);
+
+        var install = Assert.Single(new GameScanner(_disk, new Hints([Wow, Forever]), GameFolderOptions.RetailTest).Scan());
+
+        Assert.Equal(Retail, install.ForeverPath);
+        Assert.Equal(Forever, Assert.Single(Scanner(Wow, Retail).Scan()).ForeverPath);
+    }
+
+    [Fact]
+    public void RetailTestModeWithoutRetailIsNothing()
+    {
+        _disk.AddAccount(Accounts, "ACCOUNT", Saved);
+
+        Assert.Null(RetailScanner().Inspect(Wow));
+    }
+
     private GameScanner Scanner(params string[] hints) => new(_disk, new Hints(hints));
+
+    private GameScanner RetailScanner() => new(_disk, new Hints([]), GameFolderOptions.RetailTest);
 
     private sealed class Hints(string[] folders) : IInstallHints
     {

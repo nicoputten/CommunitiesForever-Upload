@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.0 (2026-10-29)
+- Retail test mode for testing the addon before Forever launches: started with `--retail`, the uploader watches and writes the retail client's folder instead of Forever's, with its own settings, and says "Retail test mode" in the window. Without the flag nothing changes.
+
 ## v0.2.0 (2026-10-28)
 - Uses far less memory, most of all in the tray: the window is drawn without the graphics card, and the app gives memory back a few seconds after you hide it to the tray.
 - Planned runs reach the game: while World of Warcraft runs (every 5 minutes) and after each upload, the uploader gets the upcoming runs from the site and writes them into the addon, so the Dungeons tab shows them after a /reload. The main window has a Runs block saying how many were sent, when it checks next, and when the game needs a /reload, a restart or a newer addon.

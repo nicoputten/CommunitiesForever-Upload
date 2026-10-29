@@ -11,6 +11,7 @@ using CommunitiesForever.Upload.App.Tray;
 using CommunitiesForever.Upload.App.ViewModels;
 using CommunitiesForever.Upload.App.Views;
 using CommunitiesForever.Upload.Core;
+using CommunitiesForever.Upload.Core.Game;
 using CommunitiesForever.Upload.Core.Notifications;
 using CommunitiesForever.Upload.Core.Runs;
 using CommunitiesForever.Upload.Core.Settings;
@@ -96,10 +97,12 @@ internal sealed partial class App : Application
     internal static ServiceProvider ConfigureServices(string[]? args = null)
     {
         string version = AppVersion();
+        var folder = GameFolder(args ?? []);
         var services = new ServiceCollection()
             .AddCore()
-            .AddWindowsAdapters();
+            .AddWindowsAdapters(folder.IsRetailTest ? AppPaths.RetailTestDirectory : null);
         services.AddSingleton(new SiteOptions(SiteUri(args ?? []), version));
+        services.AddSingleton(folder);
         // Rolling files in the app's logs folder; disposed with the container.
         services.AddLogging(logging => logging
             .SetMinimumLevel(LogLevel.Information)
@@ -161,6 +164,16 @@ internal sealed partial class App : Application
             : SiteOptions.DefaultBaseUri;
     }
 
+    /// <summary>
+    /// Retail test mode: <c>--retail</c> watches and writes the <c>_retail_</c> folder instead of <c>_forever_</c>, with its
+    /// own settings and history, for testing the addon on the retail client (docs/RETAIL-TEST-MODE.md). Works in
+    /// release builds too; off unless started with the flag.
+    /// </summary>
+    internal static GameFolderOptions GameFolder(string[] args) =>
+        args.Contains(RetailArgument, StringComparer.OrdinalIgnoreCase) ? GameFolderOptions.RetailTest : GameFolderOptions.Forever;
+
+    internal const string RetailArgument = "--retail";
+
     private static string AppVersion()
     {
         string? informational = typeof(App).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
@@ -199,6 +212,7 @@ internal sealed partial class App : Application
     {
         ForgetMain();
         _main = services.GetRequiredService<MainViewModel>();
+        _main.RetailTestMode = services.GetRequiredService<GameFolderOptions>().IsRetailTest;
         _main.ReconnectRequested += OnReconnectRequested;
         _main.AccountsChanged += OnAccountsChanged;
         _main.SettingsChanged += OnSettingsChanged;
@@ -212,6 +226,7 @@ internal sealed partial class App : Application
     private SetupWindow CreateSetup(ServiceProvider services, AppSettings? settings)
     {
         _setup = services.GetRequiredService<SetupViewModel>();
+        _setup.RetailTestMode = services.GetRequiredService<GameFolderOptions>().IsRetailTest;
         _setup.Existing = settings;
         _setup.Finished += OnSetupFinished;
         _setup.Cancelled += OnSetupCancelled;
@@ -470,7 +485,9 @@ internal sealed partial class App : Application
     // "Start with Windows" follows the setting. Debug builds leave the Run key alone (it would start a dev build).
     private void SyncAutostart()
     {
-        if (!IsDebugBuild() && _services is not null && Settings(_services) is { } settings)
+        // Retail test mode leaves the Run entry to the normal settings: Windows starts the normal mode.
+        if (!IsDebugBuild() && _services is not null && !_services.GetRequiredService<GameFolderOptions>().IsRetailTest
+            && Settings(_services) is { } settings)
         {
             _services.GetRequiredService<IAutostart>().Apply(settings.StartWithWindows);
         }
