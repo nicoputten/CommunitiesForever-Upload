@@ -172,12 +172,14 @@ public sealed class UploadHistory
                     [.. (account.History ?? []).Select(h => h.ToEntry())]);
             }
         }
-        catch (Exception e) when (e is JsonException or InvalidOperationException or FormatException or KeyNotFoundException)
+        catch (Exception e) when (e is JsonException or InvalidOperationException or FormatException or KeyNotFoundException or IOException or UnauthorizedAccessException)
         {
             _accounts.Clear();
         }
     }
 
+    // A file that can't be written right now (a virus scanner holding it) keeps the history in memory; the next record
+    // writes it all. Throwing here would lose an upload the site already took.
     private void Save()
     {
         var json = new HistoryV1Json(
@@ -187,7 +189,14 @@ public sealed class UploadHistory
                 a.Key.Account,
                 [.. a.Value.Ledger],
                 [.. a.Value.History.Select(HistoryEntryJson.From)]))]);
-        _file.Write(JsonSerializer.Serialize(json, HistoryJsonContext.Default.HistoryV1Json));
+        try
+        {
+            _file.Write(JsonSerializer.Serialize(json, HistoryJsonContext.Default.HistoryV1Json));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Kept in memory, see above.
+        }
     }
 }
 
