@@ -299,8 +299,21 @@ public sealed partial class UploadLoop : IUploadLoop, IAsyncDisposable, IDisposa
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    await StepAsync(ct).ConfigureAwait(false);
-                    await WaitAsync(NextWait(), ct).ConfigureAwait(false);
+                    TimeSpan wait;
+                    try
+                    {
+                        await StepAsync(ct).ConfigureAwait(false);
+                        wait = NextWait();
+                    }
+                    catch (Exception e) when (e is not OperationCanceledException || !ct.IsCancellationRequested)
+                    {
+                        // Anything unexpected (a watcher that can't start, a status listener that throws) must not end
+                        // watching for good: the next poll or wake tries again.
+                        Log.StepFailed(_loop._logger, Account.Account, e.GetType().Name, e.Message);
+                        wait = PollInterval;
+                    }
+
+                    await WaitAsync(wait, ct).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -656,5 +669,8 @@ public sealed partial class UploadLoop : IUploadLoop, IAsyncDisposable, IDisposa
 
         [LoggerMessage(Level = LogLevel.Warning, Message = "Could not read the file of {Account}: {Reason}")]
         public static partial void ReadFailed(ILogger logger, string account, string reason);
+
+        [LoggerMessage(Level = LogLevel.Error, Message = "Watching {Account} failed ({Error}: {Reason}); trying again")]
+        public static partial void StepFailed(ILogger logger, string account, string error, string reason);
     }
 }

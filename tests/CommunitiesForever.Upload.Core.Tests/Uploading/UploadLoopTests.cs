@@ -336,6 +336,38 @@ public sealed class UploadLoopTests
     }
 
     [Fact]
+    public async Task AHistoryFileThatCannotBeWrittenDoesNotStopWatching()
+    {
+        await using var h = new LoopHarness();
+        h.HistoryFile.FailingWrites = 1;
+        h.Save(h.First, "v1");
+        await h.StartAsync();
+        await h.AdvanceUntil(() => h.Site.Count == 1 && h.Status(h.First).State == AccountState.Watching);
+
+        // The upload counts as handled (not sent again) and the next save still goes up, writing the whole history.
+        h.Time.Advance(UploadLoop.PollInterval);
+        await LoopHarness.Settle();
+        Assert.Equal(1, h.Site.Count);
+
+        h.Save(h.First, "v2");
+        await h.AdvanceUntil(() => h.Site.Count == 2 && h.Status(h.First).State == AccountState.Watching);
+        Assert.Equal(2, new UploadHistory(h.HistoryFile).LedgerCount(h.First));
+    }
+
+    [Fact]
+    public async Task AWatcherThatFailsToStartIsTriedAgain()
+    {
+        await using var h = new LoopHarness();
+        h.Watchers.Failures = 1;
+        h.Save(h.First, "v1");
+        await h.StartAsync();
+
+        await h.AdvanceUntil(() => h.Site.Count == 1 && h.Status(h.First).State == AccountState.Watching);
+        Assert.Equal(1, h.Watchers.Active);
+        Assert.Contains(h.Logger.Lines, line => line.Contains("Watching NICO failed (IOException", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task StoppingReleasesWatchersAndWorkers()
     {
         var h = new LoopHarness("A", "B", "C");

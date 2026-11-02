@@ -176,8 +176,17 @@ internal sealed class FakeWatchers : IFileWatcherFactory
         }
     }
 
+    /// <summary>How many more watchers fail to start (a folder Windows won't watch right now).</summary>
+    public int Failures { get; set; }
+
     public IDisposable Watch(string folder, string fileName, Action changed)
     {
+        if (Failures > 0)
+        {
+            Failures--;
+            throw new IOException("The watcher could not start.");
+        }
+
         var handle = new Handle(this);
         lock (_lock)
         {
@@ -297,9 +306,24 @@ internal sealed class MemoryHistoryFile : IHistoryFile
 {
     public string? Text { get; set; }
 
-    public string? Read() => Text;
+    /// <summary>How many more writes fail (a virus scanner holding the file).</summary>
+    public int FailingWrites { get; set; }
 
-    public void Write(string text) => Text = text;
+    /// <summary>Reading throws, as for a file locked or not accessible.</summary>
+    public bool Unreadable { get; set; }
+
+    public string? Read() => Unreadable ? throw new UnauthorizedAccessException("Access to the path is denied.") : Text;
+
+    public void Write(string text)
+    {
+        if (FailingWrites > 0)
+        {
+            FailingWrites--;
+            throw new IOException("The process cannot access the file because it is being used by another process.");
+        }
+
+        Text = text;
+    }
 }
 
 internal sealed class CapturingLogger : ILogger<UploadLoop>
