@@ -344,8 +344,22 @@ public sealed partial class UpdateChecker : IDisposable
         _safeMoment = _time.CreateTimer(_ => CheckSafeMoment(), null, SafeMomentPoll, SafeMomentPoll);
     }
 
-    // "Install updates when WoW is closed": a quiet restart when the game isn't running and nothing waits to upload.
+    // A timer callback: an exception here (settings.json held by a virus scanner) would end the app, so it is logged
+    // and the next poll tries again.
     private void CheckSafeMoment()
+    {
+        try
+        {
+            CheckSafeMomentNow();
+        }
+        catch (Exception e) when (e is not OutOfMemoryException)
+        {
+            LogSafeMomentFailed(e.GetType().Name, e.Message);
+        }
+    }
+
+    // "Install updates when WoW is closed": a quiet restart when the game isn't running and nothing waits to upload.
+    private void CheckSafeMomentNow()
     {
         bool allowed = _settings.Load() is not SettingsLoad.Loaded { Settings: var s } || s.InstallUpdatesWhenWowClosed;
         if (State == UpdateState.Ready && allowed && !IsUploadPending() && !IsGameRunning())
@@ -426,4 +440,7 @@ public sealed partial class UpdateChecker : IDisposable
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "The site needs version {Version} or newer; uploads wait for the update")]
     private partial void LogRequired(string version);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Checking for a moment to install failed ({Error}: {Reason}); trying again")]
+    private partial void LogSafeMomentFailed(string error, string reason);
 }

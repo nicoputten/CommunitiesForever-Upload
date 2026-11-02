@@ -167,14 +167,20 @@ internal sealed class UpdateGames : IGameProcesses
 {
     public bool Running { get; set; }
 
-    public bool IsRunning(string foreverPath) => Running;
+    /// <summary>Thrown by the checks while set (Windows refusing to list processes).</summary>
+    public Exception? Error { get; set; }
+
+    public bool IsRunning(string foreverPath) => Error is { } error ? throw error : Running;
 }
 
 internal sealed class UpdateSettingsFile : ISettingsFile
 {
     public string? Text { get; set; }
 
-    public string? Read() => Text;
+    /// <summary>Reading throws while set (a virus scanner holding the file).</summary>
+    public bool Unreadable { get; set; }
+
+    public string? Read() => Unreadable ? throw new IOException("The process cannot access the file because it is being used by another process.") : Text;
 
     public void Write(string text) => Text = text;
 

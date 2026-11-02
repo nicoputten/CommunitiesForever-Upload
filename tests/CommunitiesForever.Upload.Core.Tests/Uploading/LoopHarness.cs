@@ -216,7 +216,10 @@ internal sealed class FakeGames : IGameProcesses
 {
     public bool Running { get; set; }
 
-    public bool IsRunning(string foreverPath) => Running;
+    /// <summary>Thrown by the checks while set (Windows refusing to list processes).</summary>
+    public Exception? Error { get; set; }
+
+    public bool IsRunning(string foreverPath) => Error is { } error ? throw error : Running;
 }
 
 internal sealed class FakeUploads : ISiteClient

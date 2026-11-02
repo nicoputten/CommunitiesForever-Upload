@@ -36,6 +36,20 @@ public sealed class RunsSyncTests : IDisposable
     }
 
     [Fact]
+    public async Task A_failing_game_check_is_tried_again_without_ending_the_app()
+    {
+        _sync.Start(Settings);
+        _games.Error = new InvalidOperationException("Process list unavailable.");
+        await Tick(UploadLoop.GameCheckInterval);
+        Assert.Equal(0, _site.Calls);
+
+        _games.Error = null;
+        _games.Running = true;
+        await Tick(UploadLoop.GameCheckInterval);
+        await Wait.Until(() => _site.Calls == 1);
+    }
+
+    [Fact]
     public async Task Fetches_when_WoW_starts_then_every_5_minutes_and_not_while_closed()
     {
         _sync.Start(Settings);
