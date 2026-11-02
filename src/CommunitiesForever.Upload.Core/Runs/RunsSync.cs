@@ -152,8 +152,21 @@ public sealed partial class RunsSync : IDisposable
         _stop.Dispose();
     }
 
-    // Every 10 s: a game that started fetches now; while any runs, every Interval.
+    // A timer callback: an exception here would end the app, so it is logged and the next tick tries again.
     private void Tick()
+    {
+        try
+        {
+            TickNow();
+        }
+        catch (Exception e) when (e is not OutOfMemoryException)
+        {
+            LogTickFailed(e.GetType().Name, e.Message);
+        }
+    }
+
+    // Every 10 s: a game that started fetches now; while any runs, every Interval.
+    private void TickNow()
     {
         var now = _time.GetUtcNow();
         bool started = false;
@@ -372,4 +385,7 @@ public sealed partial class RunsSync : IDisposable
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Runs: writing Runs.lua failed ({Error})")]
     private partial void LogWriteFailed(string error);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Runs: game check failed ({Error}: {Reason}); trying again")]
+    private partial void LogTickFailed(string error, string reason);
 }

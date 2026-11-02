@@ -106,6 +106,23 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task AnUnreadableSettingsFileSkipsOneSafeMomentCheckWithoutEndingTheApp()
+    {
+        _h.Updates.Newer = Newer;
+        var restarts = new List<bool>();
+        Checker.RestartRequested += (_, quiet) => restarts.Add(quiet);
+        await Checker.CheckNowAsync();
+
+        _h.SettingsFile.Unreadable = true;
+        _h.Time.Advance(UpdateChecker.SafeMomentPoll);
+        Assert.Empty(restarts);
+
+        _h.SettingsFile.Unreadable = false;
+        _h.Time.Advance(UpdateChecker.SafeMomentPoll);
+        Assert.Equal([true], restarts);
+    }
+
+    [Fact]
     public async Task TheSettingOffWaitsForQuit()
     {
         new SettingsStore(_h.SettingsFile).Save(new AppSettings { InstallUpdatesWhenWowClosed = false });
@@ -153,6 +170,32 @@ public sealed class UpdateCheckerTests : IDisposable
         _h.Time.Advance(UpdateChecker.RetryAfter);
 
         await Wait.Until(() => Checker.State == UpdateState.UpToDate);
+    }
+
+    [Theory]
+    [InlineData("check")]
+    [InlineData("download")]
+    public async Task AnUnexpectedErrorIsNotLeftAtChecking(string step)
+    {
+        _h.Updates.Newer = Newer;
+        var error = new InvalidOperationException("feed could not be read");
+        if (step == "check")
+        {
+            _h.Updates.CheckError = error;
+        }
+        else
+        {
+            _h.Updates.DownloadError = error;
+        }
+
+        await Checker.CheckNowAsync();
+        Assert.Equal(UpdateState.CouldntCheck, Checker.State);
+
+        _h.Updates.CheckError = null;
+        _h.Updates.DownloadError = null;
+        _h.Time.Advance(UpdateChecker.RetryAfter);
+
+        await Wait.Until(() => Checker.State == UpdateState.Ready);
     }
 
     [Fact]
