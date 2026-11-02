@@ -3,6 +3,7 @@
 ## Unreleased
 - Notices World of Warcraft running when it was started as administrator, so planned runs reach the game and the window says "Playing" then too.
 - An account no longer stops uploading until a restart when something unexpected goes wrong once, such as a virus scanner briefly holding the uploader's history file: it tries again at the next check.
+- Settings › About & updates no longer stays on "Checking…" (with no way to check again) until the next day when the update check fails in an unusual way: it says it couldn't check and tries again in an hour.
 - The uploader no longer closes by itself when Windows briefly refuses to list running programs or a virus scanner holds its settings file during a background check: the check is tried again a little later.
 
 ## v0.3.1 (2026-10-29)
