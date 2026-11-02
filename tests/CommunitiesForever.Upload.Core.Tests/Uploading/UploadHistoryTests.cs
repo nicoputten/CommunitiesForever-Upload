@@ -61,6 +61,50 @@ public sealed class UploadHistoryTests
     }
 
     [Fact]
+    public void AFileLockedForAMomentAtStartStillLoads()
+    {
+        new UploadHistory(_file).Record(Account, Entry("a", LedgerOutcome.Ok), Upload(1));
+        _file.FailingReads = 2;
+
+        var history = new UploadHistory(_file);
+
+        Assert.True(history.IsHandled(Account, "a", Now, RunStarted));
+        Assert.Single(history.Uploads(Account));
+    }
+
+    [Fact]
+    public void AFileThatCantBeReadIsNeverOverwritten()
+    {
+        new UploadHistory(_file).Record(Account, Entry("a", LedgerOutcome.Skipped), Upload(1));
+        string saved = _file.Text!;
+        _file.Unreadable = true;
+
+        var history = new UploadHistory(_file);
+        history.Record(Account, Entry("b", LedgerOutcome.Ok), Upload(2));
+
+        Assert.Equal(saved, _file.Text);
+        Assert.True(history.IsHandled(Account, "b", Now, RunStarted));
+    }
+
+    [Fact]
+    public void AFileReadableAgainIsMergedWithThisRun()
+    {
+        new UploadHistory(_file).Record(Account, Entry("a", LedgerOutcome.Skipped), Upload(1));
+        _file.Unreadable = true;
+        var history = new UploadHistory(_file);
+        history.Record(Account, Entry("b", LedgerOutcome.Ok), Upload(2));
+        _file.Unreadable = false;
+
+        history.Record(Account, Entry("c", LedgerOutcome.Ok), Upload(3));
+
+        Assert.True(history.IsHandled(Account, "a", Now, RunStarted));
+        Assert.Equal([3L, 2L, 1L], history.Uploads(Account).Select(u => u.UploadId));
+        var loaded = new UploadHistory(_file);
+        Assert.Equal(3, loaded.LedgerCount(Account));
+        Assert.Equal([3L, 2L, 1L], loaded.Uploads(Account).Select(u => u.UploadId));
+    }
+
+    [Fact]
     public void AFailedWriteKeepsTheHistoryAndTheNextOneSavesIt()
     {
         var history = new UploadHistory(_file);

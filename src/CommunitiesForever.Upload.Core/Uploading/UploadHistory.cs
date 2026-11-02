@@ -53,14 +53,22 @@ public sealed class UploadHistory
     // Migration steps: the step at key N turns a version N file into version N + 1.
     private static readonly Dictionary<int, Func<JsonObject, JsonObject>> Migrations = [];
 
+    // A file a virus scanner holds at start-up (Windows login) is read again a few times before giving up.
+    private const int StartReadAttempts = 3;
+    private static readonly TimeSpan ReadRetryDelay = TimeSpan.FromMilliseconds(100);
+
     private readonly IHistoryFile _file;
     private readonly Lock _lock = new();
     private readonly Dictionary<WatchedAccount, (List<LedgerEntry> Ledger, List<HistoryEntry> History)> _accounts = [];
 
+    // The file couldn't be read at start-up: it is not overwritten until it was read and merged with what this run
+    // recorded, so a locked file doesn't lose the history and the ledger.
+    private bool _unread;
+
     public UploadHistory(IHistoryFile file)
     {
         _file = file;
-        Load();
+        _unread = !Load(_accounts, StartReadAttempts);
     }
 
     /// <summary>
@@ -146,18 +154,38 @@ public sealed class UploadHistory
         return lists;
     }
 
-    // An unreadable history is started afresh: at worst a file is uploaded once more, which the site handles.
-    private void Load()
+    // A history that can't be understood (not JSON, a newer version) is started afresh: at worst a file is uploaded
+    // once more, which the site handles. Returns false only when the file couldn't be read at all (locked, no access).
+    private bool Load(Dictionary<WatchedAccount, (List<LedgerEntry> Ledger, List<HistoryEntry> History)> into, int attempts)
     {
+        string? text;
+        for (int attempt = 1; ; attempt++)
+        {
+            try
+            {
+                text = _file.Read();
+                break;
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                if (attempt >= attempts)
+                {
+                    return false;
+                }
+
+                Thread.Sleep(ReadRetryDelay);
+            }
+        }
+
         try
         {
-            if (_file.Read() is not { } text
+            if (text is null
                 || JsonNode.Parse(text) is not JsonObject json
                 || json["version"]?.GetValue<int>() is not int version
                 || version < 1
                 || version > CurrentVersion)
             {
-                return;
+                return true;
             }
 
             for (; version < CurrentVersion; version++)
@@ -167,21 +195,57 @@ public sealed class UploadHistory
 
             foreach (var account in json.Deserialize(HistoryJsonContext.Default.HistoryV1Json)?.Accounts ?? [])
             {
-                _accounts[new WatchedAccount(account.InstallPath, account.Account)] = (
+                into[new WatchedAccount(account.InstallPath, account.Account)] = (
                     [.. account.Ledger ?? []],
                     [.. (account.History ?? []).Select(h => h.ToEntry())]);
             }
         }
-        catch (Exception e) when (e is JsonException or InvalidOperationException or FormatException or KeyNotFoundException or IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is JsonException or InvalidOperationException or FormatException or KeyNotFoundException)
         {
-            _accounts.Clear();
+            into.Clear();
         }
+
+        return true;
+    }
+
+    // The file's entries come before this run's, as they are older; both lists stay bounded.
+    private void MergeUnread()
+    {
+        var saved = new Dictionary<WatchedAccount, (List<LedgerEntry> Ledger, List<HistoryEntry> History)>();
+        if (!Load(saved, attempts: 1))
+        {
+            return;
+        }
+
+        foreach (var (account, lists) in saved)
+        {
+            if (_accounts.TryGetValue(account, out var mine))
+            {
+                lists.Ledger.AddRange(mine.Ledger);
+                lists.History.AddRange(mine.History);
+                Trim(lists.Ledger, LedgerSize);
+                Trim(lists.History, HistorySize);
+            }
+
+            _accounts[account] = lists;
+        }
+
+        _unread = false;
     }
 
     // A file that can't be written right now (a virus scanner holding it) keeps the history in memory; the next record
     // writes it all. Throwing here would lose an upload the site already took.
     private void Save()
     {
+        if (_unread)
+        {
+            MergeUnread();
+            if (_unread)
+            {
+                return;
+            }
+        }
+
         var json = new HistoryV1Json(
             CurrentVersion,
             [.. _accounts.Select(a => new AccountHistoryJson(
