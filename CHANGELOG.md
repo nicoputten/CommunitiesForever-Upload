@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- The upload history is no longer lost when a virus scanner holds its file while the uploader starts: it reads the file again, and never overwrites a history it couldn't read.
 
 ## v0.3.2 (2026-11-02)
 - Notices World of Warcraft running when it was started as administrator, so planned runs reach the game and the window says "Playing" then too.
