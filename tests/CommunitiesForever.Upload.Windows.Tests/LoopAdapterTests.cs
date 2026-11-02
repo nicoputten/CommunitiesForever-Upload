@@ -70,6 +70,22 @@ public sealed class LoopAdapterTests : IDisposable
         Assert.Contains("Information UploadLoop: xxx", File.ReadAllText(Path.Combine(logs, "uploader.log")), StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("Wow", true)]
+    [InlineData("WowClassic", true)]
+    [InlineData("wowt", true)]
+    [InlineData("Battle.net", false)]
+    [InlineData("Agent", false)]
+    public void GameNamesStartWithWow(string name, bool game) =>
+        Assert.Equal(game, GameProcesses.IsGameName(name));
+
+    [Fact]
+    public void ReadsAProcessPathWithTheLimitedRight()
+    {
+        Assert.Equal(Environment.ProcessPath, GameProcesses.ImagePath(Environment.ProcessId), StringComparer.OrdinalIgnoreCase);
+        Assert.Null(GameProcesses.ImagePath(-1));
+    }
+
     [Fact]
     public void NoGameRunningFromAnotherFolder() =>
         Assert.False(new GameProcesses().IsRunning(Path.Combine(_directory, "_forever_")));

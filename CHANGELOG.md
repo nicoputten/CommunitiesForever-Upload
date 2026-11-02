@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Notices World of Warcraft running when it was started as administrator, so planned runs reach the game and the window says "Playing" then too.
 - The uploader no longer closes by itself when Windows briefly refuses to list running programs or a virus scanner holds its settings file during a background check: the check is tried again a little later.
 
 ## v0.3.1 (2026-10-29)
