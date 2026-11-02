@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- An account no longer stops uploading until a restart when something unexpected goes wrong once, such as a virus scanner briefly holding the uploader's history file: it tries again at the next check.
 
 ## v0.3.1 (2026-10-29)
 - The Runs block in the main window says "3 runs saved for the game" and how to load them ("Type /reload to load them"), instead of "/reload to see them". The file path moved into a tooltip.

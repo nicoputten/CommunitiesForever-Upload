@@ -50,6 +50,30 @@ public sealed class UploadHistoryTests
     }
 
     [Fact]
+    public void AnUnreadableHistoryStartsAfresh()
+    {
+        new UploadHistory(_file).Record(Account, Entry("a", LedgerOutcome.Ok));
+        _file.Unreadable = true;
+
+        var history = new UploadHistory(_file);
+
+        Assert.Equal(0, history.LedgerCount(Account));
+    }
+
+    [Fact]
+    public void AFailedWriteKeepsTheHistoryAndTheNextOneSavesIt()
+    {
+        var history = new UploadHistory(_file);
+        _file.FailingWrites = 1;
+        history.Record(Account, Entry("a", LedgerOutcome.Ok));
+        Assert.True(history.IsHandled(Account, "a", Now, RunStarted));
+
+        history.Record(Account, Entry("b", LedgerOutcome.Ok));
+
+        Assert.Equal(2, new UploadHistory(_file).LedgerCount(Account));
+    }
+
+    [Fact]
     public void LedgerAndHistoryStayBounded()
     {
         var history = new UploadHistory(_file);
