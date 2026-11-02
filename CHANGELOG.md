@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.3.3 (2026-11-02)
 - The upload history is no longer lost when a virus scanner holds its file while the uploader starts: it reads the file again, and never overwrites a history it couldn't read.
 
 ## v0.3.2 (2026-11-02)
