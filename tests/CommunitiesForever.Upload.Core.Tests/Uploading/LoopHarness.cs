@@ -315,7 +315,24 @@ internal sealed class MemoryHistoryFile : IHistoryFile
     /// <summary>Reading throws, as for a file locked or not accessible.</summary>
     public bool Unreadable { get; set; }
 
-    public string? Read() => Unreadable ? throw new UnauthorizedAccessException("Access to the path is denied.") : Text;
+    /// <summary>How many more reads fail (a virus scanner holding the file).</summary>
+    public int FailingReads { get; set; }
+
+    public string? Read()
+    {
+        if (Unreadable)
+        {
+            throw new UnauthorizedAccessException("Access to the path is denied.");
+        }
+
+        if (FailingReads > 0)
+        {
+            FailingReads--;
+            throw new IOException("The process cannot access the file because it is being used by another process.");
+        }
+
+        return Text;
+    }
 
     public void Write(string text)
     {
