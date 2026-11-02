@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Notices World of Warcraft running when it was started as administrator, so planned runs reach the game and the window says "Playing" then too.
 
 ## v0.3.1 (2026-10-29)
 - The Runs block in the main window says "3 runs saved for the game" and how to load them ("Type /reload to load them"), instead of "/reload to see them". The file path moved into a tooltip.
