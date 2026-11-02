@@ -106,6 +106,23 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task AnUnreadableSettingsFileSkipsOneSafeMomentCheckWithoutEndingTheApp()
+    {
+        _h.Updates.Newer = Newer;
+        var restarts = new List<bool>();
+        Checker.RestartRequested += (_, quiet) => restarts.Add(quiet);
+        await Checker.CheckNowAsync();
+
+        _h.SettingsFile.Unreadable = true;
+        _h.Time.Advance(UpdateChecker.SafeMomentPoll);
+        Assert.Empty(restarts);
+
+        _h.SettingsFile.Unreadable = false;
+        _h.Time.Advance(UpdateChecker.SafeMomentPoll);
+        Assert.Equal([true], restarts);
+    }
+
+    [Fact]
     public async Task TheSettingOffWaitsForQuit()
     {
         new SettingsStore(_h.SettingsFile).Save(new AppSettings { InstallUpdatesWhenWowClosed = false });

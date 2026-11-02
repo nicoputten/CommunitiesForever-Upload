@@ -336,6 +336,22 @@ public sealed class UploadLoopTests
     }
 
     [Fact]
+    public async Task AFailingGameCheckDoesNotEndTheApp()
+    {
+        await using var h = new LoopHarness();
+        h.Games.Error = new InvalidOperationException("Process list unavailable.");
+        h.Save(h.First, "v1");
+        await h.StartAsync();
+        h.Time.Advance(UploadLoop.GameCheckInterval);
+        await h.AdvanceUntil(() => h.Site.Count == 1);
+
+        h.Games.Error = null;
+        h.Games.Running = true;
+        await h.AdvanceUntil(() => h.Status(h.First).State == AccountState.Playing, TimeSpan.FromSeconds(10));
+        Assert.Contains(h.Logger.Lines, line => line.Contains("Game check failed (InvalidOperationException", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task AHistoryFileThatCannotBeWrittenDoesNotStopWatching()
     {
         await using var h = new LoopHarness();
