@@ -219,9 +219,10 @@ public sealed partial class UpdateChecker : IDisposable
             NewVersion = null;
             Set(before is UpdateState.Failed or UpdateState.CouldntCheck or UpdateState.Checking ? UpdateState.Idle : before);
         }
-        catch (Exception e) when (e is HttpRequestException or IOException or TimeoutException or OperationCanceledException)
+        catch (Exception e) when (e is not OperationCanceledException || !_stop.IsCancellationRequested)
         {
-            // Offline or the site is down: again in an hour, silently.
+            // Offline, the site is down, or anything else the updater throws (an unreadable feed, a full disk): again
+            // in an hour, silently. Never left at "Checking".
             LogCouldntCheck(e.GetType().Name);
             Set(UpdateState.CouldntCheck);
             _retry?.Dispose();
