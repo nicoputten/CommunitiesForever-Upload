@@ -336,7 +336,6 @@ public sealed class UploadLoopTests
     }
 
     [Fact]
-<<<<<<< HEAD
     public async Task AFailingGameCheckDoesNotEndTheApp()
     {
         await using var h = new LoopHarness();
@@ -350,7 +349,9 @@ public sealed class UploadLoopTests
         h.Games.Running = true;
         await h.AdvanceUntil(() => h.Status(h.First).State == AccountState.Playing, TimeSpan.FromSeconds(10));
         Assert.Contains(h.Logger.Lines, line => line.Contains("Game check failed (InvalidOperationException", StringComparison.Ordinal));
-=======
+    }
+
+    [Fact]
     public async Task AHistoryFileThatCannotBeWrittenDoesNotStopWatching()
     {
         await using var h = new LoopHarness();
@@ -380,7 +381,6 @@ public sealed class UploadLoopTests
         await h.AdvanceUntil(() => h.Site.Count == 1 && h.Status(h.First).State == AccountState.Watching);
         Assert.Equal(1, h.Watchers.Active);
         Assert.Contains(h.Logger.Lines, line => line.Contains("Watching NICO failed (IOException", StringComparison.Ordinal));
->>>>>>> origin/develop
     }
 
     [Fact]

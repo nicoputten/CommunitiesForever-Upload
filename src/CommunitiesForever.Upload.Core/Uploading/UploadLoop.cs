@@ -683,12 +683,10 @@ public sealed partial class UploadLoop : IUploadLoop, IAsyncDisposable, IDisposa
         [LoggerMessage(Level = LogLevel.Warning, Message = "Could not read the file of {Account}: {Reason}")]
         public static partial void ReadFailed(ILogger logger, string account, string reason);
 
-<<<<<<< HEAD
         [LoggerMessage(Level = LogLevel.Error, Message = "{What} failed ({Error}: {Reason}); trying again")]
         public static partial void TimerFailed(ILogger logger, string what, string error, string reason);
-=======
+
         [LoggerMessage(Level = LogLevel.Error, Message = "Watching {Account} failed ({Error}: {Reason}); trying again")]
         public static partial void StepFailed(ILogger logger, string account, string error, string reason);
->>>>>>> origin/develop
     }
 }
