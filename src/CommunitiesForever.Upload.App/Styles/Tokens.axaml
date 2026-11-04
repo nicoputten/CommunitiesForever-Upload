@@ -417,6 +417,13 @@
   <x:Double x:Key="AppAsideW">320</x:Double>
   <Thickness x:Key="AppHeroPad">22</Thickness>
   <x:Double x:Key="AppHeroIcon">76</x:Double>
+  <!-- Narrow windows (not on the boards): the hero's text never gets narrower than this. Below the
+       breakpoints in MainWindow.axaml (container queries can't read resources; keep them in step):
+       hero narrower than 520 → its buttons go under the text; window content narrower than 738 →
+       Recent uploads goes under the left column. Both keep the text column at 220 or more. -->
+  <x:Double x:Key="AppHeroTextMinW">200</x:Double>
+  <Thickness x:Key="AppHeroActionsStacked">0,12,0,0</Thickness>
+  <Thickness x:Key="AppAsideStacked">0,16,0,0</Thickness>
   <x:Double x:Key="AppShieldStroke">0.9</x:Double>
   <x:Double x:Key="AppShieldBox">26</x:Double>
   <x:Double x:Key="AppFileIconBox">84</x:Double>

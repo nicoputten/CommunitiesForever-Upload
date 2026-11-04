@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using CommunitiesForever.Upload.App.Tests.Main;
@@ -99,12 +100,50 @@ public sealed class MainScreenshotTests
         h.RunsSent();
     });
 
-    private static async Task Shot(string name, Action<MainHarness> arrange, params WatchedAccount[] accounts)
+    // Smaller windows (not on the boards): at the minimum size Recent uploads goes under the left column and
+    // the content scrolls; at a medium width the hero's buttons go under its text.
+    [AvaloniaFact]
+    public Task NotWatchingNarrow() => Shot("main-narrow-not-watching", NotWatchingState, size: Narrow);
+
+    [AvaloniaFact]
+    public Task NotWatchingMedium() => Shot("main-medium-not-watching", NotWatchingState, size: Medium);
+
+    [AvaloniaFact]
+    public Task UploadedNarrow() => Shot("main-narrow-uploaded", UploadedState, size: Narrow);
+
+    [AvaloniaFact]
+    public Task UploadedMedium() => Shot("main-medium-uploaded", UploadedState, size: Medium);
+
+    private static readonly Size Narrow = new(640, 480);
+    private static readonly Size Medium = new(780, 620);
+
+    private static void NotWatchingState(MainHarness h)
+    {
+        h.BoardHistory(MainHarness.First);
+        h.Status(MainHarness.First, AccountState.NotWatching);
+    }
+
+    private static void UploadedState(MainHarness h)
+    {
+        h.BoardHistory(MainHarness.First);
+        h.Status(MainHarness.First, AccountState.Watching);
+    }
+
+    private static Task Shot(string name, Action<MainHarness> arrange, params WatchedAccount[] accounts) =>
+        Shot(name, arrange, null, accounts);
+
+    private static async Task Shot(string name, Action<MainHarness> arrange, Size? size, params WatchedAccount[] accounts)
     {
         var h = new MainHarness(accounts);
         arrange(h);
         var vm = h.Create();
         var window = new MainWindow { DataContext = vm };
+        if (size is { } s)
+        {
+            window.Width = s.Width;
+            window.Height = s.Height;
+        }
+
         window.Show();
         await SetupHarness.Until(() => vm.Identity is not null);
         vm.Refresh();
