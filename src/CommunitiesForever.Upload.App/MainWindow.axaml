@@ -13,6 +13,45 @@
         ExtendClientAreaToDecorationsHint="True"
         WindowDecorations="BorderOnly">
   <!-- Board: design/boards/main-window; status states: design/boards/states (UP-07) -->
+  <Window.Styles>
+    <!-- Wide (the boards): Recent uploads on the right, the hero's buttons right of its text -->
+    <Style Selector="StackPanel.main-column">
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="Border.aside">
+      <Setter Property="Grid.Row" Value="0" />
+      <Setter Property="Grid.Column" Value="1" />
+      <Setter Property="Width" Value="{StaticResource AppAsideW}" />
+    </Style>
+    <Style Selector="StackPanel.hero-actions">
+      <Setter Property="Grid.Row" Value="0" />
+      <Setter Property="Grid.Column" Value="2" />
+      <Setter Property="Orientation" Value="Vertical" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <!-- Narrow (not on the boards; breakpoints explained at AppHeroTextMinW in Tokens.axaml) -->
+    <ContainerQuery Name="Main" Query="max-width:737">
+      <Style Selector="StackPanel.main-column">
+        <Setter Property="Grid.ColumnSpan" Value="2" />
+      </Style>
+      <Style Selector="Border.aside">
+        <Setter Property="Grid.Row" Value="1" />
+        <Setter Property="Grid.Column" Value="0" />
+        <Setter Property="Grid.ColumnSpan" Value="2" />
+        <Setter Property="Width" Value="NaN" />
+        <Setter Property="Margin" Value="{StaticResource AppAsideStacked}" />
+      </Style>
+    </ContainerQuery>
+    <ContainerQuery Name="Hero" Query="max-width:519">
+      <Style Selector="StackPanel.hero-actions">
+        <Setter Property="Grid.Row" Value="1" />
+        <Setter Property="Grid.Column" Value="1" />
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="Margin" Value="{StaticResource AppHeroActionsStacked}" />
+      </Style>
+    </ContainerQuery>
+  </Window.Styles>
   <Border BorderBrush="{StaticResource AppLineWindowBrush}" BorderThickness="{StaticResource BorderThickness}">
     <DockPanel>
       <c:TitleBar Name="Bar" DockPanel.Dock="Top" />
@@ -64,12 +103,20 @@
         </ContentControl.ContentTemplate>
       </ContentControl>
 
-      <Grid Margin="{StaticResource S5Thickness}" ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}" IsVisible="{Binding !IsSettingsOpen}">
-        <StackPanel Spacing="{StaticResource S4}">
+      <!-- Scrolls when the window is too small, so nothing covers the status bar -->
+      <ScrollViewer Name="Main" Container.Name="Main" Container.Sizing="Width" IsVisible="{Binding !IsSettingsOpen}">
+      <Grid Margin="{StaticResource S5Thickness}" ColumnDefinitions="*,Auto" RowDefinitions="*,Auto" ColumnSpacing="{StaticResource S4}">
+        <StackPanel Classes="main-column" Spacing="{StaticResource S4}">
 
           <!-- Status header -->
-          <Border Classes="hero" Classes.warn="{Binding Hero.IsWarn}" AutomationProperties.LiveSetting="Polite">
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource S5}">
+          <Border Name="Hero" Classes="hero" Classes.warn="{Binding Hero.IsWarn}" AutomationProperties.LiveSetting="Polite"
+                  Container.Name="Hero" Container.Sizing="Width">
+            <Grid RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource S5}">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" MinWidth="{StaticResource AppHeroTextMinW}" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
               <Panel Width="{StaticResource AppHeroIcon}" Height="{StaticResource AppHeroIcon}" VerticalAlignment="Center">
                 <!-- The pulse grows from the shield's centre (Styles/Motion.axaml animates the ScaleTransform) -->
                 <Ellipse Classes="ring" RenderTransformOrigin="50%,50%" IsVisible="{Binding Hero.IsCalm}">
@@ -99,7 +146,7 @@
                 </Viewbox>
               </Panel>
 
-              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="{StaticResource S1}">
+              <StackPanel Name="HeroText" Grid.Column="1" VerticalAlignment="Center" Spacing="{StaticResource S1}">
                 <TextBlock Classes="status"
                            Classes.fresh="{Binding Hero.Tone, Converter={x:Static c:Tones.Fresh}}"
                            Classes.gold="{Binding Hero.Tone, Converter={x:Static c:Tones.Gold}}"
@@ -114,7 +161,7 @@
                 </Border>
               </StackPanel>
 
-              <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="{StaticResource S2}">
+              <StackPanel Name="HeroActions" Classes="hero-actions" Spacing="{StaticResource S2}">
                 <Button Classes="primary" Content="Restart and update" Command="{Binding RestartToUpdateCommand}" IsVisible="{Binding Hero.ShowRestartToUpdate}" />
                 <Button Classes="primary" Content="Upload now" Command="{Binding UploadNowCommand}" IsVisible="{Binding Hero.ShowUploadNow}" />
                 <Button Classes="primary" Content="Try now" Command="{Binding TryNowCommand}" IsVisible="{Binding Hero.ShowTryNow}" />
@@ -207,7 +254,7 @@
             <Border Grid.Column="1" Classes="panel explainer">
               <StackPanel Spacing="{StaticResource S1}">
                 <TextBlock Classes="step-number" Text="2" />
-                <TextBlock Classes="meta" Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" Text="Log out or /reload: the game saves the file." />
+                <TextBlock Classes="meta" Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" Text="Log out or /&#x2060;reload: the game saves the file." />
               </StackPanel>
             </Border>
             <Border Grid.Column="2" Classes="panel explainer">
@@ -220,7 +267,7 @@
         </StackPanel>
 
         <!-- Recent uploads -->
-        <Border Grid.Column="1" Classes="panel" Width="{StaticResource AppAsideW}" AutomationProperties.Name="Recent uploads">
+        <Border Name="Aside" Classes="panel aside" AutomationProperties.Name="Recent uploads">
           <DockPanel>
             <TextBlock DockPanel.Dock="Top" Classes="section" Text="Recent uploads" Margin="{StaticResource AppFooterPad}" />
             <Button DockPanel.Dock="Bottom" Classes="link" HorizontalAlignment="Left" Content="Full history on the site →" Command="{Binding OpenHistoryCommand}" />
@@ -249,6 +296,7 @@
           </DockPanel>
         </Border>
       </Grid>
+      </ScrollViewer>
     </DockPanel>
   </Border>
 </Window>
