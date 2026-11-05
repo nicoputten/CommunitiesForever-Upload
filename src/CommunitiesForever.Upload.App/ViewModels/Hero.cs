@@ -101,7 +101,8 @@ public sealed record Hero(Tone Tone, string Status, string Title, string Line, H
                     Tone.Playing,
                     "● Playing",
                     "Waiting for the game to save",
-                    For("World of Warcraft writes the file when you log out, type /reload or quit. Nothing to do."),
+                    // U+2060 (word joiner): "/reload" never wraps after its slash.
+                    For("World of Warcraft writes the file when you log out, type /⁠reload or quit. Nothing to do."),
                     HeroActions.UploadNow | HeroActions.OpenSite);
 
             case AccountState.Settling:
@@ -199,7 +200,7 @@ public sealed record Hero(Tone Tone, string Status, string Title, string Line, H
             "The site can't read this file yet",
             $"Your addon writes data format {schemaVersion?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "?"}; the site can't read it yet. It uploads by itself once the site is updated."),
         UploadReceipt.Rejections.WrongFile => ("This isn't the CommunitiesForever file", "The site expected the addon's saved data."),
-        UploadReceipt.Rejections.Damaged => ("The file is damaged", "The game may not have finished writing it. Log out or /reload to save it again."),
+        UploadReceipt.Rejections.Damaged => ("The file is damaged", "The game may not have finished writing it. Log out or /⁠reload to save it again."),
         UploadReceipt.Rejections.NotYourFile => ("This file belongs to someone else", "Only your own addon file can be uploaded from this PC."),
         UploadReceipt.Rejections.OtherCommunity => ("This file is from another community", "It belongs to a different site."),
         UploadReceipt.Rejections.NoCommunityYet => ("The site isn't set up yet", "The admin's first upload starts the community. It tries again in an hour."),
