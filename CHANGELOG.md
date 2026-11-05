@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.3.4 (2026-11-05)
 - The main window fits at every size: in a narrow window the status card's text no longer squeezes to a few letters wide and its buttons no longer stick out. The buttons move under the text when the card is narrow, Recent uploads moves under the card in a narrow window, and the window scrolls instead of covering the status bar.
 
 ## v0.3.3 (2026-11-02)
